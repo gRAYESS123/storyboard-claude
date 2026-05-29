@@ -149,12 +149,12 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     ssml = extract_ssml_block(script_path)
-    print(f"📝  Extracted {len(ssml)} chars of SSML from {script_path.name}")
+    print(f"[ok] Extracted {len(ssml)} chars of SSML from {script_path.name}")
 
     client = ElevenLabs(api_key=api_key)
     voice_id = voice_id_for(args.voice)
 
-    print(f"🎙️   Calling ElevenLabs (voice={args.voice} -> {voice_id}, model={args.model}, speed={args.speed})...")
+    print(f"[..] Calling ElevenLabs (voice={args.voice} -> {voice_id}, model={args.model}, speed={args.speed})...")
     voice_settings = {
         'stability':       args.stability,
         'similarity_boost': args.similarity,
@@ -175,21 +175,21 @@ def main():
     audio_bytes = base64.b64decode(response.audio_base64)
     mp3_path = out_dir / args.mp3_name
     mp3_path.write_bytes(audio_bytes)
-    print(f"💾  Wrote {mp3_path} ({len(audio_bytes):,} bytes)")
+    print(f"[ok] Wrote {mp3_path} ({len(audio_bytes):,} bytes)")
 
     alignment = response.alignment if hasattr(response, 'alignment') else response.normalized_alignment
     ts_path = out_dir / 'word_timestamps.json'
     ts_path.write_text(json.dumps(alignment if isinstance(alignment, dict) else alignment.__dict__,
                                    indent=2, default=str), encoding='utf-8')
-    print(f"💾  Wrote {ts_path}")
+    print(f"[ok] Wrote {ts_path}")
 
     alignment_dict = alignment if isinstance(alignment, dict) else alignment.__dict__
     cues = compute_timings_from_alignment(alignment_dict, gap_threshold=args.gap_threshold)
-    print(f"🎯  Derived {len(cues)} slide cues from character timestamps "
+    print(f"[ok] Derived {len(cues)} slide cues from character timestamps "
           f"(gap >= {args.gap_threshold}s)")
 
     if args.slides is not None and len(cues) != args.slides:
-        print(f"⚠️   Expected {args.slides} slides but got {len(cues)} cues. "
+        print(f"[WARN] Expected {args.slides} slides but got {len(cues)} cues. "
               f"Try --gap-threshold <larger or smaller> to retune.", file=sys.stderr)
 
     block = format_timings_block(cues)
@@ -198,7 +198,7 @@ def main():
 
     if args.apply:
         if apply_to_html(args.apply, block):
-            print(f"\n✅  Rewrote TIMINGS in {args.apply}", file=sys.stderr)
+            print(f"\n[OK] Rewrote TIMINGS in {args.apply}", file=sys.stderr)
 
 
 if __name__ == '__main__':
