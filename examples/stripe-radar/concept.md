@@ -191,7 +191,7 @@
   ],
   "source": {
     "type": "html",
-    "ref": "C:/Users/georg/Desktop/Side hustkes/Georges Rayess website/stripe-radar-rule-library.html"
+    "ref": "stripe-radar-rule-library.html (georgesrayess.com/stripe-radar-rule-library)"
   }
 }
 ```

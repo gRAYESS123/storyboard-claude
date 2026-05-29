@@ -41,3 +41,7 @@ node_modules/
 
 # Generated playthrough screenshots
 playthrough/
+
+# Private worked-example reference (local client paths) — never publish
+skill/reference.md
+reference.md
