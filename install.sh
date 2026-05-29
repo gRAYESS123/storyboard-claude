@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Storyboard for Claude Code — installer (macOS / Linux)
-# Run:  curl -fsSL https://raw.githubusercontent.com/georgesrayess/storyboard-claude/main/install.sh | bash
+# Run:  curl -fsSL https://raw.githubusercontent.com/gRAYESS123/storyboard-claude/main/install.sh | bash
 
 set -euo pipefail
 
-REPO="${STORYBOARD_REPO:-https://github.com/georgesrayess/storyboard-claude.git}"
+REPO="${STORYBOARD_REPO:-https://github.com/gRAYESS123/storyboard-claude.git}"
 BRANCH="${STORYBOARD_BRANCH:-main}"
 DEST="${HOME}/.claude/skills/storyboard"
 TMPDIR="$(mktemp -d -t storyboard-XXXXXX)"

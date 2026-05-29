@@ -1,9 +1,9 @@
 # Storyboard for Claude Code — installer (Windows PowerShell)
-# Run:  irm https://raw.githubusercontent.com/georgesrayess/storyboard-claude/main/install.ps1 | iex
+# Run:  irm https://raw.githubusercontent.com/gRAYESS123/storyboard-claude/main/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
 
-$repo   = if ($env:STORYBOARD_REPO)   { $env:STORYBOARD_REPO }   else { 'https://github.com/georgesrayess/storyboard-claude.git' }
+$repo   = if ($env:STORYBOARD_REPO)   { $env:STORYBOARD_REPO }   else { 'https://github.com/gRAYESS123/storyboard-claude.git' }
 $branch = if ($env:STORYBOARD_BRANCH) { $env:STORYBOARD_BRANCH } else { 'main' }
 $dest   = Join-Path $HOME '.claude\skills\storyboard'
 $tmp    = Join-Path $env:TEMP ("storyboard-" + [Guid]::NewGuid().ToString('N').Substring(0,8))

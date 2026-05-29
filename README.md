@@ -37,19 +37,19 @@ The `examples/stripe-radar/` directory is a complete end-to-end build: a 150-sec
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/georgesrayess/storyboard-claude/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/gRAYESS123/storyboard-claude/main/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/georgesrayess/storyboard-claude/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/gRAYESS123/storyboard-claude/main/install.ps1 | iex
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/georgesrayess/storyboard-claude
+git clone https://github.com/gRAYESS123/storyboard-claude
 mkdir -p ~/.claude/skills/storyboard
 cp -r storyboard-claude/skill/* ~/.claude/skills/storyboard/
 pip install pyaaf2 mutagen elevenlabs   # optional: for AAF parsing + auto-VO
