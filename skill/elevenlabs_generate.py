@@ -6,14 +6,14 @@ TIMINGS computed from the returned word timestamps.
 
 Pipeline:
   script.md (SSML block in section 1)
-        │
-        ▼
-   ElevenLabs API   (text-to-speech-with-timestamps)
-        │
-        ▼
-   ──► VO English.mp3          (saved next to storyboard.html)
-   ──► word_timestamps.json    (raw response, for inspection)
-   ──► TIMINGS rewritten in    (if --apply storyboard.html)
+       |
+       v
+  ElevenLabs API   (text-to-speech-with-timestamps)
+       |
+       v
+  -->  VO English.mp3          (saved next to storyboard.html)
+  -->  word_timestamps.json    (raw response, for inspection)
+  -->  TIMINGS rewritten in    (if --apply storyboard.html)
        storyboard.html
 
 Requires:
