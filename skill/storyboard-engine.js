@@ -449,15 +449,106 @@
     transitionOverlay=document.getElementById('transitionOverlay');
     if(!transitionOverlay){ transitionOverlay=document.createElement('div'); transitionOverlay.id='transitionOverlay'; transitionOverlay.className='transition-overlay'; document.body.appendChild(transitionOverlay); }
   }
-  function playTransition(kind){
-    if(!kind||kind==='cut') return;
-    const ol=transitionOverlay; ol.className='transition-overlay '+kind;
-    const dur=550;
-    if(kind==='dissolve'||kind==='flash'){ ol.style.opacity='1'; ol.animate([{opacity:1},{opacity:0}],{duration:dur,easing:'cubic-bezier(0.22,1,0.36,1)',fill:'forwards'}); }
-    else if(kind==='whipPan'){ ol.style.opacity='1'; ol.animate([{transform:'translateX(-100%)',opacity:1},{transform:'translateX(100%)',opacity:1}],{duration:dur,easing:'cubic-bezier(0.7,0,0.3,1)',fill:'forwards'}).onfinish=()=>{ol.style.opacity='0';}; }
-    else if(kind==='wipe'){ ol.style.opacity='1'; ol.animate([{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0 0 0)',offset:0.5},{clipPath:'inset(0 0 0 100%)'}],{duration:600,easing:'cubic-bezier(0.7,0,0.3,1)',fill:'forwards'}).onfinish=()=>{ol.style.opacity='0';}; }
-    else if(kind==='blocks'){ ol.style.opacity='1'; ol.animate([{opacity:1,transform:'scaleY(1)'},{opacity:1,transform:'scaleY(0.05)'},{opacity:0,transform:'scaleY(0.05)'}],{duration:dur,easing:'cubic-bezier(0.85,0,0.15,1)',fill:'forwards'}); }
+  /* --- Presentation mode: slides stacked in place, transitioned (not scrolled) --- */
+  let presentationReady=false;
+  function setupPresentationMode(){
+    if(!deck) return;
+    deck.style.overflow='hidden';
+    deck.style.scrollSnapType='none';
+    deck.style.perspective='2000px';      // enables 3D flip transitions
+    allSlides.forEach((s,i)=>{
+      s.style.position='absolute'; s.style.top='0'; s.style.left='0';
+      s.style.willChange='transform,opacity,filter';
+      s.style.backfaceVisibility='hidden';
+      const on = (i===currentSlide-1) || (currentSlide===0 && i===0);
+      s.style.opacity = on?'1':'0';
+      s.style.visibility = on?'visible':'hidden';
+      s.style.transform='none'; s.style.filter='none';
+      s.style.zIndex = on?'2':'1';
+    });
+    presentationReady=true;
   }
+  function showOnly(n){
+    allSlides.forEach((s,i)=>{
+      const on=i===n-1;
+      s.style.opacity=on?'1':'0'; s.style.visibility=on?'visible':'hidden';
+      s.style.transform='none'; s.style.filter='none'; s.style.clipPath='none';
+      s.style.zIndex=on?'2':'1';
+    });
+  }
+  const EZ='cubic-bezier(0.7,0,0.2,1)', EZ_SOFT='cubic-bezier(0.22,1,0.36,1)';
+  function flashOverlay(color, dur){
+    const ol=transitionOverlay; ol.className='transition-overlay'; ol.style.background=color;
+    ol.style.opacity='1';
+    ol.animate([{opacity:0},{opacity:0.9,offset:0.4},{opacity:0}],{duration:dur,easing:'ease-in-out',fill:'forwards'}).onfinish=()=>{ol.style.opacity='0';ol.style.background='';};
+  }
+
+  /* TRANSITIONS registry: (from, to) => duration(ms). The wrapper makes `to`
+     visible/top before calling and hides `from` after. Both are full-frame
+     1920x1080 (or 1080x1920) slide elements stacked at the same position. */
+  const TRANSITIONS = {
+    cut: (f,t)=>{ return 0; },
+    crossDissolve: (f,t,d=700)=>{
+      if(f) f.animate([{opacity:1},{opacity:0}],{duration:d,easing:EZ_SOFT,fill:'forwards'});
+      t.animate([{opacity:0},{opacity:1}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d;
+    },
+    fade: (f,t,d=900)=>{ // through black
+      flashOverlay('#000', d); if(f) f.animate([{opacity:1},{opacity:0}],{duration:d*0.5,fill:'forwards'});
+      t.animate([{opacity:0},{opacity:0,offset:0.5},{opacity:1}],{duration:d,fill:'forwards'}); return d;
+    },
+    pushLeft: (f,t,d=750)=>{ if(f) f.animate([{transform:'translateX(0)'},{transform:'translateX(-100%)'}],{duration:d,easing:EZ,fill:'forwards'}); t.animate([{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    pushRight:(f,t,d=750)=>{ if(f) f.animate([{transform:'translateX(0)'},{transform:'translateX(100%)'}],{duration:d,easing:EZ,fill:'forwards'}); t.animate([{transform:'translateX(-100%)'},{transform:'translateX(0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    pushUp:   (f,t,d=750)=>{ if(f) f.animate([{transform:'translateY(0)'},{transform:'translateY(-100%)'}],{duration:d,easing:EZ,fill:'forwards'}); t.animate([{transform:'translateY(100%)'},{transform:'translateY(0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    pushDown: (f,t,d=750)=>{ if(f) f.animate([{transform:'translateY(0)'},{transform:'translateY(100%)'}],{duration:d,easing:EZ,fill:'forwards'}); t.animate([{transform:'translateY(-100%)'},{transform:'translateY(0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    coverLeft:(f,t,d=700)=>{ t.style.zIndex='3'; t.animate([{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    revealRight:(f,t,d=700)=>{ if(f){ f.style.zIndex='3'; f.animate([{transform:'translateX(0)'},{transform:'translateX(100%)'}],{duration:d,easing:EZ,fill:'forwards'}); } return d; },
+    zoomIn:  (f,t,d=800)=>{ if(f) f.animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.18)',opacity:0}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); t.animate([{transform:'scale(0.6)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d; },
+    zoomOut: (f,t,d=800)=>{ if(f) f.animate([{transform:'scale(1)',opacity:1},{transform:'scale(0.82)',opacity:0}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); t.animate([{transform:'scale(1.3)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d; },
+    flip3D:  (f,t,d=900)=>{ t.style.opacity='1';
+      if(f) f.animate([{transform:'rotateY(0deg)',opacity:1},{transform:'rotateY(-90deg)',opacity:0,offset:0.5},{transform:'rotateY(-90deg)',opacity:0}],{duration:d,easing:'cubic-bezier(0.6,0,0.4,1)',fill:'forwards'});
+      t.animate([{transform:'rotateY(90deg)',opacity:0,offset:0},{transform:'rotateY(90deg)',opacity:0,offset:0.5},{transform:'rotateY(0deg)',opacity:1}],{duration:d,easing:'cubic-bezier(0.6,0,0.4,1)',fill:'forwards'}); return d; },
+    spinZoom:(f,t,d=850)=>{ if(f) f.animate([{transform:'scale(1) rotate(0)',opacity:1},{transform:'scale(1.2) rotate(8deg)',opacity:0}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); t.animate([{transform:'scale(0.7) rotate(-12deg)',opacity:0},{transform:'scale(1) rotate(0)',opacity:1}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d; },
+    whipPan: (f,t,d=480)=>{ if(f) f.animate([{transform:'translateX(0)',filter:'blur(0)'},{transform:'translateX(-60%)',filter:'blur(20px)',opacity:0}],{duration:d,easing:EZ,fill:'forwards'}); t.animate([{transform:'translateX(60%)',filter:'blur(20px)',opacity:0},{transform:'translateX(0)',filter:'blur(0)',opacity:1}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    blurThrough:(f,t,d=800)=>{ if(f) f.animate([{filter:'blur(0)',opacity:1},{filter:'blur(28px)',opacity:0}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); t.animate([{filter:'blur(28px)',opacity:0},{filter:'blur(0)',opacity:1}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d; },
+    irisOpen:(f,t,d=850)=>{ t.style.zIndex='3'; t.animate([{clipPath:'circle(0% at 50% 50%)'},{clipPath:'circle(75% at 50% 50%)'}],{duration:d,easing:EZ_SOFT,fill:'forwards'}); return d; },
+    barWipe: (f,t,d=700)=>{ t.style.zIndex='3'; t.animate([{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0 0 0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    barWipeUp:(f,t,d=700)=>{ t.style.zIndex='3'; t.animate([{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0 0 0 0)'}],{duration:d,easing:EZ,fill:'forwards'}); return d; },
+    glitch:  (f,t,d=520)=>{ flashOverlay('rgba(124,92,255,.5)', d);
+      if(f) f.animate([{transform:'translate(0,0)',opacity:1},{transform:'translate(-12px,4px)',opacity:.6,offset:.2},{transform:'translate(10px,-6px)',opacity:.4,offset:.5},{transform:'translate(0,0)',opacity:0}],{duration:d,easing:'steps(6)',fill:'forwards'});
+      t.animate([{transform:'translate(14px,-4px)',opacity:0,offset:0},{transform:'translate(-8px,6px)',opacity:.7,offset:.5},{transform:'translate(0,0)',opacity:1}],{duration:d,easing:'steps(6)',fill:'forwards'}); return d; },
+    // overlay-flourish swaps (instant slide swap + colored overlay)
+    flash:  (f,t,d=420)=>{ flashOverlay('#fff', d); if(f) f.animate([{opacity:1},{opacity:0}],{duration:d*0.4,fill:'forwards'}); t.animate([{opacity:0},{opacity:1}],{duration:d*0.5,fill:'forwards'}); return d; },
+    blocks: (f,t,d=620)=>{ flashOverlay('var(--accent,#7C5CFF)', d); if(f) f.animate([{opacity:1},{opacity:0,offset:0.5}],{duration:d,fill:'forwards'}); t.animate([{opacity:0,offset:0.5},{opacity:1}],{duration:d,fill:'forwards'}); return d; },
+  };
+  // back-compat aliases
+  TRANSITIONS.dissolve = TRANSITIONS.crossDissolve;
+  TRANSITIONS.wipe = TRANSITIONS.barWipe;
+
+  let transitioning=false;
+  function goToSlide(n, type, instant){
+    if(!presentationReady) setupPresentationMode();
+    const fromEl=allSlides[currentSlide-1]||null, toEl=allSlides[n-1];
+    if(!toEl){ return; }
+    currentSlide=n; updateActiveMenu(n);
+    if(instant || type==='cut' || !TRANSITIONS[type]){ showOnly(n); return; }
+    // shared-element capture (before showing target)
+    const fromMap=captureSharedRects(fromEl);
+    // prepare target on top
+    toEl.style.visibility='visible'; toEl.style.opacity='1'; toEl.style.zIndex='3';
+    if(fromEl){ fromEl.style.visibility='visible'; fromEl.style.zIndex='2'; }
+    transitioning=true;
+    const dur=TRANSITIONS[type](fromEl,toEl)||0;
+    // shared-element morph rides on top once target laid out
+    requestAnimationFrame(()=>requestAnimationFrame(()=>playSharedTransition(fromMap,toEl)));
+    setTimeout(()=>{
+      if(currentSlide===n){ // settle: only target visible, transforms cleared
+        allSlides.forEach((s,i)=>{ const on=i===n-1; s.style.opacity=on?'1':'0'; s.style.visibility=on?'visible':'hidden'; s.style.transform='none'; s.style.filter='none'; s.style.clipPath='none'; s.style.zIndex=on?'2':'1'; });
+      }
+      transitioning=false;
+    }, Math.max(0,dur)+40);
+  }
+  // thin shim retained for any external callers
+  function playTransition(kind){ /* handled by goToSlide now */ }
 
   /* Shared-element transition: when leaving slide A for slide B, any element in B
      with data-shared-id matching an element in A animates from A's rect to B's. */
@@ -574,7 +665,9 @@
   function jumpToSlide(n){
     const cue=TIMINGS.find(t=>t.slide===n); if(!cue) return;
     setTime(cue.time+0.01);
-    const slide=allSlides[n-1]; if(slide) deck.scrollTo({top:slide.offsetTop,behavior:'smooth'});
+    const arriving=allSlides[n-1];
+    const trans = arriving?.dataset.transitionIn || 'crossDissolve';
+    goToSlide(n, trans, !isPlaying());  // instant when paused/scrubbing, animated when playing
     currentSlide=n; updateActiveMenu(n);
     progress.style.width=(cue.time/getDuration()*100)+'%'; progress.classList.add('is-active');
     applyAnimsAt(getTime()); applyCameras(getTime());
@@ -588,14 +681,11 @@
     let target=TIMINGS[0].slide;
     for(const t of TIMINGS){ if(elapsed>=t.time) target=t.slide; else break; }
     if(target!==currentSlide){
-      const fromSlide=allSlides[currentSlide-1], arriving=allSlides[target-1];
-      const fromMap=captureSharedRects(fromSlide);
-      const trans=arriving?.dataset.transitionIn||'cut'; playTransition(trans);
-      currentSlide=target;
-      if(arriving) deck.scrollTo({top:arriving.offsetTop,behavior:'smooth'});
-      // shared-element morph after scroll settles
-      requestAnimationFrame(()=>requestAnimationFrame(()=>playSharedTransition(fromMap,arriving)));
-      updateActiveMenu(currentSlide);
+      const arriving=allSlides[target-1];
+      const trans=arriving?.dataset.transitionIn||'crossDissolve';
+      // when scrubbing far (jump) do it instantly; when playing forward, animate
+      const instant = Math.abs(target-currentSlide)>1 && !isPlaying();
+      goToSlide(target, trans, instant);
     }
     applyAnimsAt(elapsed); applyCameras(elapsed); applyWordHits(elapsed);
     progress.style.width=Math.min(elapsed/getDuration()*100,100)+'%';
@@ -615,7 +705,7 @@
     voAudio.play().then(()=>{ ensureAudioGraph(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); playControls.classList.add('is-playing'); progress.classList.add('is-active'); cancelAnimationFrame(rafId); rafId=requestAnimationFrame(tick); }).catch(err=>console.warn('Audio play blocked:',err));
   }
   function pause(){ if(synthetic){ synthTime=getTime(); synthPlaying=false; } else if(voAudio) voAudio.pause(); playControls.classList.remove('is-playing'); cancelAnimationFrame(rafId); }
-  function reset(){ pause(); if(synthetic) synthTime=0; else if(voAudio) voAudio.currentTime=0; currentSlide=0; progress.style.width='0%'; progress.classList.remove('is-active'); deck.scrollTo({top:0,behavior:'smooth'}); ANIMS.forEach(a=>{a.el.classList.remove('anim-played'); if(!a.chained) a.el.style.opacity=0;}); applyAnimsAt(0); applyCameras(0); }
+  function reset(){ pause(); if(synthetic) synthTime=0; else if(voAudio) voAudio.currentTime=0; currentSlide=1; progress.style.width='0%'; progress.classList.remove('is-active'); showOnly(1); updateActiveMenu(1); ANIMS.forEach(a=>{a.el.classList.remove('anim-played'); if(!a.chained) a.el.style.opacity=0;}); applyAnimsAt(0); applyCameras(0); }
 
   /* ===========================================================================
      CALIBRATION (T/M/Bksp/A/E/Esc + bracket nudge)
@@ -688,6 +778,7 @@
     resolveSchedule();
     resolveCameras();
     bindKeys();
+    currentSlide=1; setupPresentationMode();   // stack slides in place, show slide 1
 
     if(voAudio){
       voAudio.addEventListener('error',()=>activateSynthetic('audio error'));
@@ -707,7 +798,9 @@
   const Storyboard = {
     init, EASE, PRESETS, LOOPS,
     play, pause, reset,
-    seek(t){ setTime(t); let target=TIMINGS[0].slide; for(const c of TIMINGS){ if(t>=c.time) target=c.slide; else break; } if(target!==currentSlide){ currentSlide=target; const s=allSlides[currentSlide-1]; if(s) deck.scrollTo({top:s.offsetTop,behavior:'auto'}); } applyAnimsAt(t); applyCameras(t); },
+    seek(t){ setTime(t); let target=TIMINGS[0].slide; for(const c of TIMINGS){ if(t>=c.time) target=c.slide; else break; } if(target!==currentSlide){ goToSlide(target,'cut',true); } applyAnimsAt(t); applyCameras(t); },
+    transitions:()=>Object.keys(TRANSITIONS),
+    goToSlide,
     currentSlide:()=>currentSlide,
     isSynthetic:()=>synthetic,
     registerPreset(name,def){ PRESETS[name]=def; },

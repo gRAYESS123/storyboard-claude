@@ -45,3 +45,7 @@ playthrough/
 # Private worked-example reference (local client paths) — never publish
 skill/reference.md
 reference.md
+
+# Scratch render/test frames
+examples/**/frame_*.png
+examples/**/trans_*.png

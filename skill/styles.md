@@ -93,3 +93,18 @@ The showcase look. Dark canvas, glowing accents, glassy depth, 3D.
 ## Inventing a style
 
 If the brand doesn't fit any of the six, derive a new one the same way: pick a palette (bg + 1–3 accents + highlight), a type pairing (display + mono/body), a motion vocabulary of 6–8 presets, ONE signature emphasis preset, a transition pair, and a pacing range. Write it into `concept.md` so the build stays coherent. If a `brand-profile.json` exists (from the `/ads` skill), derive the palette and type from it automatically.
+
+---
+
+## Transition vocabulary per style (v0.4)
+
+Each style has a coherent transition pair. Use these, not a random one per slide.
+
+| Style | Default transition | Accent (earned beats) | Avoid |
+|---|---|---|---|
+| `kurzgesagt` | `crossDissolve` | `irisOpen`, `spinZoom` | glitch, whipPan |
+| `apple-keynote` | `cut` | `fade`, `crossDissolve` (slow) | glitch, spinZoom, blocks |
+| `documentary` | `crossDissolve` | `fade`, `blurThrough` | push*, glitch, flip3D |
+| `bold-editorial` | `cut` | `barWipe`, `pushLeft`, `blocks` | blurThrough, irisOpen |
+| `data-journalism` | `cut` | `flash` (on a data reveal), `crossDissolve` | flip3D, spinZoom, glitch |
+| `neon-tech` | `crossDissolve` | `glitch`, `whipPan`, `flip3D`, `zoomIn` | (anything goes — it's maximal) |

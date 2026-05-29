@@ -522,3 +522,53 @@ Storyboard.calib.clearSaved();     // wipe stored calibration
 ```
 
 Decks declare `const TIMINGS = [...]` then pass it to `init` so the Python tooling (audit/aaf/elevenlabs/compress) can read and rewrite it.
+
+---
+
+# Cinematic slide transitions (v0.4)
+
+**Big change in v0.4:** the engine no longer scrolls between slides. Slides are stacked in place and the outgoing slide animates *against* the incoming one. Set `data-transition-in="<name>"` on a `<section class="slide">` to choose how it arrives.
+
+> Previously every slide change was a vertical scroll with an overlay flourish on top — so everything read as "scrolling." Now transitions are real slide-on-slide motion.
+
+## The transition catalog
+
+| Name | Motion | Feel / when to use |
+|---|---|---|
+| `cut` | Instant swap | Same energy as previous beat. Most slides. |
+| `crossDissolve` *(default)* | Outgoing fades out as incoming fades in | Smooth, neutral. The safe default. |
+| `fade` | Through black | Chapter break, tonal reset. |
+| `pushLeft` / `pushRight` | Incoming pushes outgoing off-frame horizontally | Forward momentum, "next." Kinetic. |
+| `pushUp` / `pushDown` | Vertical push | Intentional vertical move (the old scroll, but deliberate). |
+| `coverLeft` | Incoming slides over the top from the right | Layering, "new thing on top." |
+| `revealRight` | Outgoing slides away to reveal incoming underneath | "Pull back the curtain." |
+| `zoomIn` | Incoming scales up from center; outgoing scales away | Push into a topic. Energetic. |
+| `zoomOut` | Incoming scales down from large; outgoing shrinks | Pull back to context / overview. |
+| `flip3D` | Frame flips like a card on the Y axis | Premium reveal, "flip to the answer." Use sparingly. |
+| `spinZoom` | Incoming rotates + scales in | Playful, dynamic. |
+| `whipPan` | Fast motion-blurred horizontal swap | High energy pivot. The kinetic favorite. |
+| `blurThrough` | Outgoing blurs out, incoming blurs in | Dreamy, soft focus shift. |
+| `irisOpen` | Incoming revealed through an expanding circle | Iconic film iris. A spotlight reveal. |
+| `barWipe` / `barWipeUp` | Incoming revealed by a sweeping edge | Editorial, decisive. |
+| `glitch` | Digital jitter + accent flash, then swap | Tech/urgent. Use once. |
+| `flash` | White flash swap | Surprise, data landing. |
+| `blocks` | Accent-color overlay swap | Section card / chapter. |
+
+Aliases: `dissolve` → `crossDissolve`, `wipe` → `barWipe`.
+
+## Choosing transitions (still ≤3 non-cut rule)
+
+The discipline from `animator.md` still holds: **most slides should `cut` or `crossDissolve`.** Reserve the showy ones (`flip3D`, `zoomIn`, `whipPan`, `irisOpen`, `glitch`, `spinZoom`) for the 2–4 beats that earn them — the problem→solution pivot, a big reveal, the CTA. A different flashy transition on every slide reads as a transitions demo, not a film. (The bundled `examples/showcase` deck deliberately uses a different one per slide *because it is a demo* — don't copy that pattern into real videos.)
+
+Each style in `styles.md` has a recommended transition pair — use those for coherence.
+
+## Timing notes
+
+- Transitions run 0.42s (`flash`) to 0.9s (`fade`/`flip3D`). The default is ~0.7s.
+- Element entrance anims (`data-t-rel`) start at the slide's cue, so they overlap the transition. For a clean "transition first, then content," give the first element a `data-t-rel` ≥ the transition duration (~0.8).
+- When **scrubbing** (paused) or **jumping** more than one slide, the engine swaps instantly (no transition) so you can navigate fast. Transitions only animate during playback.
+- `render_video.py` records real playback, so all transitions appear in the MP4.
+
+## Shared-element still composes
+
+`data-shared-id` morphs ride *on top of* whatever `data-transition-in` you choose — e.g. a `crossDissolve` while a card flies from its old position to its new one. They layer.

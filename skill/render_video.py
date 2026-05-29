@@ -95,6 +95,7 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
                 '--mute-audio',                 # silent playback; we mux real audio later
                 '--disable-blink-features=AutomationControlled',
                 '--enable-features=NetworkService',
+                '--allow-file-access-from-files',  # allows file:// pages to load local audio
             ]
         )
         context = await browser.new_context(
@@ -112,7 +113,7 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
         print("[..] Loading deck + waiting for audio metadata...")
         try:
             await page.wait_for_function(
-                "window.STORYBOARD && document.getElementById('voAudio') && document.getElementById('voAudio').readyState >= 2",
+                "window.Storyboard && document.getElementById('voAudio') && document.getElementById('voAudio').readyState >= 2",
                 timeout=20000,
             )
         except Exception:
@@ -125,7 +126,7 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
         print(f"[ok] Audio duration: {duration:.2f}s")
 
         # Reset deck to t=0, ensure animations are at the initial frame
-        await page.evaluate("STORYBOARD.reset()")
+        await page.evaluate("Storyboard.reset()")
         await asyncio.sleep(0.4)
 
         # Press play and record the lead-in offset for ffmpeg trim
