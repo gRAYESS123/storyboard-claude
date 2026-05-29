@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <style>
+    /* ============================================================
+       RESET + ASPECT-LOCKED 1080x1920 VERTICAL CANVAS (9:16)
+       Optimized for Reels / TikTok / Shorts / vertical YouTube
+    ============================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    .stage {
+      width: 100vw; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .deck {
+      width: 1080px; height: 1920px;
+      transform-origin: center;
+      overflow-y: scroll; overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    .deck::-webkit-scrollbar { display: none; }
+
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --paper:       #FFFFFF;
+      --ink:         #1B1B19;
+      --ink-soft:    #5A5A55;
+      --accent:      #3CA8E8;
+      --accent-deep: #2A4DA3;
+      --accent-hot:  #E8762C;
+      --muted:       #EDEDED;
+      --highlight:   #FFE066;
+      --shadow-card: 0 12px 32px rgba(20, 30, 50, 0.10);
+      --shadow-big:  0 24px 48px rgba(20, 30, 50, 0.14);
+    }
+
+    /* ============================================================
+       SLIDE BASE — vertical canvas. Safe zones for platform UI:
+         Top 180px (camera notch, app header)
+         Bottom 320px (caption rail, like/comment buttons)
+    ============================================================ */
+    .slide {
+      width: 1080px; height: 1920px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      display: flex; align-items: center; justify-content: center;
+      padding: 200px 80px 360px;  /* safe zones built into padding */
+      contain: layout paint;
+      transform: translateZ(0);
+      color: var(--ink);
+    }
+    .slide.dark { background: var(--ink); color: #fff; }
+
+    /* Anim engine base */
+    .anim { opacity: 0; will-change: transform, opacity, filter; }
+    .anim.anim-played { opacity: 1; }
+
+    /* Gradient-fill text */
+    .gradient-fill {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+      background-size: 220% 100%; background-position: 0% 50%;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: HERO
+       Big stacked title, eyebrow above, subtitle below
+    ============================================================ */
+    .v-hero { width: 100%; text-align: center; }
+    .v-hero-eyebrow {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent-deep); margin-bottom: 48px;
+    }
+    .v-hero-title {
+      font-size: 180px; line-height: 0.96; font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+    .v-hero-sub {
+      font-size: 42px; line-height: 1.3; color: var(--ink-soft);
+      margin-top: 64px; max-width: 900px; margin-left: auto; margin-right: auto;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: CINEMATIC
+       Full-bleed photo, text in lower third
+    ============================================================ */
+    .v-cine { padding: 0; background: #000; align-items: stretch; }
+    .v-cine-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      filter: saturate(0.92);
+      transform-origin: 50% 50%;
+    }
+    .v-cine-veil {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg,
+        rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.85) 100%);
+    }
+    .v-cine-vignette {
+      position: absolute; inset: 0; pointer-events: none;
+      box-shadow: inset 0 0 240px 80px rgba(0,0,0,0.7);
+      z-index: 3;
+    }
+    .v-cine-content {
+      position: absolute; left: 80px; right: 80px;
+      bottom: 360px;       /* sit above the platform caption rail */
+      z-index: 4; color: #fff;
+    }
+    .v-cine-tag {
+      display: inline-block;
+      font-size: 24px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      background: var(--accent); padding: 10px 22px;
+      border-radius: 999px; margin-bottom: 40px;
+    }
+    .v-cine-headline {
+      font-size: 120px; line-height: 1.02; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 32px;
+    }
+    .v-cine-body {
+      font-size: 38px; line-height: 1.35; opacity: 0.92;
+      max-width: 920px;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: STAT
+       Huge centered number, caption below
+    ============================================================ */
+    .v-stat { width: 100%; text-align: center; }
+    .v-stat-eyebrow {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-soft); margin-bottom: 56px;
+    }
+    .v-stat-num {
+      font-size: 360px; line-height: 0.88;
+      font-weight: 900; letter-spacing: -0.05em;
+      color: var(--accent-deep);
+      font-variant-numeric: tabular-nums;
+    }
+    .v-stat-num .pct {
+      font-size: 220px; vertical-align: top; margin-left: 16px;
+    }
+    .v-stat-caption {
+      font-size: 48px; line-height: 1.3; color: var(--ink);
+      margin-top: 64px; max-width: 920px; margin-left: auto; margin-right: auto;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: LIST
+       Big vertical stack — thumb-friendly
+    ============================================================ */
+    .v-list { width: 100%; max-width: 920px; }
+    .v-list-title {
+      font-size: 96px; line-height: 1.06; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 80px; text-align: left;
+    }
+    .v-list-items { list-style: none; display: flex; flex-direction: column; gap: 36px; }
+    .v-list-items li {
+      display: flex; align-items: baseline; gap: 32px;
+      font-size: 52px; line-height: 1.3;
+    }
+    .v-list-items .num {
+      font-weight: 800; color: var(--accent);
+      font-variant-numeric: tabular-nums; min-width: 80px;
+      font-size: 44px;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: PULL-QUOTE
+    ============================================================ */
+    .v-quote { width: 100%; max-width: 920px; text-align: center; }
+    .v-quote-mark {
+      font-size: 200px; line-height: 0.8; font-weight: 900;
+      color: var(--accent); margin-bottom: 32px;
+    }
+    .v-quote-text {
+      font-size: 64px; line-height: 1.25; font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .v-quote-attr {
+      font-size: 32px; color: var(--ink-soft);
+      margin-top: 56px; letter-spacing: 0.04em;
+    }
+
+    /* ============================================================
+       VERTICAL SLIDE TYPE: CTA
+       Big tap-friendly button + url
+    ============================================================ */
+    .v-cta { width: 100%; text-align: center; }
+    .v-cta-eyebrow {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-soft); margin-bottom: 56px;
+    }
+    .v-cta-title {
+      font-size: 156px; line-height: 0.96; font-weight: 800;
+      letter-spacing: -0.035em;
+      color: var(--accent);
+    }
+    .v-cta-body {
+      font-size: 42px; line-height: 1.3; color: var(--ink);
+      margin-top: 56px;
+    }
+    .v-cta-pill {
+      display: inline-block; margin-top: 88px;
+      padding: 36px 56px;
+      background: var(--accent); color: #fff;
+      border-radius: 20px;
+      font-size: 48px; font-weight: 700; letter-spacing: 0.005em;
+      box-shadow: 0 16px 48px rgba(60,168,232,0.45);
+    }
+    .v-cta-url {
+      font-size: 28px; color: var(--ink-soft);
+      margin-top: 32px; letter-spacing: 0.04em;
+    }
+
+    /* ============================================================
+       SCENE TRANSITIONS (same as horizontal)
+    ============================================================ */
+    .transition-overlay {
+      position: fixed; inset: 0; z-index: 9000; pointer-events: none;
+      opacity: 0; will-change: opacity, transform, clip-path;
+    }
+    .transition-overlay.dissolve { background: #000; }
+    .transition-overlay.flash    { background: #fff; }
+    .transition-overlay.whipPan {
+      background: linear-gradient(90deg, transparent, #000 50%, transparent);
+      transform: translateX(-100%);
+    }
+    .transition-overlay.wipe { background: var(--accent); clip-path: inset(0 100% 0 0); }
+    .transition-overlay.blocks { background: var(--accent-hot); }
+
+    /* ============================================================
+       PLAY CONTROLS — pinned outside the 1080x1920 surface
+    ============================================================ */
+    .play-controls {
+      position: fixed; top: 12px; right: 12px;
+      display: flex; gap: 8px; z-index: 9999; opacity: 0.42;
+    }
+    .play-controls button {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(12, 18, 32, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer; padding: 0; color: rgba(255, 255, 255, 0.95);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .play-controls button svg { width: 14px; height: 14px; fill: currentColor; }
+    .play-controls .icon-pause { display: none; }
+    .play-controls.is-playing .icon-play { display: none; }
+    .play-controls.is-playing .icon-pause { display: block; }
+
+    .play-progress {
+      position: fixed; top: 0; left: 0;
+      height: 2px; background: var(--accent);
+      z-index: 9998; width: 0%; opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .play-progress.is-active { opacity: 0.75; }
+
+    .jump-menu {
+      position: fixed; top: 56px; right: 12px;
+      width: 320px; max-height: calc(100vh - 80px); overflow-y: auto;
+      background: rgba(12, 18, 32, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px; padding: 6px; z-index: 9999;
+      opacity: 0; pointer-events: none; transform: translateY(-8px);
+      transition: opacity 0.2s, transform 0.2s; backdrop-filter: blur(8px);
+    }
+    .jump-menu.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .jump-menu button {
+      display: flex; align-items: baseline; gap: 10px;
+      width: 100%; padding: 7px 12px;
+      background: transparent; border: none; border-radius: 6px;
+      color: rgba(255, 255, 255, 0.85);
+      font: 12.5px/1.35 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      text-align: left; cursor: pointer;
+    }
+    .jump-menu button .jm-num {
+      font-weight: 700; color: var(--accent);
+      font-variant-numeric: tabular-nums; min-width: 22px;
+      font-size: 11px; letter-spacing: 0.06em;
+    }
+    .jump-menu button.is-active { background: rgba(60, 168, 232, 0.22); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="deck" id="deck">
+
+      <!-- SLIDE 1 — HERO -->
+      <section class="slide" data-slide="1" data-transition-in="cut">
+        <div class="v-hero">
+          <p class="v-hero-eyebrow anim" data-anim="typewriter" data-t-rel="0.2" data-dur="1.0">{{EYEBROW}}</p>
+          <h1 class="v-hero-title gradient-fill anim" data-anim="gradientSweep" data-t-rel="1.0" data-dur="1.6">{{HERO_TITLE}}</h1>
+          <p class="v-hero-sub anim" data-anim="fadeUp" data-t-rel="2.4" data-dur="0.9">{{HERO_SUBTITLE}}</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 2 — CINEMATIC -->
+      <section class="slide v-cine dark" data-slide="2" data-transition-in="dissolve">
+        <div class="v-cine-bg anim" data-anim="kenburns" data-t-rel="0" data-dur="12" data-zoom="0.12"
+             style="background-image:url('{{SLIDE2_IMAGE}}');"></div>
+        <div class="v-cine-veil"></div>
+        <div class="v-cine-vignette"></div>
+        <div class="v-cine-content">
+          <span class="v-cine-tag anim" data-anim="fadeIn" data-t-rel="0.3" data-dur="0.6">{{SLIDE2_TAG}}</span>
+          <h2 class="v-cine-headline anim" data-anim="anticipate" data-t-rel="0.8" data-dur="1.2">{{SLIDE2_HEADLINE}}</h2>
+          <p class="v-cine-body anim" data-anim="wordReveal" data-t-rel="2.0" data-dur="2.2">{{SLIDE2_BODY}}</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 3 — STAT -->
+      <section class="slide" data-slide="3" data-transition-in="flash">
+        <div class="v-stat">
+          <p class="v-stat-eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">{{STAT_EYEBROW}}</p>
+          <div class="v-stat-num anim" data-anim="counter" data-t-rel="0.8" data-dur="1.6"
+               data-to="{{STAT_NUMBER}}" data-suffix="{{STAT_SUFFIX}}">0</div>
+          <p class="v-stat-caption anim" data-anim="fadeUp" data-t-rel="2.6" data-dur="1.0">{{STAT_CAPTION}}</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 4 — LIST -->
+      <section class="slide" data-slide="4" data-transition-in="cut">
+        <div class="v-list">
+          <h2 class="v-list-title anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.9">{{LIST_TITLE}}</h2>
+          <ul class="v-list-items">
+            <li class="anim" data-anim="slideInLeft" data-t-rel="1.0" data-dur="0.7"><span class="num">01</span><span>{{LIST_ITEM_1}}</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="1.5" data-dur="0.7"><span class="num">02</span><span>{{LIST_ITEM_2}}</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="2.0" data-dur="0.7"><span class="num">03</span><span>{{LIST_ITEM_3}}</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="2.5" data-dur="0.7"><span class="num">04</span><span>{{LIST_ITEM_4}}</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- SLIDE 5 — QUOTE -->
+      <section class="slide" data-slide="5" data-transition-in="dissolve">
+        <div class="v-quote">
+          <div class="v-quote-mark anim" data-anim="scaleIn" data-t-rel="0.2" data-dur="0.8">"</div>
+          <p class="v-quote-text anim" data-anim="wordReveal" data-t-rel="0.8" data-dur="2.4">{{QUOTE_TEXT}}</p>
+          <p class="v-quote-attr anim" data-anim="fadeIn" data-t-rel="3.4" data-dur="0.7">— {{QUOTE_ATTR}}</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 6 — CTA -->
+      <section class="slide" data-slide="6" data-transition-in="whipPan">
+        <div class="v-cta">
+          <p class="v-cta-eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">{{CTA_EYEBROW}}</p>
+          <h2 class="v-cta-title anim" data-anim="spring" data-t-rel="0.8" data-dur="1.4">{{CTA_TITLE}}</h2>
+          <p class="v-cta-body anim" data-anim="fadeUp" data-t-rel="2.4" data-dur="1.0">{{CTA_BODY}}</p>
+          <span class="v-cta-pill anim" data-anim="glow" data-t-rel="3.6" data-dur="6.0">{{CTA_PILL}}</span>
+          <p class="v-cta-url anim" data-anim="typewriter" data-t-rel="4.4" data-dur="1.4">{{CTA_URL}}</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="transition-overlay" id="transitionOverlay"></div>
+
+  <div class="play-controls" id="playControls">
+    <button id="jumpBtn" aria-label="Jump to slide" title="Jump (J)">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/></svg>
+    </button>
+    <button id="resetBtn" aria-label="Reset" title="Reset (R)">
+      <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6.5 12 11V8a5 5 0 11-5 5H5a7 7 0 107-7z"/></svg>
+    </button>
+    <button id="playBtn" aria-label="Play / Pause" title="Play / Pause (Space)">
+      <svg class="icon-play" viewBox="0 0 24 24"><path d="M7 4l13 8L7 20z"/></svg>
+      <svg class="icon-pause" viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>
+    </button>
+  </div>
+  <div class="play-progress" id="playProgress"></div>
+  <div class="jump-menu" id="jumpMenu" role="menu" aria-label="Jump to slide"></div>
+
+  <audio id="voAudio" preload="metadata" src="{{AUDIO_SRC}}"></audio>
+
+  <script>
+  /* =============================================================
+     STORYBOARD ENGINE — vertical edition
+     (Engine code is identical to template.html — kept self-contained
+     so vertical_template.html can ship standalone)
+  ============================================================= */
+
+  const TIMINGS = [
+    { time:  0.0, slide: 1 },
+    { time:  6.0, slide: 2 },
+    { time: 15.0, slide: 3 },
+    { time: 25.0, slide: 4 },
+    { time: 36.0, slide: 5 },
+    { time: 48.0, slide: 6 }
+  ];
+  const SLIDE_LABELS = [
+    '{{LABEL_1}}', '{{LABEL_2}}', '{{LABEL_3}}',
+    '{{LABEL_4}}', '{{LABEL_5}}', '{{LABEL_6}}'
+  ];
+  const WORD_HITS = [];
+  const FALLBACK_DURATION = 60;
+
+  // Hash of the file's TIMINGS as initially loaded — discards stale calibration
+  const INITIAL_TIMINGS_HASH = TIMINGS.map(t => t.slide + ':' + t.time.toFixed(2)).join(',');
+
+  /* === Easings === */
+  const easeOutCubic   = p => 1 - Math.pow(1 - p, 3);
+  const easeInOutCubic = p => p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3) / 2;
+  const easeOutQuint   = p => 1 - Math.pow(1 - p, 5);
+  const easeOutBack    = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p-1, 3) + c1 * Math.pow(p-1, 2); };
+  const easeOutElastic = p => {
+    const c4 = (2 * Math.PI) / 3;
+    return p === 0 ? 0 : p === 1 ? 1 : Math.pow(2, -10*p) * Math.sin((p*10 - 0.75) * c4) + 1;
+  };
+  const easeOutBounce = p => {
+    const n1 = 7.5625, d1 = 2.75;
+    if (p < 1/d1) return n1*p*p;
+    if (p < 2/d1) return n1*(p -= 1.5/d1)*p + 0.75;
+    if (p < 2.5/d1) return n1*(p -= 2.25/d1)*p + 0.9375;
+    return n1*(p -= 2.625/d1)*p + 0.984375;
+  };
+
+  /* === PRESETS — identical catalog to template.html === */
+  const PRESETS = {
+    fadeIn:  { dur: 0.8, apply: (el, p) => { el.style.opacity = easeOutCubic(p); } },
+    fadeOut: { dur: 0.8, apply: (el, p) => { el.style.opacity = 1 - easeOutCubic(p); } },
+    fadeUp:  { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateY(${(1-e)*40}px)`; } },
+    fadeDown:{ dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateY(${(1-e)*-40}px)`; } },
+    slideInLeft:  { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateX(${(1-e)*-120}px)`; } },
+    slideInRight: { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateX(${(1-e)*120}px)`; } },
+    scaleIn: { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `scale(${0.85 + 0.15*e})`; } },
+    crossfade: { dur: 1.2, apply: (el, p) => { const out = el.dataset.out === '1'; el.style.opacity = out ? (1-p) : p; } },
+    anticipate: { dur: 1.2, apply: (el, p) => {
+      let x;
+      if (p < 0.25) { x = -8 * (p / 0.25); }
+      else { const q = (p - 0.25) / 0.75; x = -8 + (8 + 100) * easeOutBack(q); }
+      el.style.opacity = Math.min(1, p * 3);
+      el.style.transform = `translateX(${-x}px)`;
+    }},
+    overshoot: { dur: 1.0, apply: (el, p) => {
+      el.style.opacity = easeOutCubic(p);
+      el.style.transform = `translateY(${(1 - easeOutBack(p)) * 30}px)`;
+    }},
+    spring: { dur: 1.2, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 2);
+      el.style.transform = `scale(${0.7 + 0.3 * easeOutElastic(p)})`;
+    }},
+    bounce: { dur: 1.2, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 2);
+      el.style.transform = `translateY(${(1 - easeOutBounce(p)) * -120}px)`;
+    }},
+    wobble: { dur: 0.9, apply: (el, p) => { el.style.opacity = 1; el.style.transform = `rotate(${Math.sin(p * Math.PI * 4) * (1 - p) * 4}deg)`; }},
+    shake: { dur: 0.5, apply: (el, p) => { el.style.opacity = 1; el.style.transform = `translateX(${Math.sin(p * Math.PI * 10) * (1 - p) * 12}px)`; }},
+    squash: { dur: 0.6, apply: (el, p) => { el.style.opacity = 1; const phase = Math.sin(p * Math.PI); el.style.transform = `scale(${1 + phase*0.18}, ${1 - phase*0.22})`; }},
+    pulse: { dur: 0.9, apply: (el, p) => { el.style.opacity = 1; el.style.transform = `scale(${1 + 0.08 * Math.sin(p * Math.PI)})`; }},
+    typewriter: { dur: 1.5, apply: (el, p) => {
+      if (!el.dataset.fullText) el.dataset.fullText = el.textContent;
+      const txt = el.dataset.fullText;
+      const n = Math.floor(txt.length * easeOutCubic(p));
+      el.textContent = txt.slice(0, n); el.style.opacity = 1;
+    }},
+    wordReveal: { dur: 1.8, apply: (el, p) => {
+      if (!el.dataset.fullText) {
+        el.dataset.fullText = el.innerHTML;
+        const words = el.innerHTML.split(/(\s+)/);
+        el.innerHTML = words.map(w => /\S/.test(w) ? `<span class="wr-w" style="opacity:0">${w}</span>` : w).join('');
+        el.dataset.wordCount = el.querySelectorAll('.wr-w').length;
+      }
+      el.style.opacity = 1;
+      const n = parseInt(el.dataset.wordCount, 10);
+      const shown = Math.floor(n * easeOutCubic(p));
+      el.querySelectorAll('.wr-w').forEach((w, i) => { w.style.opacity = i < shown ? 1 : 0; });
+    }},
+    tracking: { dur: 1.2, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.letterSpacing = `${(1-e) * 0.2}em`; }},
+    gradientSweep: { dur: 2.0, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 3);
+      const fill = el.classList.contains('gradient-fill') ? el : el.querySelector('.gradient-fill');
+      if (fill) fill.style.backgroundPosition = `${100 - p * 100}% 50%`;
+    }},
+    splitReveal: { dur: 1.2, apply: (el, p) => { const e = easeInOutCubic(p); el.style.opacity = 1; el.style.clipPath = `inset(${(1-e)*50}% 0 ${(1-e)*50}% 0)`; }},
+    counter: { dur: 1.8, apply: (el, p) => {
+      const to = parseFloat(el.dataset.to) || 0;
+      const decimals = parseInt(el.dataset.decimals || '0', 10);
+      const suffix = el.dataset.suffix || '';
+      const val = to * easeOutQuint(p);
+      el.textContent = val.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix;
+      el.style.opacity = 1;
+    }},
+    kenburns: { dur: 10, apply: (el, p) => {
+      const zoom = parseFloat(el.dataset.zoom || '0.1');
+      const dx = parseFloat(el.dataset.dx || '2');
+      const dy = parseFloat(el.dataset.dy || '-2');
+      el.style.opacity = 1;
+      el.style.transform = `scale(${1 + zoom*p}) translate(${p*dx}%, ${p*dy}%)`;
+    }},
+    cameraZoom: { dur: 2.5, apply: (el, p) => {
+      const to = parseFloat(el.dataset.scale || '1.5');
+      const ox = parseFloat(el.dataset.ox || '50');
+      const oy = parseFloat(el.dataset.oy || '50');
+      const e = easeInOutCubic(p);
+      el.style.opacity = 1;
+      el.style.transformOrigin = `${ox}% ${oy}%`;
+      el.style.transform = `scale(${1 + (to - 1) * e})`;
+    }},
+    cameraPan: { dur: 3.0, apply: (el, p) => {
+      const dx = parseFloat(el.dataset.dx || '0');
+      const dy = parseFloat(el.dataset.dy || '0');
+      const e = easeInOutCubic(p);
+      el.style.opacity = 1;
+      el.style.transform = `translate(${e*dx}px, ${e*dy}px)`;
+    }},
+    focusBlur: { dur: 1.4, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = Math.min(1, p * 3); el.style.filter = `blur(${(1-e) * 14}px)`; }},
+    parallax: { dur: 8, apply: (el, p) => { const range = parseFloat(el.dataset.range || '40'); el.style.opacity = 1; el.style.transform = `translateY(${(p-0.5)*range}px)`; }},
+    glow: { dur: 1.6, apply: (el, p) => {
+      el.style.opacity = 1;
+      const intensity = 0.5 + 0.5 * Math.sin(p * Math.PI * 2);
+      el.style.boxShadow = `0 0 ${30 + intensity * 60}px rgba(60, 168, 232, ${0.4 + intensity * 0.4})`;
+    }},
+    flicker: { dur: 1.0, apply: (el, p) => {
+      const cycles = 6; const phase = (p * cycles) % 1;
+      const on = phase > 0.15 && phase < 0.5 ? 0 : 1;
+      el.style.opacity = on ? Math.min(1, p * 2) : 0.15;
+    }},
+    highlight: { dur: 0.8, apply: (el, p) => {
+      const e = easeOutCubic(p);
+      el.style.opacity = 1;
+      el.style.backgroundImage = `linear-gradient(90deg, #FFE066 ${e*100}%, transparent ${e*100}%)`;
+      el.style.backgroundRepeat = 'no-repeat';
+      el.style.backgroundSize = '100% 38%';
+      el.style.backgroundPosition = '0 88%';
+    }},
+    reveal: { dur: 1.2, apply: (el, p) => { const e = easeInOutCubic(p); el.style.clipPath = `inset(0 ${(1-e)*100}% 0 0)`; el.style.opacity = 1; }},
+    revealUp: { dur: 1.2, apply: (el, p) => { const e = easeInOutCubic(p); el.style.clipPath = `inset(${(1-e)*100}% 0 0 0)`; el.style.opacity = 1; }},
+    irisIn: { dur: 1.4, apply: (el, p) => { const e = easeInOutCubic(p); el.style.opacity = 1; el.style.clipPath = `circle(${e * 100}% at 50% 50%)`; }},
+    pathdraw: { dur: 2.0, apply: (el, p) => {
+      if (!el.dataset.len) { try { el.dataset.len = el.getTotalLength(); } catch(e) { el.dataset.len = 1000; } }
+      const len = parseFloat(el.dataset.len);
+      el.style.strokeDasharray = len;
+      el.style.strokeDashoffset = len * (1 - easeInOutCubic(p));
+      el.style.opacity = 1;
+    }},
+    motionPath: { dur: 2.0, apply: (el, p) => {
+      const sel = el.dataset.path; const path = sel ? document.querySelector(sel) : null;
+      if (!path) return;
+      if (!el.dataset.pathLen) { try { el.dataset.pathLen = path.getTotalLength(); } catch(e) { el.dataset.pathLen = 0; } }
+      const len = parseFloat(el.dataset.pathLen);
+      if (!len) return;
+      const pt = path.getPointAtLength(len * easeInOutCubic(p));
+      if (el.tagName === 'circle' || el.tagName === 'ellipse') { el.setAttribute('cx', pt.x); el.setAttribute('cy', pt.y); }
+      else { el.setAttribute('transform', `translate(${pt.x}, ${pt.y})`); }
+      el.style.opacity = 1;
+    }}
+  };
+
+  /* === Scene transitions === */
+  const TRANSITION_OVERLAY = document.getElementById('transitionOverlay');
+  function playTransition(kind) {
+    if (!kind || kind === 'cut') return;
+    TRANSITION_OVERLAY.className = 'transition-overlay ' + kind;
+    if (kind === 'dissolve' || kind === 'flash') {
+      TRANSITION_OVERLAY.style.opacity = '1';
+      TRANSITION_OVERLAY.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 550, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+    } else if (kind === 'whipPan') {
+      TRANSITION_OVERLAY.style.opacity = '1';
+      TRANSITION_OVERLAY.animate(
+        [{ transform: 'translateX(-100%)', opacity: 1 }, { transform: 'translateX(100%)', opacity: 1 }],
+        { duration: 550, easing: 'cubic-bezier(0.7, 0, 0.3, 1)', fill: 'forwards' }
+      ).onfinish = () => { TRANSITION_OVERLAY.style.opacity = '0'; };
+    } else if (kind === 'wipe') {
+      TRANSITION_OVERLAY.style.opacity = '1';
+      TRANSITION_OVERLAY.animate(
+        [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)', offset: 0.5 }, { clipPath: 'inset(0 0 0 100%)' }],
+        { duration: 600, easing: 'cubic-bezier(0.7, 0, 0.3, 1)', fill: 'forwards' }
+      ).onfinish = () => { TRANSITION_OVERLAY.style.opacity = '0'; };
+    } else if (kind === 'blocks') {
+      TRANSITION_OVERLAY.style.opacity = '1';
+      TRANSITION_OVERLAY.animate(
+        [{ opacity: 1, transform: 'scaleY(1)' }, { opacity: 1, transform: 'scaleY(0.05)' }, { opacity: 0, transform: 'scaleY(0.05)' }],
+        { duration: 550, easing: 'cubic-bezier(0.85, 0, 0.15, 1)', fill: 'forwards' }
+      );
+    }
+  }
+
+  /* === Boilerplate === */
+  const deck = document.getElementById('deck');
+  const playControls = document.getElementById('playControls');
+  const playBtn = document.getElementById('playBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const jumpBtn = document.getElementById('jumpBtn');
+  const jumpMenu = document.getElementById('jumpMenu');
+  const progress = document.getElementById('playProgress');
+  const voAudio = document.getElementById('voAudio');
+  const allSlides = [...document.querySelectorAll('.slide')];
+  let currentSlide = 0; let rafId = 0;
+
+  function scaleToFit() {
+    const sx = window.innerWidth / 1080;
+    const sy = window.innerHeight / 1920;
+    const s = Math.min(sx, sy);
+    deck.style.transform = `translate3d(0,0,0) scale(${s})`;
+  }
+  scaleToFit();
+  window.addEventListener('resize', scaleToFit);
+
+  /* Synthetic clock for previewing without audio */
+  let useSyntheticClock = false;
+  let syntheticTime = 0;
+  let syntheticPlaying = false;
+  let syntheticPlayStartedAt = 0;
+  function activateSynthetic() { useSyntheticClock = true; }
+  function getTime() {
+    if (useSyntheticClock) {
+      if (syntheticPlaying) return syntheticTime + (performance.now() - syntheticPlayStartedAt) / 1000;
+      return syntheticTime;
+    }
+    return voAudio.currentTime;
+  }
+  function setTime(t) {
+    if (useSyntheticClock) {
+      syntheticTime = t;
+      if (syntheticPlaying) syntheticPlayStartedAt = performance.now();
+    } else {
+      voAudio.currentTime = t;
+    }
+  }
+  function isPlaying() { return useSyntheticClock ? syntheticPlaying : !voAudio.paused; }
+  voAudio.addEventListener('error', () => activateSynthetic());
+  setTimeout(() => { if (voAudio.readyState === 0 && !voAudio.duration) activateSynthetic(); }, 1200);
+
+  /* Anims */
+  const ANIMS = [];
+  function resolveAnims() {
+    ANIMS.length = 0;
+    const cueFor = {};
+    TIMINGS.forEach(t => { cueFor[t.slide] = t.time; });
+    document.querySelectorAll('.anim').forEach(el => {
+      const slideEl = el.closest('.slide');
+      const slideN = slideEl ? parseInt(slideEl.dataset.slide || '0', 10) : 0;
+      const cue = cueFor[slideN] ?? 0;
+      let t;
+      if (el.dataset.t !== undefined) t = parseFloat(el.dataset.t);
+      else if (el.dataset.tRel !== undefined) t = cue + parseFloat(el.dataset.tRel);
+      else t = cue;
+      const presetName = el.dataset.anim || 'fadeIn';
+      const preset = PRESETS[presetName] || PRESETS.fadeIn;
+      const dur = el.dataset.dur !== undefined ? parseFloat(el.dataset.dur) : preset.dur;
+      ANIMS.push({ el, t, dur, preset, name: presetName });
+    });
+  }
+  function applyAnimsAt(time) {
+    for (const a of ANIMS) {
+      if (time < a.t) { a.el.style.opacity = 0; a.el.classList.remove('anim-played'); }
+      else if (time >= a.t && time <= a.t + a.dur) { a.preset.apply(a.el, Math.max(0, Math.min(1, (time - a.t) / a.dur))); }
+      else if (!a.el.classList.contains('anim-played')) { a.preset.apply(a.el, 1); a.el.classList.add('anim-played'); }
+    }
+  }
+
+  /* === Calibration (T enter, M mark, A apply, E export) === */
+  const CALIB = {
+    active: false, cues: [], badge: null,
+    key() { return 'storyboard-calib::' + location.pathname; },
+    start() { this.active = true; this.cues = [0]; this.ensureBadge(); this.update(); },
+    exitMode() { this.active = false; if (this.badge) { this.badge.remove(); this.badge = null; } },
+    mark(t) {
+      if (!this.active || this.cues.length >= TIMINGS.length) return;
+      if (t <= this.cues[this.cues.length - 1]) t = this.cues[this.cues.length - 1] + 0.1;
+      this.cues.push(parseFloat(t.toFixed(2))); this.update();
+    },
+    undo() { if (this.active && this.cues.length > 1) { this.cues.pop(); this.update(); } },
+    apply() {
+      const n = Math.min(this.cues.length, TIMINGS.length);
+      for (let i = 0; i < n; i++) TIMINGS[i].time = this.cues[i];
+      ANIMS.length = 0; resolveAnims();
+      jumpMenu.innerHTML = ''; buildJumpMenu();
+      applyAnimsAt(getTime());
+      try { localStorage.setItem(this.key(), JSON.stringify({ sourceHash: INITIAL_TIMINGS_HASH, cues: this.cues })); } catch (e) {}
+      this.flash('APPLIED · ' + n + ' cues');
+    },
+    exportCues() {
+      const txt = 'const TIMINGS = [\n' +
+        this.cues.map((t, i) => `  { time: ${t.toFixed(2).padStart(7)}, slide: ${(i+1).toString().padStart(2)} }`).join(',\n') +
+        '\n];';
+      console.log(txt);
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => this.flash('COPIED'), () => this.flash('LOGGED to console'));
+      else this.flash('LOGGED to console');
+    },
+    loadSaved() {
+      try {
+        const saved = localStorage.getItem(this.key()); if (!saved) return false;
+        const parsed = JSON.parse(saved);
+        if (!parsed || !parsed.sourceHash || !Array.isArray(parsed.cues)) { localStorage.removeItem(this.key()); return false; }
+        if (parsed.sourceHash !== INITIAL_TIMINGS_HASH) { console.info('Storyboard: file TIMINGS changed — discarding stale calibration.'); localStorage.removeItem(this.key()); return false; }
+        const cues = parsed.cues; if (!cues.length) return false;
+        this.cues = cues;
+        const n = Math.min(cues.length, TIMINGS.length);
+        for (let i = 0; i < n; i++) TIMINGS[i].time = cues[i];
+        ANIMS.length = 0; resolveAnims();
+        return true;
+      } catch (e) { return false; }
+    },
+    clearSaved() { try { localStorage.removeItem(this.key()); } catch (e) {} },
+    ensureBadge() {
+      if (this.badge) return;
+      const b = document.createElement('div');
+      b.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;font:600 12px/1.5 ui-monospace,monospace;letter-spacing:.06em;background:rgba(60,168,232,.95);color:#fff;padding:10px 18px;border-radius:8px;text-align:center;min-width:420px;box-shadow:0 4px 16px rgba(0,0,0,0.35);';
+      document.body.appendChild(b); this.badge = b;
+    },
+    update() {
+      if (!this.badge) return;
+      const n = this.cues.length, total = TIMINGS.length;
+      const label = n >= total ? 'ALL CAPTURED — [A]pply · [E]xport · [Esc] exit' : 'CALIBRATION · captured ' + n + '/' + total + ' · next: slide ' + (n+1);
+      this.badge.innerHTML = label + '<br><span style="opacity:.85;font-weight:400;">[M] mark · [Bksp] undo · [A]pply · [E]xport · [Esc] exit</span>';
+    },
+    flash(msg) {
+      if (!this.badge) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;font:600 12px/1.4 ui-monospace,monospace;letter-spacing:.06em;background:rgba(10,132,120,.95);color:#fff;padding:10px 18px;border-radius:8px;';
+        document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+      } else { this.badge.innerHTML = '<strong>' + msg + '</strong>'; setTimeout(() => { if (this.badge) this.update(); }, 1500); }
+    }
+  };
+
+  /* UI */
+  function buildJumpMenu() {
+    const frag = document.createDocumentFragment();
+    TIMINGS.forEach((cue, idx) => {
+      const btn = document.createElement('button');
+      btn.dataset.slide = cue.slide;
+      const mm = Math.floor(cue.time / 60).toString().padStart(2, '0');
+      const ss = Math.floor(cue.time % 60).toString().padStart(2, '0');
+      btn.innerHTML =
+        '<span class="jm-num">' + String(cue.slide).padStart(2, '0') + '</span>' +
+        '<span class="jm-title">' + (SLIDE_LABELS[idx] || ('Slide ' + cue.slide)) + '</span>' +
+        '<span class="jm-num" style="min-width:38px;text-align:right;opacity:.6;">' + mm + ':' + ss + '</span>';
+      frag.appendChild(btn);
+    });
+    jumpMenu.appendChild(frag);
+  }
+  function updateActiveMenu(n) { jumpMenu.querySelectorAll('button').forEach(b => { b.classList.toggle('is-active', parseInt(b.dataset.slide, 10) === n); }); }
+  function getDuration() {
+    if (useSyntheticClock) return FALLBACK_DURATION;
+    return (voAudio && voAudio.duration && isFinite(voAudio.duration)) ? voAudio.duration : FALLBACK_DURATION;
+  }
+  function jumpToSlide(n) {
+    const cue = TIMINGS.find(t => t.slide === n); if (!cue) return;
+    setTime(cue.time + 0.01);
+    const slide = allSlides[n - 1];
+    if (slide) deck.scrollTo({ top: slide.offsetTop, behavior: 'smooth' });
+    currentSlide = n; updateActiveMenu(n);
+    progress.style.width = (cue.time / getDuration() * 100) + '%';
+    progress.classList.add('is-active');
+    applyAnimsAt(getTime());
+  }
+
+  jumpBtn.addEventListener('click', (e) => { e.stopPropagation(); jumpMenu.classList.toggle('is-open'); });
+  jumpMenu.addEventListener('click', (e) => { const btn = e.target.closest('button[data-slide]'); if (!btn) return; jumpToSlide(parseInt(btn.dataset.slide, 10)); jumpMenu.classList.remove('is-open'); });
+  document.addEventListener('click', (e) => { if (!jumpMenu.contains(e.target) && e.target !== jumpBtn) jumpMenu.classList.remove('is-open'); });
+
+  function tick() {
+    const elapsed = getTime();
+    let target = TIMINGS[0].slide;
+    for (const t of TIMINGS) { if (elapsed >= t.time) target = t.slide; else break; }
+    if (target !== currentSlide) {
+      const arriving = allSlides[target - 1];
+      const trans = arriving?.dataset.transitionIn || 'cut';
+      playTransition(trans);
+      currentSlide = target;
+      if (arriving) deck.scrollTo({ top: arriving.offsetTop, behavior: 'smooth' });
+      updateActiveMenu(currentSlide);
+    }
+    applyAnimsAt(elapsed);
+    progress.style.width = Math.min(elapsed / getDuration() * 100, 100) + '%';
+    if (isPlaying() && elapsed < getDuration()) rafId = requestAnimationFrame(tick);
+  }
+  function play() {
+    if (useSyntheticClock) { syntheticPlaying = true; syntheticPlayStartedAt = performance.now(); playControls.classList.add('is-playing'); progress.classList.add('is-active'); cancelAnimationFrame(rafId); rafId = requestAnimationFrame(tick); return; }
+    voAudio.play().then(() => { playControls.classList.add('is-playing'); progress.classList.add('is-active'); cancelAnimationFrame(rafId); rafId = requestAnimationFrame(tick); }).catch(err => console.warn('Audio play blocked:', err));
+  }
+  function pause() {
+    if (useSyntheticClock) { syntheticTime = getTime(); syntheticPlaying = false; }
+    else voAudio.pause();
+    playControls.classList.remove('is-playing');
+    cancelAnimationFrame(rafId);
+  }
+  function reset() {
+    pause();
+    if (useSyntheticClock) syntheticTime = 0; else voAudio.currentTime = 0;
+    currentSlide = 0;
+    progress.style.width = '0%'; progress.classList.remove('is-active');
+    deck.scrollTo({ top: 0, behavior: 'smooth' });
+    ANIMS.forEach(a => { a.el.classList.remove('anim-played'); a.el.style.opacity = 0; });
+    applyAnimsAt(0);
+  }
+
+  voAudio.addEventListener('play', () => playControls.classList.add('is-playing'));
+  voAudio.addEventListener('pause', () => playControls.classList.remove('is-playing'));
+  voAudio.addEventListener('ended', () => { playControls.classList.remove('is-playing'); progress.style.width = '100%'; });
+  voAudio.addEventListener('timeupdate', () => { if (voAudio.paused) applyAnimsAt(voAudio.currentTime); });
+  voAudio.addEventListener('seeked', () => { applyAnimsAt(voAudio.currentTime); });
+
+  playBtn.addEventListener('click', () => isPlaying() ? pause() : play());
+  resetBtn.addEventListener('click', reset);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    if (e.code === 'KeyT') { e.preventDefault(); CALIB.active ? CALIB.exitMode() : CALIB.start(); return; }
+    if (CALIB.active) {
+      if (e.code === 'KeyM')      { e.preventDefault(); CALIB.mark(getTime()); return; }
+      if (e.code === 'Backspace') { e.preventDefault(); CALIB.undo(); return; }
+      if (e.code === 'KeyA')      { e.preventDefault(); CALIB.apply(); return; }
+      if (e.code === 'KeyE')      { e.preventDefault(); CALIB.exportCues(); return; }
+      if (e.code === 'Escape')    { e.preventDefault(); CALIB.exitMode(); return; }
+    }
+    if (e.code === 'Space') { e.preventDefault(); isPlaying() ? pause() : play(); }
+    else if (e.code === 'KeyR' || e.code === 'Home') { e.preventDefault(); reset(); }
+    else if (e.code === 'KeyJ') { e.preventDefault(); jumpMenu.classList.toggle('is-open'); }
+    else if (e.code === 'Escape') { jumpMenu.classList.remove('is-open'); }
+    else if (e.code === 'ArrowRight') {
+      e.preventDefault();
+      const now = getTime();
+      const next = TIMINGS.find(t => t.time > now + 0.1);
+      if (next) jumpToSlide(next.slide);
+    } else if (e.code === 'ArrowLeft') {
+      e.preventDefault();
+      const now = getTime();
+      const past = [...TIMINGS].reverse().find(t => t.time < now - 0.5);
+      if (past) jumpToSlide(past.slide);
+    } else if (e.code === 'BracketLeft' || e.code === 'Comma') {
+      e.preventDefault();
+      const cue = TIMINGS.find(t => t.slide === currentSlide);
+      if (cue && cue.slide > 1) { cue.time = Math.max(0, cue.time - 0.25); ANIMS.length = 0; resolveAnims(); jumpMenu.innerHTML = ''; buildJumpMenu(); applyAnimsAt(getTime()); CALIB.flash('Slide ' + cue.slide + ' cue: ' + cue.time.toFixed(2) + 's'); }
+    } else if (e.code === 'BracketRight' || e.code === 'Period') {
+      e.preventDefault();
+      const cue = TIMINGS.find(t => t.slide === currentSlide);
+      if (cue && cue.slide > 1) { cue.time = cue.time + 0.25; ANIMS.length = 0; resolveAnims(); jumpMenu.innerHTML = ''; buildJumpMenu(); applyAnimsAt(getTime()); CALIB.flash('Slide ' + cue.slide + ' cue: ' + cue.time.toFixed(2) + 's'); }
+    }
+  });
+
+  window.STORYBOARD = {
+    cues: TIMINGS, labels: SLIDE_LABELS,
+    seek(t) {
+      setTime(t);
+      let target = TIMINGS[0].slide;
+      for (const cue of TIMINGS) { if (t >= cue.time) target = cue.slide; else break; }
+      if (target !== currentSlide) {
+        currentSlide = target;
+        const slide = allSlides[currentSlide - 1];
+        if (slide) deck.scrollTo({ top: slide.offsetTop, behavior: 'auto' });
+        updateActiveMenu(currentSlide);
+      }
+      applyAnimsAt(t);
+    },
+    currentSlide: () => currentSlide,
+    play, pause, reset,
+    presets: Object.keys(PRESETS),
+    isSynthetic: () => useSyntheticClock,
+    calib: CALIB
+  };
+
+  buildJumpMenu();
+  resolveAnims();
+  if (CALIB.loadSaved()) { jumpMenu.innerHTML = ''; buildJumpMenu(); CALIB.flash('Loaded saved calibration'); }
+  applyAnimsAt(0);
+  </script>
+
+</body>
+</html>

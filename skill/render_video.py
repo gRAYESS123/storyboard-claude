@@ -63,6 +63,29 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
     print(f"[out] MP4   : {out_mp4}")
     print()
 
+    # First pass: open the page at a default 1920x1080, read the deck's
+    # actual size (.deck width/height) so we can re-record at the right
+    # aspect. This lets the same renderer handle 1920x1080 horizontal
+    # and 1080x1920 vertical templates transparently.
+    async with async_playwright() as p:
+        probe_browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
+        probe_ctx = await probe_browser.new_context(viewport={'width': 1920, 'height': 1080})
+        probe_page = await probe_ctx.new_page()
+        await probe_page.goto(html_path.as_uri())
+        try:
+            await probe_page.wait_for_selector('.deck', timeout=5000)
+            deck_dims = await probe_page.evaluate(
+                "(() => { const d = document.querySelector('.deck');"
+                " return d ? [d.offsetWidth, d.offsetHeight] : [1920, 1080]; })()"
+            )
+        except Exception:
+            deck_dims = [1920, 1080]
+        await probe_ctx.close()
+        await probe_browser.close()
+
+    deck_w, deck_h = int(deck_dims[0]), int(deck_dims[1])
+    print(f"[ok] Detected deck size: {deck_w}x{deck_h}")
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=True,
@@ -75,10 +98,10 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
             ]
         )
         context = await browser.new_context(
-            viewport={'width': 1920, 'height': 1080},
+            viewport={'width': deck_w, 'height': deck_h},
             device_scale_factor=1,
             record_video_dir=str(tmp_dir),
-            record_video_size={'width': 1920, 'height': 1080},
+            record_video_size={'width': deck_w, 'height': deck_h},
         )
         page = await context.new_page()
 

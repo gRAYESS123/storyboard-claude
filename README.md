@@ -144,13 +144,16 @@ How it works in one line: Playwright launches Chromium headless at 1920×1080, p
 | `skill/SKILL.md` | Workflow, phase chain, slide recipes, calibration docs |
 | `skill/animator.md` | The judgment layer — decision matrix, 12 principles, choreography recipes, anti-patterns |
 | `skill/animations.md` | Technical reference for all 36 animation presets |
-| `skill/template.html` | 1920×1080 playable deck with the audio-clock engine + calibration UI + scene transitions + Lottie support |
+| `skill/template.html` | 1920×1080 horizontal playable deck (audio-clock engine + calibration + scene transitions + Lottie) |
+| `skill/vertical_template.html` | 1080×1920 vertical playable deck for Reels/TikTok/Shorts — same engine, portrait-native slide types |
 | `skill/overlay.html` | Adopt-mode injection snippet — adds the same engine to any existing HTML page before `</body>` |
 | `skill/concept.template.md` | Scaffolds the concept plan (structured JSON + prose) |
 | `skill/script.template.md` | Scaffolds the ElevenLabs-ready script (SSML breaks + timing table) |
 | `skill/aaf_to_timings.py` | Pro Tools / Logic / Reaper AAF → sample-accurate TIMINGS |
 | `skill/compress_anim_timings.py` | Scale all `data-t-rel` values when in-slide content feels late |
 | `skill/elevenlabs_generate.py` | Standalone CLI that calls ElevenLabs and writes MP3 + word timestamps + TIMINGS |
+| `skill/render_video.py` | Headless Chromium + ffmpeg → finished MP4 (auto-detects horizontal vs vertical aspect) |
+| `skill/audit_deck.py` | Animator self-critique against `animator.md` — pass/warn report with fix hints |
 | `skill/render_video.py` | Standalone CLI that headless-plays the deck and writes a finished 1920×1080 H.264 MP4 |
 
 ## The animation engine in one minute

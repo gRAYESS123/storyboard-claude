@@ -1,6 +1,6 @@
 ---
 name: storyboard
-description: "Turn a webpage, pasted information, a local document (PDF/MD/DOCX), or an existing HTML deck into a playable, screen-recordable storyboard video. Claude acts as the animator — choreographs each beat using a decision matrix (animator.md), the 12 principles of animation, and a 36-preset library driven by the audio clock. Multi-phase: concept (structured plan), script (ElevenLabs-ready narration with SSML breaks), optional generate (calls ElevenLabs MCP or CLI for MP3 + word timestamps), build (1920x1080 HTML with creatively-authored animations + scene transitions + word-sync hits), verify (preview-MCP playthrough). Adopt mode injects a control + animation overlay into your existing HTML without modifying its styles. AAF support via pyaaf2 for sample-accurate sync from any DAW. In-page calibration tool for tap-to-tune retiming. Presets include: fadeIn/Up/Down, slideIn, scaleIn, anticipate, overshoot, spring, bounce, wobble, shake, squash, pulse, typewriter, wordReveal, tracking, gradientSweep, splitReveal, counter, kenburns, cameraZoom, cameraPan, focusBlur, parallax, glow, flicker, highlight, particles, confetti, rays, reveal, revealUp, irisIn, pathdraw, morph, motionPath, lottie. Scene transitions: cut, dissolve, whipPan, wipe, flash, blocks. Word-sync via ElevenLabs timestamps for per-word visual hits. Trigger on: storyboard, make a video, video script, narrated slides, explainer video, playable deck, voice-over slides, scrollytelling video, adopt this HTML as a video, narrate this page, animate this, motion graphics."
+description: "Turn a webpage, pasted information, a local document (PDF/MD/DOCX), or an existing HTML deck into a playable, screen-recordable storyboard video. Claude acts as the animator — choreographs each beat using a decision matrix (animator.md), the 12 principles of animation, and a 36-preset library driven by the audio clock. Multi-phase: concept (structured plan), script (ElevenLabs-ready narration with SSML breaks), optional generate (calls ElevenLabs MCP or CLI for MP3 + word timestamps), build (HTML with creatively-authored animations + scene transitions + word-sync hits), audit (programmatic acid-test against animator.md), verify (preview-MCP playthrough), render (headless Chromium + ffmpeg -> MP4). Two templates: 1920x1080 horizontal (YouTube/web) and 1080x1920 vertical (Reels/TikTok/Shorts) — render auto-detects the aspect from the deck. Adopt mode injects a control + animation overlay into your existing HTML without modifying its styles. AAF support via pyaaf2 for sample-accurate sync from any DAW. In-page calibration tool for tap-to-tune retiming. Presets include: fadeIn/Up/Down, slideIn, scaleIn, anticipate, overshoot, spring, bounce, wobble, shake, squash, pulse, typewriter, wordReveal, tracking, gradientSweep, splitReveal, counter, kenburns, cameraZoom, cameraPan, focusBlur, parallax, glow, flicker, highlight, particles, confetti, rays, reveal, revealUp, irisIn, pathdraw, morph, motionPath, lottie. Scene transitions: cut, dissolve, whipPan, wipe, flash, blocks. Word-sync via ElevenLabs timestamps for per-word visual hits. Trigger on: storyboard, make a video, video script, narrated slides, explainer video, playable deck, voice-over slides, scrollytelling video, adopt this HTML as a video, narrate this page, animate this, motion graphics, vertical video, Reels, TikTok, Shorts."
 trigger: /storyboard
 ---
 
@@ -36,6 +36,7 @@ A complete worked example lives in this repo at `examples/stripe-radar/` — see
 /storyboard script                        # read existing concept.md, write script.md
 /storyboard generate                      # call ElevenLabs (MCP or CLI) -> MP3 + sample-accurate TIMINGS
 /storyboard build                         # read concept.md + script.md, render storyboard.html
+/storyboard audit                         # programmatic acid-test against animator.md
 /storyboard verify                        # use preview MCP to scrub through and screenshot each cue
 /storyboard render                        # headless Chromium + ffmpeg -> finished MP4
 
@@ -43,6 +44,8 @@ A complete worked example lives in this repo at `examples/stripe-radar/` — see
 /storyboard --out <dir>                   # specific output dir
 /storyboard --style dark                  # dark theme variant
 /storyboard --beats 12                    # force a beat count
+/storyboard --aspect 16:9                 # horizontal (default) — uses template.html
+/storyboard --aspect 9:16                 # vertical — uses vertical_template.html (Reels/TikTok/Shorts)
 /storyboard --auto-vo                     # run the generate phase automatically after script
 /storyboard --voice "Adam" --speed 0.90   # ElevenLabs voice + speed for --auto-vo
 /storyboard --render                      # also render the MP4 after build (needs MP3 to exist)
@@ -71,7 +74,7 @@ Skip for:
 The skill is split into four phases. The default `/storyboard <input>` runs the chain end-to-end. Each phase can be run alone — Claude (or the user) can stop at any phase to review.
 
 ```
-input ─► concept ─► script ─► [generate] ─► build ─► [verify] ─► [render]
+input ─► concept ─► script ─► [generate] ─► build ─► [audit] ─► [verify] ─► [render]
             │         │           │            │          │           │
             ▼         ▼           ▼            ▼          ▼           ▼
        concept.md script.md  VO.mp3 +    storyboard.html  pngs   storyboard.mp4
@@ -540,6 +543,54 @@ From `animator.md § The acid test`:
 - Does every beat ≥ 8s have an atmospheric layer (`kenburns`/`parallax`/`particles`)?
 
 If "no" to any: iterate.
+
+---
+
+## Phase 3.5 — `audit` (optional — animator self-critique)
+
+**Input:** `storyboard.html`.
+
+**Output:** stdout report (and optionally `audit.md`) with pass/warn findings and stats.
+
+Programmatic acid-test against `animator.md`. Runs 8 checks:
+
+| Check | Rule of thumb |
+|---|---|
+| `diversity` | At least 6 distinct preset names used |
+| `signature` | Most-used emphasis preset (spring/bounce/anticipate/overshoot/scaleIn) used ≥ 3 times |
+| `transitions` | At most 3 non-cut transitions across the deck |
+| `atmosphere` | Beats > 8 seconds have parallax/kenburns/particles/glow somewhere |
+| `overshoot` | No animation finishes after the next slide's cue (atmospheric layers excluded) |
+| `counter-dur` | No `counter` animation has dur > 2.5s (past that it feels like a load bar) |
+| `stacking` | No element has 3+ stacked emphasis presets (glow + pulse + shake) |
+| `breath` | At least one slide has ≤ 2 entrance animations (lets the deck breathe) |
+
+```bash
+python ~/.claude/skills/storyboard/audit_deck.py path/to/storyboard.html
+python ~/.claude/skills/storyboard/audit_deck.py path/to/storyboard.html --write       # also writes audit.md
+python ~/.claude/skills/storyboard/audit_deck.py path/to/storyboard.html --json        # machine-readable
+```
+
+Exit code 0 if no warnings, 1 if any — so you can wire it into pre-render CI.
+
+When invoking inside Claude Code, the `/storyboard audit` phase runs this script, reads the warnings, and offers per-warning fixes (e.g., "Slide 7 has 4 entrance anims and no atmospheric layer — should I add a parallax background?").
+
+---
+
+## Aspect ratio — horizontal vs vertical
+
+Two templates ship in the skill directory:
+
+| Template | Canvas | Use for |
+|---|---|---|
+| `template.html` | 1920×1080 (16:9) | YouTube, web embeds, in-app pitch decks. The default. |
+| `vertical_template.html` | 1080×1920 (9:16) | Reels, TikTok, YouTube Shorts, vertical LinkedIn |
+
+The vertical template has redesigned slide types optimised for portrait viewing — bigger stacked titles (180px), lower-third caption placement for cinematic slides (above the platform's caption rail), vertical list stacks instead of two-columns, hero stat with the number at 360px, pull-quote layout that needs the height.
+
+`render_video.py` auto-detects the deck size at runtime (reads `.deck` width/height from the DOM) and sets Playwright viewport + recording size accordingly. So the same renderer produces 1920×1080 MP4s from `template.html` and 1080×1920 MP4s from `vertical_template.html` with no flag changes.
+
+When building from scratch, pick the template based on the user's distribution channel. When in doubt, ask. When they say "I want one for both" — build the vertical version first (harder constraint), then expand to horizontal.
 
 ---
 
