@@ -1,6 +1,6 @@
 ---
 name: storyboard
-description: "Turn a webpage, pasted information, a local document (PDF/MD/DOCX), or an existing HTML deck into a playable, screen-recordable storyboard video. Claude acts as the animator — choreographs each beat using a decision matrix (animator.md), the 12 principles of animation, and a 36-preset library driven by the audio clock. Multi-phase: concept (structured plan), script (ElevenLabs-ready narration with SSML breaks), optional generate (calls ElevenLabs MCP or CLI for MP3 + word timestamps), build (HTML with creatively-authored animations + scene transitions + word-sync hits), audit (programmatic acid-test against animator.md), verify (preview-MCP playthrough), render (headless Chromium + ffmpeg -> MP4). Two templates: 1920x1080 horizontal (YouTube/web) and 1080x1920 vertical (Reels/TikTok/Shorts) — render auto-detects the aspect from the deck. Adopt mode injects a control + animation overlay into your existing HTML without modifying its styles. AAF support via pyaaf2 for sample-accurate sync from any DAW. In-page calibration tool for tap-to-tune retiming. Presets include: fadeIn/Up/Down, slideIn, scaleIn, anticipate, overshoot, spring, bounce, wobble, shake, squash, pulse, typewriter, wordReveal, tracking, gradientSweep, splitReveal, counter, kenburns, cameraZoom, cameraPan, focusBlur, parallax, glow, flicker, highlight, particles, confetti, rays, reveal, revealUp, irisIn, pathdraw, morph, motionPath, lottie. Scene transitions: cut, dissolve, whipPan, wipe, flash, blocks. Word-sync via ElevenLabs timestamps for per-word visual hits. Trigger on: storyboard, make a video, video script, narrated slides, explainer video, playable deck, voice-over slides, scrollytelling video, adopt this HTML as a video, narrate this page, animate this, motion graphics, vertical video, Reels, TikTok, Shorts."
+description: "Turn a webpage, pasted information, a local document (PDF/MD/DOCX), or an existing HTML deck into a playable, screen-recordable storyboard video. Claude acts as the animator — choreographs each beat using a decision matrix (animator.md), the 12 principles of animation, signature style systems (styles.md: kurzgesagt/apple-keynote/documentary/bold-editorial/data-journalism/neon-tech), and a composable motion engine (storyboard-engine.js) driven by the audio clock. Composable motion: per-element easing + tunable spring physics, data-stagger to cascade containers, data-then to chain sequences, data-loop for continuous ambient motion (float/breathe/orbit/beat-sync), 3D presets (flipInY/tiltIn/cardFlip), animated data-viz (barGrow/donutSweep/lineDraw/comparisonBar that draw on the clock), cinematic shared-element morph transitions and a keyframed camera rig. Concept intelligence: explores 3 creative directions then picks, maps an emotional-energy arc across beats. Multi-phase: concept (structured plan), script (ElevenLabs-ready narration with SSML breaks), optional generate (calls ElevenLabs MCP or CLI for MP3 + word timestamps), build (HTML with creatively-authored animations + scene transitions + word-sync hits), audit (programmatic acid-test against animator.md), verify (preview-MCP playthrough), render (headless Chromium + ffmpeg -> MP4). Two templates: 1920x1080 horizontal (YouTube/web) and 1080x1920 vertical (Reels/TikTok/Shorts) — render auto-detects the aspect from the deck. Adopt mode injects a control + animation overlay into your existing HTML without modifying its styles. AAF support via pyaaf2 for sample-accurate sync from any DAW. In-page calibration tool for tap-to-tune retiming. Presets include: fadeIn/Up/Down, slideIn, scaleIn, anticipate, overshoot, spring, bounce, wobble, shake, squash, pulse, typewriter, wordReveal, tracking, gradientSweep, splitReveal, counter, kenburns, cameraZoom, cameraPan, focusBlur, parallax, glow, flicker, highlight, particles, confetti, rays, reveal, revealUp, irisIn, pathdraw, morph, motionPath, lottie. Scene transitions: cut, dissolve, whipPan, wipe, flash, blocks. Word-sync via ElevenLabs timestamps for per-word visual hits. Trigger on: storyboard, make a video, video script, narrated slides, explainer video, playable deck, voice-over slides, scrollytelling video, adopt this HTML as a video, narrate this page, animate this, motion graphics, vertical video, Reels, TikTok, Shorts."
 trigger: /storyboard
 ---
 
@@ -249,20 +249,31 @@ The user opens `storyboard.html` and the deck plays with sample-accurate sync �
 
 **Output:** `storyboard.html` — the playable deck, **fully choreographed**.
 
-This is not a layout pass. Your job is to be the animator: for every beat, you choose which elements animate, in what order, with which preset, with what easing, with what transition into the slide, and which word in the narration (if any) gets a visual hit. **Before authoring any beat, re-read `animator.md`** — it's the judgment layer (decision matrix, 12 principles, choreography recipes, anti-patterns, signature motion). `animations.md` is the technical reference for individual preset signatures.
+This is not a layout pass. Your job is to be the animator: for every beat, you choose which elements animate, in what order, with which preset, with what easing, with what transition into the slide, and which word in the narration (if any) gets a visual hit. **Before authoring any beat, re-read `animator.md`** — it's the judgment layer (decision matrix, 12 principles, choreography recipes, composable-motion recipes, data-viz choreography, cinematic recipes, anti-patterns, signature motion). `animations.md` is the technical reference for individual preset signatures + the composable attributes.
 
 Two paths: **from-scratch** (start from `template.html`) and **adopt** (overlay onto existing HTML).
 
+### The composable engine (v0.3)
+
+Decks load `storyboard-engine.js` — a composable motion engine. **Copy `storyboard-engine.js` into the output dir alongside `storyboard.html`** (it's in this skill's directory). The deck declares `const TIMINGS = [...]` then calls `Storyboard.init({timings:TIMINGS, labels:..., fallbackDuration:...})`. Keeping `const TIMINGS` is what lets the Python tooling (audit/aaf/elevenlabs/compress) read and rewrite cues.
+
+Compose motion instead of one-preset-per-element (full reference in `animations.md § Composable motion`):
+- `data-ease="outBack"` / `data-spring="200,12"` — per-element curve
+- `class="anim-group" data-stagger="0.12"` — cascade a container's children with one instruction
+- `data-then="pulse@1.6"` — chain animations after the entrance
+- `data-loop="float|breathe|orbit|beat"` — continuous ambient motion (keeps long beats alive)
+- 3D: `flipInY`, `tiltIn`, `cardFlip`; text: `letterSpring`, `scramble`
+- data-viz: `barGrow`, `donutSweep`, `lineDraw`, `comparisonBar` (charts that draw on the audio clock)
+- cinematic: `data-shared-id` (shared-element morph across a cut), `.camera data-camera="..."` (dolly/pan/push-in)
+
 ### Pre-flight (do this once before any beats)
 
-Read `animator.md § Signature motion` and **commit** to four choices for this project:
+1. **Pick a style** from `styles.md` (kurzgesagt / apple-keynote / documentary / bold-editorial / data-journalism / neon-tech, or derive one). Set its palette in the deck's `:root` and carry its motion vocabulary + signature into the build. ONE style per video.
+2. **Commit to a signature emphasis preset** — your "this is the moment" entrance (`spring`/`bounce`/`anticipate`/`letterSpring`). Use it on your 3 biggest beats (the energy-5 beats from `concept.md`'s `emotional_arc`).
+3. **Commit to a signature ease/spring** — the curve that matches the style's personality, reused on most entrances.
+4. **Commit to a transition pair** — the style's non-cut transitions, used only at real section boundaries (≤3 total).
 
-1. **One signature ease** — your default for entrances. (Most projects: `easeOutCubic`. For playful: `easeOutBack`. For weighty: `easeOutQuint`.)
-2. **One emphasis preset** — your "this is the moment" entrance. (Pick one: `spring` / `bounce` / `anticipate` / `overshoot`. Use this *consistently* for the big-deal headline on every beat that has one.)
-3. **One signature transition** — the non-cut transition you'll use at section boundaries. (Pick one of: `dissolve` / `whipPan` / `wipe` / `flash` / `blocks`.)
-4. **One accent treatment** — color + decorative preset for highlights/glows. (e.g., accent-hot for highlights, blue glow for CTAs.)
-
-Record these in `concept.md` if not already there. The viewer's brain will lock in on them — that's coherence, that's quality.
+Record these in `concept.md`. Use the `emotional_arc` to decide where to spend intensity: energy-5 beats get the signature emphasis + a transition; energy-1–2 beats get the breath (one quiet anim, no transition, no loop).
 
 ### Path A — from scratch
 

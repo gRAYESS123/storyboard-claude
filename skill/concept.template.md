@@ -4,6 +4,26 @@ This document is the **plan** before any narration is written. It defines what t
 
 The JSON block at the top is the machine-readable spec — keep it in sync with the prose below. When `/storyboard script` or `/storyboard build` runs, it parses this block.
 
+---
+
+## Step 0 — Explore 3 directions before committing (concept intelligence)
+
+Don't write one plan. Sketch **three distinct creative directions** for the same source, then pick. This 5-minute divergence is what separates a designed video from a default one. For each direction give: a one-line angle, the narrative shape, the signature style (from `styles.md`), and the emotional through-line.
+
+| # | Angle (one line) | Shape | Style | Emotional through-line | Best when |
+|---|---|---|---|---|---|
+| A | _e.g. "the cost of doing nothing"_ | problem-frame-solution | data-journalism | dread → relief | the data is the story |
+| B | _e.g. "one person's morning"_ | narrative-arc | documentary | empathy → resolve | the human angle sells it |
+| C | _e.g. "the bold claim, defended"_ | question-answer-evidence | bold-editorial | provocation → conviction | you want to stop the scroll |
+
+**Pick one** (note why), then fill the spec below from it. If the user is present, show the three and let them choose. Record the chosen direction in `"chosen_direction"`.
+
+## Step 0.5 — Map the emotional arc
+
+A video that *feels* designed has a shaped energy curve, not a flat one. Assign each beat an **energy** (1–5) and an **emotion**. Aim for contrast: a quiet beat before the big reveal makes the reveal hit. The `"emotional_arc"` array in the JSON captures this; the build uses it to decide where to spend animation intensity (high-energy beats get the signature emphasis + transitions; low-energy beats get the breath).
+
+Example arc for a 6-beat explainer: `[2, 4, 1, 3, 5, 2]` — open calm, raise the problem, drop to a quiet human beat, build, peak at the solution, settle into the CTA. Never flat (`[3,3,3,3,3]` reads as monotone).
+
 ```json
 {
   "title": "{{TITLE}}",
@@ -11,6 +31,11 @@ The JSON block at the top is the machine-readable spec — keep it in sync with 
   "goal": "{{GOAL}}",
   "duration_seconds": {{DURATION_SECONDS}},
   "shape": "{{SHAPE}}",
+  "style": "{{STYLE}}",
+  "chosen_direction": "{{CHOSEN_DIRECTION_AND_WHY}}",
+  "directions_considered": ["{{DIR_A}}", "{{DIR_B}}", "{{DIR_C}}"],
+  "emotional_arc": [{{ENERGY_PER_BEAT}}],
+  "aspect": "{{ASPECT_16x9_or_9x16}}",
   "tone": "{{TONE}}",
   "voice": {
     "gender": "{{VOICE_GENDER}}",

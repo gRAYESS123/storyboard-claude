@@ -30,7 +30,8 @@ The "playable document" pattern is the unlock. Animations sync to your voice-ove
 
 ## See it in action
 
-The `examples/stripe-radar/` directory is a complete end-to-end build: a 150-second pitch video for a real Stripe Radar tool, choreographed with 16 distinct presets, 5 scene transitions, and AAF-driven sync. Open `examples/stripe-radar/storyboard.html` in a browser to scrub through the deck. (MP3 and AAF excluded from git — drop your own next to the HTML.)
+- **`examples/showcase/`** — the v0.3 capability reel. Ten beats that each demo a new power: per-letter gradient titles, one-instruction staggers, 3D card flips, data-viz charts that draw on the clock, a shared-element morph across a cut, and a keyframed camera push-in. Open `examples/showcase/showcase.html` (synthetic clock plays it with no audio) or browse the `frame_*.png` captures.
+- **`examples/stripe-radar/`** — a complete 150-second product pitch: 16 presets, AAF-driven sync, full concept → script → build → render pipeline.
 
 ## Install
 
@@ -142,8 +143,10 @@ How it works in one line: Playwright launches Chromium headless at 1920×1080, p
 | File | Role |
 |---|---|
 | `skill/SKILL.md` | Workflow, phase chain, slide recipes, calibration docs |
-| `skill/animator.md` | The judgment layer — decision matrix, 12 principles, choreography recipes, anti-patterns |
-| `skill/animations.md` | Technical reference for all 36 animation presets |
+| `skill/storyboard-engine.js` | **The composable motion engine** — easing registry, spring physics, stagger, chaining, loops, 3D, data-viz, shared-element transitions, camera rig. Single source of truth. |
+| `skill/styles.md` | Six signature style systems (kurzgesagt / apple-keynote / documentary / bold-editorial / data-journalism / neon-tech) — each a palette + motion vocabulary + signature + pacing bundle |
+| `skill/animator.md` | The judgment layer — decision matrix, 12 principles, composable + data-viz + cinematic recipes, emotional-arc usage, anti-patterns |
+| `skill/animations.md` | Technical reference for all presets + the composable attributes (stagger/chain/ease/spring/loop/3D/dataviz/cinematic) |
 | `skill/template.html` | 1920×1080 horizontal playable deck (audio-clock engine + calibration + scene transitions + Lottie) |
 | `skill/vertical_template.html` | 1080×1920 vertical playable deck for Reels/TikTok/Shorts — same engine, portrait-native slide types |
 | `skill/overlay.html` | Adopt-mode injection snippet — adds the same engine to any existing HTML page before `</body>` |

@@ -299,3 +299,100 @@ Before declaring a build done, ask yourself:
 - Did I leave at least one beat with no entrance animations at all (the breath)?
 
 If "no" to any: keep going.
+
+---
+
+# Composable motion — recipes (v0.3)
+
+The v0.3 engine lets you *compose* instead of picking one preset per element. Reach for these patterns. (Full attribute reference in `animations.md § Composable motion`.)
+
+## Stagger a group with one instruction
+
+Stop hand-numbering list items. Use a `.anim-group`:
+
+```html
+<ul class="anim-group" data-anim="slideInLeft" data-stagger="0.12" data-t-rel="1.0">
+  <li>..</li><li>..</li><li>..</li>
+</ul>
+```
+
+Stagger interval encodes rhythm: 0.06–0.10s = brisk/energetic, 0.12–0.18s = deliberate, 0.25s+ = ceremonial. Match it to the narration cadence.
+
+## Enter, then live (chain + loop)
+
+A static element after entrance reads as frozen on long beats. Chain a settle-beat and a loop:
+
+```html
+<h2 class="anim" data-anim="scaleIn" data-then="pulse@1.6" data-loop="breathe" data-loop-amp="3" data-loop-period="3.5">
+```
+
+Rule: any element on screen >6s should either loop subtly OR have an atmospheric layer behind it. The `breathe` loop at amp 2–3 is invisible-but-alive — use it on heroes and CTAs constantly.
+
+## Tune the feel with spring/ease
+
+Don't accept the default curve on your signature moment. A premium product wants `data-spring="120,18"` (gentle settle); a playful brand wants `data-spring="260,10"` (bouncy). Pick the curve that matches the style's personality and reuse it.
+
+## 3D card decks
+
+A flipping card grid is a high-value "here are the N things" beat:
+
+```html
+<div class="cards anim-group" data-anim="flipInY" data-stagger="0.18" data-t-rel="0.4">
+  <div class="card3d">..</div> ... x3
+</div>
+```
+
+`tiltIn` is the subtler cousin — use it when full flips feel too much.
+
+---
+
+# Data-viz choreography
+
+Numbers are the most under-animated thing in explainers. When the narration cites a figure, the figure should *build* as it's spoken.
+
+- **Bars**: stagger a row 0.2–0.3s apart with `barGrow` + `data-ease="outBack"`, pair each with a `counter` that lands as the bar tops out. Hold ≥1.5s after the last bar.
+- **Single big stat**: `donutSweep` to `data-pct` + a `counter` to the same number, side by side. The ring and the number finish together.
+- **Trend over time**: `lineDraw` the line as the narrator walks the years; `scaleIn` a marker dot at the end point.
+- **Comparison**: two `comparisonBar`s growing to relative widths — the visual gap IS the argument. Don't animate them simultaneously; grow "us" after "them" so the contrast lands.
+
+Anti-pattern: never just fade a finished chart in. The *growth* is the narrative. A chart that's already drawn when the slide arrives wastes the beat.
+
+---
+
+# Cinematic recipes
+
+## Shared-element morph (the "wow" cut)
+
+The single most impressive transition. A card/object on slide N becomes a differently-placed object on slide N+1 via `data-shared-id`. Use it once or twice per video on a genuine continuation (a product that moves from hero to context, a number that travels from headline to a chart). Don't overuse — it means "this is the same thing, now reframed."
+
+## Camera push for emphasis
+
+Wrap a detailed scene in a `.camera` and push in on the part the narrator is describing:
+
+```html
+<div class="camera" data-camera="0=>scale:1; 2.5=>scale:1.7,x:-200,y:-100; 5=>scale:1">
+```
+
+The pull-back at the end returns context. Use on maps, diagrams, dashboards, anything where "look here specifically" matters.
+
+## Beat-sync for energy peaks
+
+If there's a music bed, `data-loop="beat"` on a logo or pulse-ring at the climax makes the visual breathe with the track. Reserve for the single highest-energy beat.
+
+---
+
+# Using the emotional arc
+
+The concept's `emotional_arc` array (energy 1–5 per beat) tells you where to spend intensity:
+
+- **Energy 5 (peaks)**: signature emphasis preset + a non-cut transition INTO the beat + maybe beat-sync. This is where you splurge.
+- **Energy 3–4**: standard choreography — entrance + secondary layer.
+- **Energy 1–2 (valleys)**: the breath. One quiet `fadeIn` or `wordReveal`, no transition, no loop. The stillness recharges the viewer for the next peak.
+
+A common mistake is animating every beat at energy 5 — it flattens to noise. The valleys are what make the peaks land. Audit your build: if `emotional_arc` has no value ≤2, you have no breath; if it's all 4–5, nothing peaks.
+
+---
+
+# Pick a style first
+
+Before choosing presets per beat, pick ONE signature style from `styles.md` (kurzgesagt / apple-keynote / documentary / bold-editorial / data-journalism / neon-tech, or a derived one). The style hands you a palette, a motion vocabulary, a signature emphasis preset, and a transition pair. Author within it. Coherence across all beats reads as craft; a different look per beat reads as a template someone filled in.

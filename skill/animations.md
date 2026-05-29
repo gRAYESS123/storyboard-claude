@@ -346,3 +346,179 @@ Then use `<div class="anim" data-anim="myThing">...</div>`.
 - **`morph` jumps instead of morphs** → the two `d` values have different command structures. Restructure them so they match command-for-command.
 - **`counter` ends at the wrong number** → `data-to` parsed as float. Use `data-decimals` for floats.
 - **An anim is cut off mid-motion at the slide change** → `t_rel + dur` extends past the next slide's cue. Tighten `dur` or shift `t_rel` earlier.
+
+---
+
+# Composable motion (v0.3 engine)
+
+The v0.3 engine (`storyboard-engine.js`) makes animations *composable* instead of one-preset-per-element. These attributes layer on top of any `data-anim`:
+
+## `data-ease` — override the curve
+
+Any element can override its preset's internal easing with a named curve:
+
+```html
+<h1 class="anim" data-anim="fadeUp" data-ease="outBack">Pops past, settles</h1>
+```
+
+Named eases: `linear, inQuad, outQuad, inOutQuad, inCubic, outCubic, inOutCubic, outQuart, outQuint, outExpo, inOutExpo, outBack, inBack, outElastic, outBounce` plus aliases `smooth` (inOutCubic), `snap` (outQuint), `pop` (outBack).
+
+## `data-spring` — real spring physics
+
+Replace the ease with a tuned damped-spring solver: `data-spring="stiffness,damping"`.
+
+```html
+<div class="anim" data-anim="scaleIn" data-spring="200,12">Springy</div>
+<div class="anim" data-anim="scaleIn" data-spring="120,18">Gentle, premium</div>
+```
+
+Stiffness ~80–400 (higher = snappier), damping ~8–30 (lower = more bounce). Underdamped springs overshoot before settling — that's the point.
+
+## `data-stagger` — cascade a container's children with one instruction
+
+Put `class="anim-group"` + `data-stagger` on a container. Every child becomes an `.anim` with start times offset by the stagger interval. No more hand-numbering each item.
+
+```html
+<ul class="anim-group" data-anim="slideInLeft" data-stagger="0.12" data-t-rel="1.0" data-dur="0.7">
+  <li>First</li><li>Second</li><li>Third</li><li>Fourth</li>
+</ul>
+```
+
+Optional `data-ease` on the group applies to every child.
+
+## `data-then` — chain sequences on one element
+
+Run animations *after* the entrance. `@` sets an absolute delay (relative to the entrance start); otherwise steps run back-to-back after the previous finishes.
+
+```html
+<!-- enter with scaleIn, then pulse 1.6s after entrance start, then keep floating -->
+<h2 class="anim" data-anim="scaleIn" data-then="pulse@1.6">Enter, then react</h2>
+```
+
+## `data-loop` — continuous ambient motion
+
+Keeps an element alive *forever* after its entrance settles. The loop runs off the audio clock so it's deterministic for rendering.
+
+```html
+<h1 class="anim" data-anim="letterSpring" data-loop="float" data-loop-amp="10" data-loop-period="4">Alive</h1>
+```
+
+| Loop | Effect | amp means | typical period |
+|---|---|---|---|
+| `float` | vertical bob | px | 3–5s |
+| `sway` | gentle rotate | deg | 3–6s |
+| `breathe` | scale pulse | % | 3–4s |
+| `rotate` | continuous spin | (ignored) | 6–20s |
+| `orbit` | circular drift | px radius | 4–8s |
+| `pulse` | scale beat | % | 1.5–3s |
+| `shimmer` | background-position sweep | (ignored) | 2–4s |
+| `beat` | scale reacts to music amplitude | % at full volume | (auto) |
+
+`data-loop="beat"` requires audio (uses a WebAudio AnalyserNode on the VO/music track). Falls back to inert under the synthetic preview clock.
+
+## 3D presets
+
+| Preset | Effect |
+|---|---|
+| `flipInX` | rotateX -90°→0 (flips up from flat) |
+| `flipInY` | rotateY 90°→0 (swings in from the side) |
+| `cardFlip` | rotateY 180°→0 (full card flip) |
+| `tiltIn` | rotateX + rotateZ + rise (3D card lands) |
+| `zoomThrough` | translateZ -600px→0 (flies toward camera) |
+
+Combine with `data-stagger` on a `.cards` grid for a flipping card deck.
+
+## New text presets
+
+| Preset | Effect |
+|---|---|
+| `letterSpring` | each letter springs up in sequence (gradient-fill aware, `<br>` aware) |
+| `scramble` | decode/glitch effect — random glyphs resolve to the real text |
+
+**Gradient titles**: `letterSpring` carries a `.gradient-fill` gradient onto each letter automatically. `typewriter` and `scramble` work with `.gradient-fill` directly (they don't wrap in child spans). For `wordReveal` on a gradient title, keep the gradient OFF (it wraps words in spans) — use `gradientSweep` for an animated gradient headline instead.
+
+---
+
+# Data-viz presets (v0.3)
+
+Charts that draw and grow on the audio clock as the narrator cites them.
+
+## `barGrow` — bar / column
+
+Scales a bar from 0 to full along one axis. Default grows vertical (`scaleY` from the bottom); set `data-dir="h"` for horizontal (`scaleX` from the left).
+
+```html
+<div class="bar anim" data-anim="barGrow" data-t-rel="1.0" data-dur="1.2" data-ease="outBack" style="height:61%"></div>
+```
+
+Pair each bar with a `counter` for the value label. Stagger a row of bars by giving each a slightly later `data-t-rel` (0.2–0.3s apart) so they grow in sequence.
+
+## `donutSweep` / `ringFill` — radial progress
+
+Animates `stroke-dashoffset` on an SVG `<circle>` to draw an arc to `data-pct` percent. Rotate the SVG `-90deg` so it starts at 12 o'clock.
+
+```html
+<svg class="donut" viewBox="0 0 400 400" style="transform:rotate(-90deg)">
+  <circle class="track" cx="200" cy="200" r="160" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="38"/>
+  <circle class="arc anim" data-anim="donutSweep" data-t-rel="0.6" data-dur="1.8" data-pct="73"
+          cx="200" cy="200" r="160" fill="none" stroke="var(--accent)" stroke-width="38" stroke-linecap="round"/>
+</svg>
+```
+
+## `lineDraw` — line / area chart
+
+Alias of `pathdraw` for chart lines. Build the line as an SVG `<path>`, it draws itself left-to-right.
+
+## `comparisonBar` — animated width bar
+
+Grows an element's CSS `width` to `data-width` percent. Good for "us vs them" horizontal comparisons.
+
+```html
+<div class="cmp anim" data-anim="comparisonBar" data-t-rel="0.8" data-width="84"></div>
+```
+
+---
+
+# Cinematic layer (v0.3)
+
+## Shared-element transitions
+
+Give an element `data-shared-id="x"` on two consecutive slides. When the deck cuts from the first to the second, the element animates (FLIP) from its old position/size to its new one — a card that becomes the next slide's hero, no duplicate markup.
+
+```html
+<!-- slide 6 -->
+<div class="hero-card" data-shared-id="hero" style="...big, centered...">...</div>
+<!-- slide 7 -->
+<div class="hero-card" data-shared-id="hero" style="...small, top-left...">...</div>
+```
+
+## Camera rig
+
+Wrap a slide's content in `<div class="camera" data-camera="...">`. Keyframe `time=>scale:N,x:N,y:N` segments (times relative to the slide cue). The engine interpolates with `inOutCubic` between keyframes — dolly, pan, push-in.
+
+```html
+<div class="camera" data-camera="0=>scale:1; 2.5=>scale:1.8,x:-260,y:-120; 5.5=>scale:1">
+  <div class="map">...pins...</div>
+</div>
+```
+
+## Beat-sync
+
+`data-loop="beat"` on any element scales it in time with the music's low-frequency amplitude (WebAudio AnalyserNode). Use on a logo, a pulse ring, or a CTA when there's a music bed.
+
+---
+
+# Engine API
+
+```js
+Storyboard.init({ timings, labels, wordHits, fallbackDuration });
+Storyboard.play(); Storyboard.pause(); Storyboard.reset();
+Storyboard.seek(seconds);          // jump + redraw (used by render/verify)
+Storyboard.currentSlide();         // 1-based
+Storyboard.isSynthetic();          // true when previewing without audio
+Storyboard.registerPreset(name, { dur, apply(el,p,ctx){} });  // add your own
+Storyboard.registerEase(name, fn);
+Storyboard.calib.clearSaved();     // wipe stored calibration
+```
+
+Decks declare `const TIMINGS = [...]` then pass it to `init` so the Python tooling (audit/aaf/elevenlabs/compress) can read and rewrite it.
