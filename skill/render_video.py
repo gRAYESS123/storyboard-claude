@@ -1,0 +1,192 @@
+#!/usr/bin/env python
+"""
+render_video.py
+Headless-render a storyboard.html into a finished MP4.
+
+Pipeline:
+  1. Playwright launches Chromium at 1920x1080 (headless, muted, autoplay allowed)
+  2. Loads the storyboard.html, waits for STORYBOARD engine + audio metadata
+  3. Resets the deck, presses play, records the viewport for `audio.duration` seconds
+  4. ffmpeg trims the lead-in time from the WebM, muxes with the source MP3
+     into a final H.264 MP4 with AAC audio (broadcast quality)
+
+Output: MP4 at the path you choose (default: alongside the HTML).
+
+Requires:
+  pip install playwright imageio-ffmpeg
+  python -m playwright install chromium
+
+Usage:
+  python render_video.py storyboard.html
+  python render_video.py storyboard.html --out final.mp4
+  python render_video.py storyboard.html --audio "VO English.mp3" --quality high
+  python render_video.py storyboard.html --quality fast    # crf 23, faster encode
+"""
+import argparse
+import asyncio
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    sys.exit(
+        "playwright not installed.\n"
+        "  pip install playwright\n"
+        "  python -m playwright install chromium"
+    )
+
+try:
+    import imageio_ffmpeg
+    FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+except ImportError:
+    FFMPEG = shutil.which('ffmpeg')
+    if not FFMPEG:
+        sys.exit(
+            "ffmpeg not found.\n"
+            "  Easiest:  pip install imageio-ffmpeg   (auto-downloads ffmpeg)\n"
+            "  Or install ffmpeg system-wide and ensure it is on PATH."
+        )
+
+
+async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str = 'high') -> None:
+    tmp_dir = out_mp4.parent / '.render-tmp'
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
+    tmp_dir.mkdir(parents=True)
+
+    print(f"[ in] HTML  : {html_path}")
+    print(f"[ in] Audio : {audio_path}")
+    print(f"[out] MP4   : {out_mp4}")
+    print()
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                '--autoplay-policy=no-user-gesture-required',
+                '--no-sandbox',
+                '--mute-audio',                 # silent playback; we mux real audio later
+                '--disable-blink-features=AutomationControlled',
+                '--enable-features=NetworkService',
+            ]
+        )
+        context = await browser.new_context(
+            viewport={'width': 1920, 'height': 1080},
+            device_scale_factor=1,
+            record_video_dir=str(tmp_dir),
+            record_video_size={'width': 1920, 'height': 1080},
+        )
+        page = await context.new_page()
+
+        recording_start = time.perf_counter()
+        await page.goto(html_path.as_uri())
+
+        # Wait for engine + audio metadata
+        print("[..] Loading deck + waiting for audio metadata...")
+        try:
+            await page.wait_for_function(
+                "window.STORYBOARD && document.getElementById('voAudio') && document.getElementById('voAudio').readyState >= 2",
+                timeout=20000,
+            )
+        except Exception:
+            sys.exit("Engine or audio failed to initialize within 20s. "
+                     "Check the HTML opens correctly in a normal browser.")
+
+        duration = await page.evaluate("document.getElementById('voAudio').duration")
+        if not duration or duration <= 0:
+            sys.exit("Could not read audio duration. Is the MP3 referenced by the HTML present?")
+        print(f"[ok] Audio duration: {duration:.2f}s")
+
+        # Reset deck to t=0, ensure animations are at the initial frame
+        await page.evaluate("STORYBOARD.reset()")
+        await asyncio.sleep(0.4)
+
+        # Press play and record the lead-in offset for ffmpeg trim
+        play_start = time.perf_counter()
+        lead_in = play_start - recording_start
+        print(f"[ok] Lead-in before play(): {lead_in:.3f}s")
+
+        await page.evaluate("document.getElementById('voAudio').play()")
+
+        # Hold for full duration + a tail to let final animations settle
+        TAIL_SEC = 0.6
+        print(f"[..] Recording for {duration + TAIL_SEC:.2f}s...")
+        await asyncio.sleep(duration + TAIL_SEC)
+
+        await context.close()
+        await browser.close()
+
+    # Find the recorded WebM
+    webms = list(tmp_dir.glob('*.webm'))
+    if not webms:
+        sys.exit("Playwright produced no video. Recording may have been disabled.")
+    webm = max(webms, key=lambda p: p.stat().st_size)
+    print(f"[ok] Raw recording: {webm.name} ({webm.stat().st_size / 1_048_576:.1f} MB)")
+
+    # ffmpeg: trim lead-in from video, mux with audio MP3, encode to H.264 MP4
+    print(f"[..] Encoding MP4 (quality={quality})...")
+    crf = '18' if quality == 'high' else '23'
+    preset = 'medium' if quality == 'high' else 'veryfast'
+    cmd = [
+        FFMPEG, '-y',
+        '-ss', f'{lead_in:.3f}',
+        '-i', str(webm),
+        '-i', str(audio_path),
+        '-map', '0:v:0',
+        '-map', '1:a:0',
+        '-c:v', 'libx264',
+        '-preset', preset,
+        '-crf', crf,
+        '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac',
+        '-b:a', '192k',
+        '-shortest',
+        '-movflags', '+faststart',
+        str(out_mp4),
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        print("\n[ERROR] ffmpeg failed:\n")
+        print(proc.stderr[-2000:])
+        sys.exit(1)
+
+    shutil.rmtree(tmp_dir)
+
+    size_mb = out_mp4.stat().st_size / 1_048_576
+    print(f"\n[OK] Wrote {out_mp4.name} ({size_mb:.1f} MB)")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('html', help='Path to storyboard.html')
+    ap.add_argument('--audio', help='Path to source MP3 (default: first *.mp3 next to HTML)')
+    ap.add_argument('--out', default=None, help='Output MP4 path (default: storyboard.mp4 next to HTML)')
+    ap.add_argument('--quality', choices=['high', 'fast'], default='high',
+                    help='high = crf 18, medium preset (best); fast = crf 23, veryfast preset (lower size)')
+    args = ap.parse_args()
+
+    html = Path(args.html).resolve()
+    if not html.exists():
+        sys.exit(f"HTML not found: {html}")
+
+    if args.audio:
+        audio = Path(args.audio).resolve()
+    else:
+        candidates = sorted(html.parent.glob('*.mp3'))
+        if not candidates:
+            sys.exit("No MP3 found next to the HTML. Pass --audio explicitly.")
+        audio = candidates[0]
+    if not audio.exists():
+        sys.exit(f"Audio not found: {audio}")
+
+    out = Path(args.out).resolve() if args.out else html.parent / (html.stem + '.mp4')
+
+    asyncio.run(render(html, audio, out, quality=args.quality))
+
+
+if __name__ == '__main__':
+    main()

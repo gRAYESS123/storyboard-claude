@@ -1,0 +1,43 @@
+# Audio assets — too large for git, generated locally
+*.mp3
+*.wav
+*.aif
+*.aiff
+*.flac
+*.aac
+
+# AAF / DAW project files
+*.aaf
+*.ptx
+*.logicx/
+*.sesx
+
+# Backups created by compress_anim_timings.py / extractors
+*.bak
+
+# OS / editor crud
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node (if anyone adds a JS toolchain later)
+node_modules/
+
+# Env files
+.env
+.env.local
+*.env
+
+# Generated playthrough screenshots
+playthrough/

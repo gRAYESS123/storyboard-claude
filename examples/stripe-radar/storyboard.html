@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe Radar Rule Generator — Storyboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       1920x1080 ASPECT-LOCKED CANVAS
+    ============================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #0F172A;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .stage { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .deck {
+      width: 1920px; height: 1080px;
+      transform-origin: center;
+      overflow-y: scroll; overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    .deck::-webkit-scrollbar { display: none; }
+
+    /* ============================================================
+       DESIGN TOKENS — inherited from the source page
+    ============================================================ */
+    :root {
+      --paper: #FFFFFF;
+      --bg-surface: #F8F9FB;
+      --bg-elev: #F0F2F5;
+      --bg-code: #0F172A;
+      --ink: #0F172A;
+      --ink-soft: #475569;
+      --ink-muted: #64748B;
+      --ink-dim: #94A3B8;
+      --orange: #C94F2E;
+      --orange-deep: #A03E20;
+      --orange-tint: rgba(201,79,46,.12);
+      --orange-soft: rgba(201,79,46,.06);
+      --teal: #0A8478;
+      --teal-tint: rgba(10,132,120,.14);
+      --danger: #B91C1C;
+      --warning: #B45309;
+      --warning-tint: rgba(180,83,9,.12);
+      --danger-tint: rgba(185,28,28,.12);
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --shadow-md: 0 4px 16px rgba(15,23,42,.06);
+      --shadow-lg: 0 16px 48px rgba(15,23,42,.10);
+    }
+
+    /* ============================================================
+       SLIDE BASE
+    ============================================================ */
+    .slide {
+      width: 1920px; height: 1080px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px;
+      contain: layout paint;
+      transform: translateZ(0);
+      color: var(--ink);
+    }
+    .slide.dark { background: var(--bg-code); color: #fff; }
+
+    /* Animation engine base */
+    .anim { opacity: 0; will-change: transform, opacity, filter; }
+    .anim.anim-played { opacity: 1; }
+
+    /* ============================================================
+       SHARED COMPONENTS — mirror the source page's design language
+    ============================================================ */
+    .eyebrow {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 22px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 40px;
+    }
+    .eyebrow.muted { color: var(--ink-muted); }
+    .eyebrow.dark  { color: rgba(255,255,255,0.6); }
+
+    .gradient-fill {
+      background: linear-gradient(135deg, var(--orange) 0%, var(--orange-deep) 100%);
+      background-size: 220% 100%;
+      background-position: 0% 50%;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+
+    .fp-pill {
+      display: inline-flex; align-items: center;
+      font-family: var(--font-mono);
+      font-size: 18px; font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 8px 18px; border-radius: 999px;
+    }
+    .fp-low { background: var(--teal-tint); color: var(--teal); }
+    .fp-med { background: var(--warning-tint); color: var(--warning); }
+    .fp-high { background: var(--danger-tint); color: var(--danger); }
+
+    /* Particle layer for atmosphere */
+    .particle-layer { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+    .particle-layer text {
+      font-family: var(--font-mono);
+      fill: rgba(201, 79, 46, 0.18);
+      font-size: 22px;
+    }
+    .slide.dark .particle-layer text { fill: rgba(201, 79, 46, 0.32); }
+
+    /* ============================================================
+       SLIDE 1 — HERO
+    ============================================================ */
+    .hero-wrap { width: 100%; max-width: 1500px; text-align: center; position: relative; z-index: 2; }
+    .hero-title {
+      font-size: 144px; line-height: 1.0; font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+    .hero-title .slash { color: var(--orange); margin: 0 12px; }
+    .hero-sub {
+      font-size: 32px; line-height: 1.45; color: var(--ink-soft);
+      margin-top: 36px;
+      max-width: 1100px; margin-left: auto; margin-right: auto;
+    }
+
+    /* ============================================================
+       SLIDE 2 — CINEMATIC DARK (card testing)
+    ============================================================ */
+    .cine-wrap { position: relative; z-index: 2; max-width: 1500px; text-align: center; }
+    .cine-headline {
+      font-size: 124px; line-height: 1.04; font-weight: 800;
+      letter-spacing: -0.025em; color: #fff;
+    }
+    .cine-body {
+      font-size: 36px; line-height: 1.45; color: rgba(255,255,255,0.82);
+      margin-top: 36px; max-width: 1200px; margin-left: auto; margin-right: auto;
+    }
+
+    /* ============================================================
+       SLIDE 3 — STAT
+    ============================================================ */
+    .stat-wrap { text-align: center; max-width: 1400px; }
+    .stat-number {
+      font-size: 320px; line-height: 0.9; font-weight: 900;
+      letter-spacing: -0.045em;
+      color: var(--danger);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-number .pct { font-size: 200px; vertical-align: top; margin-left: 16px; }
+    .stat-caption {
+      font-size: 42px; line-height: 1.35; color: var(--ink-soft);
+      margin-top: 40px; max-width: 1200px; margin-left: auto; margin-right: auto;
+    }
+    .stat-foot {
+      display: inline-block; margin-top: 36px;
+      font-family: var(--font-mono);
+      font-size: 22px; color: var(--ink-muted);
+      padding: 10px 22px; border: 1px solid rgba(15,23,42,.12); border-radius: 999px;
+    }
+
+    /* ============================================================
+       SLIDE 4 — LIST OF PAINS
+    ============================================================ */
+    .pain-wrap { width: 100%; max-width: 1500px; }
+    .pain-title {
+      font-size: 84px; line-height: 1.05; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 64px;
+    }
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+    .pain-list li {
+      display: flex; align-items: baseline; gap: 28px;
+      font-size: 38px; line-height: 1.35;
+    }
+    .pain-list .num {
+      font-family: var(--font-mono);
+      font-size: 28px; font-weight: 700;
+      color: var(--orange);
+      min-width: 60px;
+    }
+    .pain-list code {
+      font-family: var(--font-mono);
+      font-size: 30px;
+      color: var(--orange);
+      background: var(--orange-soft);
+      padding: 2px 10px; border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    /* ============================================================
+       SLIDE 5 — TOOL REVEAL
+    ============================================================ */
+    .reveal-wrap { text-align: center; max-width: 1500px; }
+    .reveal-title {
+      font-size: 152px; line-height: 1.0; font-weight: 800;
+      letter-spacing: -0.035em;
+      color: var(--orange);
+    }
+    .reveal-sub {
+      font-size: 36px; line-height: 1.4; color: var(--ink);
+      margin-top: 40px;
+    }
+    .reveal-sub strong { color: var(--orange); font-weight: 700; }
+
+    /* ============================================================
+       SLIDE 6 — DEMO · PATTERN GRID
+    ============================================================ */
+    .demo-wrap { width: 100%; max-width: 1600px; }
+    .demo-step-label {
+      display: flex; align-items: center; gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 22px; text-transform: uppercase; letter-spacing: 0.10em;
+      color: var(--ink-muted);
+      font-weight: 600; margin-bottom: 16px;
+    }
+    .demo-step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--orange); color: #fff;
+      font-size: 18px; font-weight: 700;
+    }
+    .demo-headline {
+      font-size: 76px; line-height: 1.08; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 56px;
+    }
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .pattern-card {
+      background: var(--paper);
+      border: 2px solid rgba(15, 23, 42, 0.10);
+      border-radius: 14px;
+      padding: 28px 30px;
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+    }
+    .pattern-card.is-active {
+      border-color: var(--orange);
+      background: var(--orange-soft);
+      box-shadow: 0 0 0 6px rgba(201,79,46,.10);
+    }
+    .pattern-card__head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .pattern-card__cat {
+      font-family: var(--font-mono);
+      font-size: 18px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--ink-muted); font-weight: 600;
+    }
+    .pattern-card__title {
+      font-size: 28px; font-weight: 600; line-height: 1.2;
+      color: var(--ink);
+    }
+    .pattern-card__desc {
+      font-size: 20px; line-height: 1.4; color: var(--ink-soft);
+    }
+
+    /* ============================================================
+       SLIDE 7 — DEMO · PARAMETERS
+    ============================================================ */
+    .params-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 16px;
+    }
+    .param-card {
+      background: var(--bg-surface);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 12px;
+      padding: 28px 32px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .param-card__label {
+      font-family: var(--font-mono);
+      font-size: 18px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--ink-muted); font-weight: 600;
+    }
+    .param-card__hint {
+      font-size: 20px; color: var(--ink-soft); line-height: 1.4;
+    }
+    .param-input {
+      font-family: var(--font-mono);
+      font-size: 38px; font-weight: 600;
+      color: var(--ink);
+      background: var(--paper);
+      padding: 14px 22px;
+      border-radius: 8px;
+      border: 2px solid var(--orange);
+      box-shadow: 0 0 0 6px var(--orange-soft);
+      width: fit-content;
+    }
+    .action-pills { display: flex; gap: 10px; }
+    .action-pill {
+      font-family: var(--font-mono);
+      font-size: 22px; font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(15,23,42,.18);
+      background: var(--paper);
+      color: var(--ink-soft);
+    }
+    .action-pill.is-active--block {
+      background: var(--danger); color: #fff;
+      border-color: var(--danger);
+    }
+
+    /* ============================================================
+       SLIDE 8 — DEMO · CODE OUTPUT
+    ============================================================ */
+    .code-wrap { width: 100%; max-width: 1600px; }
+    .code-block {
+      background: var(--bg-code);
+      border-radius: 16px;
+      padding: 56px;
+      font-family: var(--font-mono);
+      font-size: 38px;
+      line-height: 1.5;
+      color: #E2E8F0;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .code-block .kw { color: #FCA5A5; }
+    .code-block .attr { color: #FCD34D; }
+    .code-block .op { color: #93C5FD; }
+    .code-block .str { color: #86EFAC; }
+
+    .copy-btn {
+      position: absolute; top: 24px; right: 24px;
+      font-family: var(--font-mono);
+      font-size: 18px; font-weight: 600;
+      padding: 10px 18px; border-radius: 6px;
+      background: rgba(255,255,255,0.08); color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .copy-btn.copied {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+    .code-step-row {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* ============================================================
+       SLIDE 9 — 20 PATTERNS / 5 CATEGORIES
+    ============================================================ */
+    .twenty-wrap { text-align: center; max-width: 1700px; }
+    .twenty-num {
+      font-size: 360px; line-height: 0.9; font-weight: 900;
+      letter-spacing: -0.05em;
+      color: var(--orange);
+      font-variant-numeric: tabular-nums;
+    }
+    .twenty-sub {
+      font-size: 38px; line-height: 1.4; color: var(--ink-soft);
+      margin-top: 32px;
+    }
+    .cat-pill-row {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 14px; margin-top: 56px;
+    }
+    .cat-pill {
+      font-family: var(--font-mono);
+      font-size: 22px; text-transform: uppercase; letter-spacing: 0.06em;
+      font-weight: 600;
+      padding: 14px 28px; border-radius: 999px;
+      background: var(--ink); color: #fff;
+    }
+
+    /* ============================================================
+       SLIDE 10 — PATTERN SHOWCASE (rapid retry)
+    ============================================================ */
+    .show-wrap { width: 100%; max-width: 1500px; }
+    .show-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 22px; text-transform: uppercase; letter-spacing: 0.10em;
+      color: var(--ink-muted); font-weight: 600;
+    }
+    .show-title {
+      font-size: 76px; line-height: 1.06; font-weight: 800;
+      letter-spacing: -0.025em; margin: 18px 0 40px;
+    }
+    .show-card {
+      background: var(--paper);
+      border: 2px solid var(--orange);
+      border-radius: 18px;
+      padding: 48px 56px;
+      box-shadow: 0 0 0 8px var(--orange-soft);
+    }
+    .show-rule {
+      font-family: var(--font-mono);
+      font-size: 38px; line-height: 1.5; color: var(--ink);
+      margin-top: 24px; margin-bottom: 28px;
+    }
+    .show-rule .kw   { color: var(--danger); font-weight: 600; }
+    .show-rule .attr { color: var(--orange); font-weight: 600; position: relative; display: inline-block; }
+    .show-rule .op   { color: var(--ink-muted); }
+    .show-why {
+      font-size: 26px; line-height: 1.45; color: var(--ink-soft);
+      padding-top: 28px;
+      border-top: 1px solid rgba(15,23,42,.10);
+    }
+    .show-meta { display: flex; gap: 16px; margin-bottom: 28px; }
+
+    /* ============================================================
+       SLIDE 11 — ATTRIBUTE REFERENCE WALL
+    ============================================================ */
+    .attr-wrap { width: 100%; max-width: 1700px; }
+    .attr-headline {
+      text-align: center;
+      font-size: 72px; line-height: 1.08; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 60px;
+    }
+    .attr-headline .accent { color: var(--orange); }
+    .attr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px 36px;
+    }
+    .attr-item {
+      font-family: var(--font-mono);
+      font-size: 26px; line-height: 1.3;
+      color: var(--ink-soft);
+      padding: 12px 18px;
+      background: var(--bg-surface);
+      border-radius: 8px;
+      border-left: 3px solid var(--orange);
+      white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .attr-item.highlighted {
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-weight: 600;
+      box-shadow: 0 0 0 3px var(--orange-tint);
+    }
+
+    /* ============================================================
+       SLIDE 12 — PROOF (13% → <1%)
+    ============================================================ */
+    .proof-slide { background: var(--ink); color: #fff; }
+    .proof-wrap { text-align: center; max-width: 1700px; }
+    .proof-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 22px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); margin-bottom: 56px;
+    }
+    .proof-line {
+      display: flex; align-items: center; justify-content: center;
+      gap: 56px;
+      font-variant-numeric: tabular-nums;
+    }
+    .proof-from { font-size: 280px; font-weight: 900; line-height: 0.9; color: var(--danger); }
+    .proof-arrow {
+      font-size: 200px; line-height: 0.9;
+      color: var(--orange);
+    }
+    .proof-arrow svg {
+      width: 200px; height: 120px;
+    }
+    .proof-to {
+      font-size: 280px; font-weight: 900; line-height: 0.9;
+      color: var(--teal);
+    }
+    .proof-foot {
+      font-size: 38px; color: rgba(255,255,255,0.78);
+      margin-top: 64px;
+    }
+    .proof-foot strong { color: var(--orange); font-weight: 700; }
+
+    /* ============================================================
+       SLIDE 13 — BUILT BY
+    ============================================================ */
+    .builtby-wrap {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      align-items: center; gap: 80px;
+      width: 100%; max-width: 1600px;
+    }
+    .builtby-name {
+      font-size: 96px; line-height: 1.05; font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+    .builtby-name strong { color: var(--orange); }
+    .builtby-sub {
+      font-size: 28px; line-height: 1.5; color: var(--ink-soft);
+      margin-top: 24px;
+    }
+    .builtby-badge {
+      width: 480px; height: 480px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--orange-deep) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff;
+      box-shadow: 0 16px 64px rgba(201,79,46,0.35);
+    }
+    .builtby-badge__mono {
+      font-family: var(--font-mono);
+      font-size: 28px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .builtby-badge__big {
+      font-size: 84px; font-weight: 800; line-height: 1.0;
+      margin-top: 12px;
+    }
+    .builtby-badge__small {
+      font-family: var(--font-mono);
+      font-size: 20px; letter-spacing: 0.08em;
+      margin-top: 16px;
+      opacity: 0.85;
+    }
+
+    /* ============================================================
+       SLIDE 14 — ACADEMY CARDS
+    ============================================================ */
+    .academy-wrap { width: 100%; max-width: 1700px; }
+    .academy-title {
+      font-size: 76px; line-height: 1.08; font-weight: 800;
+      letter-spacing: -0.025em; margin-bottom: 48px;
+    }
+    .academy-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .academy-card {
+      background: var(--paper);
+      border: 1.5px solid rgba(15,23,42,.10);
+      border-radius: 16px;
+      padding: 36px 32px;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: var(--shadow-md);
+      min-height: 320px;
+    }
+    .academy-card__icon {
+      width: 56px; height: 56px;
+      border-radius: 12px;
+      background: var(--orange-tint);
+      color: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+    }
+    .academy-card__icon svg { width: 28px; height: 28px; }
+    .academy-card__title {
+      font-size: 32px; font-weight: 700; line-height: 1.2;
+    }
+    .academy-card__desc {
+      font-size: 22px; line-height: 1.45; color: var(--ink-soft);
+    }
+
+    /* ============================================================
+       SLIDE 15 — CTA
+    ============================================================ */
+    .cta-wrap { text-align: center; max-width: 1600px; }
+    .cta-title {
+      font-size: 152px; line-height: 1.0; font-weight: 800;
+      letter-spacing: -0.035em;
+      color: var(--orange);
+    }
+    .cta-body {
+      font-size: 36px; line-height: 1.4; color: var(--ink);
+      margin-top: 32px;
+    }
+    .cta-row {
+      display: flex; justify-content: center; gap: 24px;
+      margin-top: 56px;
+    }
+    .cta-pill {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 24px 48px;
+      font-size: 28px; font-weight: 700;
+      background: var(--orange); color: #fff;
+      border-radius: 14px;
+      letter-spacing: 0.005em;
+      box-shadow: 0 8px 24px rgba(201,79,46,.28);
+    }
+    .cta-pill.secondary {
+      background: var(--paper); color: var(--ink);
+      border: 2px solid rgba(15,23,42,.18);
+      box-shadow: var(--shadow-md);
+    }
+    .cta-url {
+      font-family: var(--font-mono);
+      font-size: 22px; color: var(--ink-muted);
+      margin-top: 24px;
+    }
+
+    /* ============================================================
+       SCENE TRANSITIONS
+    ============================================================ */
+    .transition-overlay { position: fixed; inset: 0; z-index: 9000; pointer-events: none; opacity: 0; will-change: opacity, transform, clip-path; }
+    .transition-overlay.dissolve { background: #0F172A; }
+    .transition-overlay.flash    { background: #fff; }
+    .transition-overlay.whipPan { background: linear-gradient(90deg, transparent, #0F172A 50%, transparent); transform: translateX(-100%); }
+    .transition-overlay.wipe { background: var(--orange); clip-path: inset(0 100% 0 0); }
+    .transition-overlay.blocks { background: var(--orange); }
+
+    /* ============================================================
+       PLAY CONTROLS — outside the 1920x1080 deck (croppable)
+    ============================================================ */
+    .play-controls { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 9999; opacity: 0.42; }
+    .play-controls button {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(12, 18, 32, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer; padding: 0; color: rgba(255, 255, 255, 0.95);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .play-controls button svg { width: 14px; height: 14px; fill: currentColor; }
+    .play-controls .icon-pause { display: none; }
+    .play-controls.is-playing .icon-play { display: none; }
+    .play-controls.is-playing .icon-pause { display: block; }
+    .play-progress { position: fixed; top: 0; left: 0; height: 2px; background: var(--orange); z-index: 9998; width: 0%; opacity: 0; transition: opacity 0.3s ease; }
+    .play-progress.is-active { opacity: 0.75; }
+
+    .jump-menu {
+      position: fixed; top: 56px; right: 12px;
+      width: 320px; max-height: calc(100vh - 80px); overflow-y: auto;
+      background: rgba(12, 18, 32, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px; padding: 6px;
+      z-index: 9999; opacity: 0; pointer-events: none; transform: translateY(-8px);
+      transition: opacity 0.2s, transform 0.2s; backdrop-filter: blur(8px);
+    }
+    .jump-menu.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .jump-menu button {
+      display: flex; align-items: baseline; gap: 10px;
+      width: 100%; padding: 7px 12px;
+      background: transparent; border: none; border-radius: 6px;
+      color: rgba(255, 255, 255, 0.85);
+      font: 12.5px/1.35 'Inter', system-ui, sans-serif;
+      text-align: left; cursor: pointer;
+    }
+    .jump-menu button .jm-num {
+      font-weight: 700; color: var(--orange);
+      font-variant-numeric: tabular-nums; min-width: 22px;
+      font-size: 11px; letter-spacing: 0.06em;
+    }
+    .jump-menu button .jm-title { flex: 1; }
+    .jump-menu button.is-active { background: rgba(201, 79, 46, 0.24); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="deck" id="deck">
+
+      <!-- =====================================================
+           SLIDE 1 — HERO
+      ===================================================== -->
+      <section class="slide" data-slide="1" data-transition-in="cut">
+        <div class="hero-wrap">
+          <p class="eyebrow anim" data-anim="typewriter" data-t-rel="0.08" data-dur="1.4">Stripe Radar Academy</p>
+          <h1 class="hero-title anim" data-anim="gradientSweep" data-t-rel="0.64" data-dur="2.0">
+            <span class="gradient-fill">Stripe Radar</span><br>Rule Generator
+          </h1>
+          <p class="hero-sub anim" data-anim="fadeUp" data-t-rel="1.36" data-dur="1.0">
+            Production-ready rules. Real Stripe syntax.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 2 — CINEMATIC DARK (card testing right now)
+      ===================================================== -->
+      <section class="slide dark" data-slide="2" data-transition-in="cut">
+        <!-- Atmospheric: mono code-tokens parallax behind text -->
+        <svg class="particle-layer" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="140" y="220">:card_funding:</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="1500" y="180">in ("debit","prepaid")</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="280" y="420">:ip_country:</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="1380" y="500">&gt; 3</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="180" y="680">:total_transactions_per_payment_instrument_fingerprint_hourly:</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="1500" y="780">Block if</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="380" y="900">:declined_transactions_per_payment_instrument_fingerprint_hourly:</text>
+          <text class="anim p" data-anim="particles" data-t-rel="0.0" data-dur="14" x="1420" y="980">Review if</text>
+        </svg>
+        <div class="cine-wrap">
+          <h2 class="cine-headline anim" data-anim="anticipate" data-t-rel="0.24" data-dur="1.4">
+            Card testing is happening<br>right now.
+          </h2>
+          <p class="cine-body anim" data-anim="wordReveal" data-t-rel="0.96" data-dur="3.5">
+            Every hour, automated scripts hammer your checkout with stolen cards, looking for one that still works.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 3 — STAT (13% chargebacks)
+      ===================================================== -->
+      <section class="slide" data-slide="3" data-transition-in="flash">
+        <div class="stat-wrap">
+          <p class="eyebrow muted anim" data-anim="fadeIn" data-t-rel="0.04" data-dur="0.6">Real client engagement</p>
+          <div class="anim" data-anim="fadeUp" data-t-rel="0.24" data-dur="0.8" style="margin-top:32px;">
+            <span class="stat-number">
+              <span class="anim" id="stat13" data-anim="counter" data-t-rel="0.36" data-dur="2.0" data-to="13.0" data-decimals="1">0.0</span><span class="pct">%</span>
+            </span>
+          </div>
+          <p class="stat-caption anim" data-anim="fadeUp" data-t-rel="1.36" data-dur="1.0">
+            Chargeback rate the day we started.
+          </p>
+          <div class="stat-foot anim" data-anim="fadeIn" data-t-rel="1.84" data-dur="0.6">
+            Stripe ECM threshold &nbsp;·&nbsp; 0.9%
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 4 — LIST OF PAINS
+      ===================================================== -->
+      <section class="slide" data-slide="4" data-transition-in="cut">
+        <div class="pain-wrap">
+          <h2 class="pain-title anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.9">
+            Building Radar rules is hard.
+          </h2>
+          <ul class="pain-list">
+            <li class="anim" data-anim="slideInLeft" data-t-rel="0.56" data-dur="0.7"><span class="num">01</span><span>Know the <code>:attribute_names:</code>.</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="0.92" data-dur="0.7"><span class="num">02</span><span>Know the time windows.</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="1.28" data-dur="0.7"><span class="num">03</span><span>Pick a sensible threshold.</span></li>
+            <li class="anim" data-anim="slideInLeft" data-t-rel="1.64" data-dur="0.7"><span class="num">04</span><span>Deploy in <code>Review</code> first — without breaking real customers.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 5 — TOOL REVEAL (signature: spring)
+      ===================================================== -->
+      <section class="slide" data-slide="5" data-transition-in="whipPan">
+        <div class="reveal-wrap">
+          <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.08" data-dur="0.6">So we built it.</p>
+          <h2 class="reveal-title anim" data-anim="spring" data-t-rel="0.4" data-dur="1.4">
+            The Rule Generator.
+          </h2>
+          <p class="reveal-sub anim" data-anim="wordReveal" data-t-rel="1.2" data-dur="3.0">
+            <strong>20 patterns.</strong> Real attributes. Copy-ready output.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 6 — DEMO STEP 1 · PATTERN GRID
+      ===================================================== -->
+      <section class="slide" data-slide="6" data-transition-in="cut">
+        <div class="demo-wrap">
+          <div class="demo-step-label anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.6">
+            <span class="demo-step-num">1</span> Pick the fraud pattern
+          </div>
+          <h2 class="demo-headline anim" data-anim="fadeUp" data-t-rel="0.24" data-dur="0.9">
+            Pick a fraud pattern.
+          </h2>
+          <div class="pattern-grid">
+            <div class="pattern-card anim" data-anim="slideInLeft" data-t-rel="0.64" data-dur="0.6">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Card testing</span><span class="fp-pill fp-low">FP: low</span></div>
+              <div class="pattern-card__title">Rapid card retry</div>
+              <div class="pattern-card__desc">Same card, many attempts per hour.</div>
+            </div>
+            <div class="pattern-card anim" data-anim="slideInLeft" data-t-rel="0.84" data-dur="0.6">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Stolen card</span><span class="fp-pill fp-med">FP: med</span></div>
+              <div class="pattern-card__title">Stolen-card velocity</div>
+              <div class="pattern-card__desc">Issuer-flagged BINs at scale.</div>
+            </div>
+            <div class="pattern-card anim" data-anim="slideInLeft" data-t-rel="1.04" data-dur="0.6">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Sign-up abuse</span><span class="fp-pill fp-low">FP: low</span></div>
+              <div class="pattern-card__title">Disposable email burst</div>
+              <div class="pattern-card__desc">Many trials from throwaway domains.</div>
+            </div>
+            <div class="pattern-card anim" data-anim="slideInLeft" data-t-rel="1.24" data-dur="0.6">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Geo / IP</span><span class="fp-pill fp-med">FP: med</span></div>
+              <div class="pattern-card__title">High-risk country</div>
+              <div class="pattern-card__desc">Block list by IP country code.</div>
+            </div>
+            <div class="pattern-card anim" data-anim="slideInLeft" data-t-rel="1.44" data-dur="0.6">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Customer</span><span class="fp-pill fp-high">FP: high</span></div>
+              <div class="pattern-card__title">First-time high-amount</div>
+              <div class="pattern-card__desc">New customer + amount &gt; threshold.</div>
+            </div>
+            <div class="pattern-card is-active anim" data-anim="spring" data-t-rel="1.76" data-dur="1.0">
+              <div class="pattern-card__head"><span class="pattern-card__cat">Card testing</span><span class="fp-pill fp-low">FP: low</span></div>
+              <div class="pattern-card__title">Many cards from one IP</div>
+              <div class="pattern-card__desc">Classic card-testing fingerprint.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 7 — DEMO STEP 2 · PARAMETERS
+      ===================================================== -->
+      <section class="slide" data-slide="7" data-transition-in="cut">
+        <div class="demo-wrap">
+          <div class="demo-step-label anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.6">
+            <span class="demo-step-num">2</span> Tune the parameters
+          </div>
+          <h2 class="demo-headline anim" data-anim="fadeUp" data-t-rel="0.24" data-dur="0.9">
+            Tune the parameters.
+          </h2>
+          <div class="params-grid">
+            <div class="param-card anim" data-anim="slideInLeft" data-t-rel="0.56" data-dur="0.7">
+              <span class="param-card__label">Max cards per hour per IP</span>
+              <span class="param-input">5</span>
+              <span class="param-card__hint">Catches scripts cleanly; legitimate shared IPs rarely exceed 3.</span>
+            </div>
+            <div class="param-card anim" data-anim="slideInRight" data-t-rel="0.84" data-dur="0.7">
+              <span class="param-card__label">Card funding</span>
+              <span class="param-input">debit, prepaid</span>
+              <span class="param-card__hint">Restricting non-credit drops false positives on shared IPs.</span>
+            </div>
+            <div class="param-card anim" data-anim="slideInLeft" data-t-rel="1.12" data-dur="0.7">
+              <span class="param-card__label">Time window</span>
+              <span class="param-input">hourly</span>
+              <span class="param-card__hint">Hourly is the right grain for testing scripts.</span>
+            </div>
+            <div class="param-card anim" data-anim="slideInRight" data-t-rel="1.4" data-dur="0.7">
+              <span class="param-card__label">Action</span>
+              <div class="action-pills" style="margin-top:6px;">
+                <span class="action-pill is-active--block">Block</span>
+                <span class="action-pill">Review</span>
+                <span class="action-pill">3DS</span>
+              </div>
+              <span class="param-card__hint">Deploy in <code style="font-family:var(--font-mono);background:var(--orange-soft);color:var(--orange);padding:1px 6px;border-radius:4px">Review</code> first, then promote.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 8 — DEMO STEP 3 · CODE OUTPUT
+      ===================================================== -->
+      <section class="slide" data-slide="8" data-transition-in="flash">
+        <div class="code-wrap">
+          <div class="code-step-row">
+            <div class="demo-step-label anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.6" style="margin-bottom:0;">
+              <span class="demo-step-num">3</span> Copy the rule
+            </div>
+          </div>
+          <h2 class="demo-headline anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.8">
+            Real Stripe syntax.
+          </h2>
+          <div class="code-block anim" data-anim="scaleIn" data-t-rel="0.56" data-dur="0.9" style="margin-top:36px;">
+            <button id="copyBtn" class="copy-btn anim" data-anim="fadeIn" data-t-rel="0.84" data-dur="0.6">Copy</button>
+            <span id="ruleText" class="anim" data-anim="typewriter" data-t-rel="0.96" data-dur="4.2">Block if :card_count_for_ip_address_hourly: &gt; 5 and :card_funding: in ("debit", "prepaid")</span>
+          </div>
+          <p class="anim" data-anim="fadeUp" data-t-rel="2.96" data-dur="0.8" style="font-family:var(--font-mono);font-size:22px;color:var(--ink-muted);margin-top:32px;">
+            → Paste into Stripe → Radar → Rules
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 9 — 20 PATTERNS / 5 CATEGORIES
+      ===================================================== -->
+      <section class="slide" data-slide="9" data-transition-in="cut">
+        <div class="twenty-wrap">
+          <p class="eyebrow muted anim" data-anim="fadeIn" data-t-rel="0.04" data-dur="0.6">Library</p>
+          <div class="twenty-num anim" data-anim="counter" data-t-rel="0.24" data-dur="1.8" data-to="20">0</div>
+          <p class="twenty-sub anim" data-anim="fadeUp" data-t-rel="1.04" data-dur="0.9">
+            Patterns covering five categories.
+          </p>
+          <div class="cat-pill-row">
+            <span class="cat-pill anim" data-anim="slideInLeft" data-t-rel="1.44" data-dur="0.6">Card testing</span>
+            <span class="cat-pill anim" data-anim="slideInLeft" data-t-rel="1.6" data-dur="0.6">Stolen cards</span>
+            <span class="cat-pill anim" data-anim="slideInLeft" data-t-rel="1.76" data-dur="0.6">Sign-up abuse</span>
+            <span class="cat-pill anim" data-anim="slideInRight" data-t-rel="1.92" data-dur="0.6">Geo / IP</span>
+            <span class="cat-pill anim" data-anim="slideInRight" data-t-rel="2.08" data-dur="0.6">Customer · Amount</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 10 — PATTERN SHOWCASE (rapid retry)
+      ===================================================== -->
+      <section class="slide" data-slide="10" data-transition-in="cut">
+        <div class="show-wrap">
+          <p class="show-eyebrow anim" data-anim="fadeIn" data-t-rel="0.08" data-dur="0.5">Example · Card testing</p>
+          <h2 class="show-title anim" data-anim="fadeUp" data-t-rel="0.24" data-dur="0.9">Rapid card retry.</h2>
+          <div class="show-card anim" data-anim="scaleIn" data-t-rel="0.64" data-dur="0.9">
+            <div class="show-meta">
+              <span class="fp-pill fp-low anim" data-anim="fadeIn" data-t-rel="0.96" data-dur="0.5">FP: low</span>
+              <span class="fp-pill" style="background:var(--bg-elev);color:var(--ink-muted);" class="anim">Review window: 7 days</span>
+            </div>
+            <div class="show-rule anim" data-anim="typewriter" data-t-rel="1.04" data-dur="3.0">Block if :total_transactions_per_payment_instrument_fingerprint_hourly: &gt; 3</div>
+            <div class="show-why anim" data-anim="wordReveal" data-t-rel="2.4" data-dur="3.0">
+              Card-testing scripts retry the same card multiple times per hour. Legitimate users almost never do. Three is the sane ceiling.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 11 — ATTRIBUTE WALL
+      ===================================================== -->
+      <section class="slide" data-slide="11" data-transition-in="cut">
+        <div class="attr-wrap">
+          <h2 class="attr-headline anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.9">
+            Real attribute names. <span class="accent">Real syntax.</span>
+          </h2>
+          <div class="attr-grid">
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.48" data-dur="0.5">:card_funding:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.56" data-dur="0.5">:ip_country:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.64" data-dur="0.5">:amount_in_usd:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.72" data-dur="0.5">:customer_lifetime_value:</span>
+            <span class="attr-item anim highlighted" data-anim="fadeUp" data-t-rel="0.8" data-dur="0.5">:card_count_for_ip_address_hourly:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.88" data-dur="0.5">:declined_transactions...:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="0.96" data-dur="0.5">:email_domain:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="1.04" data-dur="0.5">:is_3d_secure_supported:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="1.12" data-dur="0.5">:risk_score:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="1.2" data-dur="0.5">:cvc_check:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="1.28" data-dur="0.5">:address_zip_check:</span>
+            <span class="attr-item anim" data-anim="fadeUp" data-t-rel="1.36" data-dur="0.5">:total_charges_per_customer_daily:</span>
+          </div>
+          <p class="anim" data-anim="fadeUp" data-t-rel="1.68" data-dur="0.8" style="text-align:center;font-size:24px;color:var(--ink-muted);margin-top:48px;font-family:var(--font-mono);">
+            Source: docs.stripe.com / radar / rules / supported-attributes
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 12 — PROOF (13% → <1%)
+      ===================================================== -->
+      <section class="slide proof-slide" data-slide="12" data-transition-in="flash">
+        <div class="proof-wrap">
+          <p class="proof-eyebrow anim" data-anim="fadeIn" data-t-rel="0.08" data-dur="0.6">90-day chargeback rescue · Phase 1</p>
+          <div class="proof-line">
+            <span class="proof-from anim" data-anim="counter" data-t-rel="0.4" data-dur="1.6" data-to="13.0" data-decimals="1" data-suffix="%">0.0%</span>
+            <span class="proof-arrow">
+              <svg class="anim" data-anim="pathdraw" data-t-rel="1.12" data-dur="1.0" viewBox="0 0 200 120">
+                <path d="M 10 60 L 170 60" stroke="#C94F2E" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <path d="M 140 30 L 180 60 L 140 90" stroke="#C94F2E" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="proof-to anim" data-anim="bounce" data-t-rel="1.44" data-dur="1.2">&lt;1%</span>
+          </div>
+          <p class="proof-foot anim" data-anim="wordReveal" data-t-rel="2.08" data-dur="2.0">
+            <strong>90 days.</strong> Phase one was the Radar rebuild.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 13 — BUILT BY GEORGES RAYESS
+      ===================================================== -->
+      <section class="slide" data-slide="13" data-transition-in="cut">
+        <div class="builtby-wrap">
+          <div>
+            <p class="eyebrow muted anim" data-anim="fadeIn" data-t-rel="0.08" data-dur="0.5">Built by</p>
+            <h2 class="builtby-name anim" data-anim="fadeUp" data-t-rel="0.24" data-dur="1.0">
+              <strong>Georges Rayess.</strong>
+            </h2>
+            <p class="builtby-sub anim" data-anim="wordReveal" data-t-rel="0.8" data-dur="3.0">
+              Patterns from the engagement that moved the dispute ratio. Not generic defaults.
+            </p>
+          </div>
+          <div class="builtby-badge anim" data-anim="irisIn" data-t-rel="0.32" data-dur="1.3">
+            <span class="builtby-badge__mono">Radar · Phase 1</span>
+            <span class="builtby-badge__big">13% → &lt;1%</span>
+            <span class="builtby-badge__small">90 days · Beirut</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 14 — ACADEMY CARDS
+      ===================================================== -->
+      <section class="slide" data-slide="14" data-transition-in="cut">
+        <div class="academy-wrap">
+          <h2 class="academy-title anim" data-anim="fadeUp" data-t-rel="0.08" data-dur="0.9">
+            And there's a whole academy around it.
+          </h2>
+          <div class="academy-cards">
+            <div class="academy-card anim" data-anim="slideInLeft" data-t-rel="0.56" data-dur="0.7">
+              <div class="academy-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              </div>
+              <div class="academy-card__title">Detect — Story Mode</div>
+              <div class="academy-card__desc">Five-chapter fraud detective campaign with boss challenges.</div>
+            </div>
+            <div class="academy-card anim" data-anim="slideInLeft" data-t-rel="0.8" data-dur="0.7">
+              <div class="academy-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4z"/><path d="M4 14h10v6H4z"/><path d="m18 14 4 4-4 4"/></svg>
+              </div>
+              <div class="academy-card__title">Drill — Flashcards</div>
+              <div class="academy-card__desc">Speed-drill the attribute deck. Sub-3-second recognition.</div>
+            </div>
+            <div class="academy-card anim" data-anim="slideInRight" data-t-rel="1.04" data-dur="0.7">
+              <div class="academy-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+              </div>
+              <div class="academy-card__title">Risk Calculator</div>
+              <div class="academy-card__desc">Plug in your fraud and chargeback counts. Model live VAMP / ECM.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SLIDE 15 — CTA
+      ===================================================== -->
+      <section class="slide" data-slide="15" data-transition-in="whipPan">
+        <div class="cta-wrap">
+          <p class="eyebrow muted anim" data-anim="fadeIn" data-t-rel="0.04" data-dur="0.5">Start now</p>
+          <h2 class="cta-title anim" data-anim="spring" data-t-rel="0.24" data-dur="1.4">Try the generator.</h2>
+          <p class="cta-body anim" data-anim="fadeUp" data-t-rel="0.88" data-dur="1.0">
+            Pick a pattern. Build a rule in under a minute.
+          </p>
+          <div class="cta-row">
+            <span class="cta-pill anim" data-anim="glow" data-t-rel="1.44" data-dur="6.0">
+              Open the Generator →
+            </span>
+            <span class="cta-pill secondary anim" data-anim="fadeUp" data-t-rel="1.76" data-dur="0.8">
+              Book the Rescue Program
+            </span>
+          </div>
+          <p class="cta-url anim" data-anim="typewriter" data-t-rel="2.16" data-dur="1.8">
+            georgesrayess.com / stripe-radar-rule-library
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="transition-overlay" id="transitionOverlay"></div>
+
+  <div class="play-controls" id="playControls">
+    <button id="jumpBtn" aria-label="Jump to slide" title="Jump (J)">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/></svg>
+    </button>
+    <button id="resetBtn" aria-label="Reset" title="Reset (R)">
+      <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6.5 12 11V8a5 5 0 11-5 5H5a7 7 0 107-7z"/></svg>
+    </button>
+    <button id="playBtn" aria-label="Play / Pause" title="Play / Pause (Space)">
+      <svg class="icon-play" viewBox="0 0 24 24"><path d="M7 4l13 8L7 20z"/></svg>
+      <svg class="icon-pause" viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>
+    </button>
+  </div>
+  <div class="play-progress" id="playProgress"></div>
+  <div class="jump-menu" id="jumpMenu" role="menu" aria-label="Jump to slide"></div>
+
+  <audio id="voAudio" preload="metadata" src="VO%20English.mp3"></audio>
+
+  <script>
+  /* =============================================================
+     STORYBOARD ENGINE — Stripe Radar Generator pitch deck
+  ============================================================= */
+  const TIMINGS = [
+  { time:    0.18, slide:  1 },
+  { time:    6.79, slide:  2 },
+  { time:   17.55, slide:  3 },
+  { time:   27.74, slide:  4 },
+  { time:   42.63, slide:  5 },
+  { time:   54.13, slide:  6 },
+  { time:   65.72, slide:  7 },
+  { time:   75.57, slide:  8 },
+  { time:   83.33, slide:  9 },
+  { time:   97.41, slide: 10 },
+  { time:  108.93, slide: 11 },
+  { time:  119.61, slide: 12 },
+  { time:  131.13, slide: 13 },
+  { time:  139.94, slide: 14 },
+  { time:  150.54, slide: 15 }
+];
+  const SLIDE_LABELS = [
+    'Hero — Rule Generator',
+    'Card testing right now',
+    '13% chargebacks',
+    'Building Radar rules is hard',
+    'Tool reveal',
+    'Demo · Pick the pattern',
+    'Demo · Tune the parameters',
+    'Demo · Copy the rule',
+    '20 patterns · 5 categories',
+    'Rapid card retry',
+    'Real Stripe attributes',
+    '13% → under 1%',
+    'Built by Georges Rayess',
+    'Detect · Drill · Calculator',
+    'Try the generator'
+  ];
+  // Word-sync hits — pull from ElevenLabs word-timestamp JSON after recording
+  const WORD_HITS = [
+    // { time: 30.5, sel: '#somePainCode', hit: 'pulse' },
+  ];
+  const FALLBACK_DURATION = 162;
+
+  // Hash of the file's TIMINGS as initially loaded — used to detect when the
+  // source has changed (e.g., from re-running aaf_to_timings.py) so a stale
+  // localStorage calibration doesn't silently override new cues.
+  const INITIAL_TIMINGS_HASH = TIMINGS.map(t => t.slide + ':' + t.time.toFixed(2)).join(',');
+
+  /* === Easings === */
+  const easeOutCubic   = p => 1 - Math.pow(1 - p, 3);
+  const easeInOutCubic = p => p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3) / 2;
+  const easeOutQuint   = p => 1 - Math.pow(1 - p, 5);
+  const easeOutBack    = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p-1, 3) + c1 * Math.pow(p-1, 2); };
+  const easeOutElastic = p => {
+    const c4 = (2 * Math.PI) / 3;
+    return p === 0 ? 0 : p === 1 ? 1 : Math.pow(2, -10*p) * Math.sin((p*10 - 0.75) * c4) + 1;
+  };
+  const easeOutBounce = p => {
+    const n1 = 7.5625, d1 = 2.75;
+    if (p < 1/d1) return n1*p*p;
+    if (p < 2/d1) return n1*(p -= 1.5/d1)*p + 0.75;
+    if (p < 2.5/d1) return n1*(p -= 2.25/d1)*p + 0.9375;
+    return n1*(p -= 2.625/d1)*p + 0.984375;
+  };
+
+  /* === PRESETS (subset used in this deck) === */
+  const PRESETS = {
+    fadeIn: { dur: 0.8, apply: (el, p) => { el.style.opacity = easeOutCubic(p); } },
+    fadeUp: { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateY(${(1-e)*40}px)`; } },
+    slideInLeft:  { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateX(${(1-e)*-120}px)`; } },
+    slideInRight: { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `translateX(${(1-e)*120}px)`;  } },
+    scaleIn: { dur: 1.0, apply: (el, p) => { const e = easeOutCubic(p); el.style.opacity = e; el.style.transform = `scale(${0.85 + 0.15*e})`; } },
+    anticipate: { dur: 1.2, apply: (el, p) => {
+      let x;
+      if (p < 0.25) { x = -8 * (p / 0.25); }
+      else { const q = (p - 0.25) / 0.75; x = -8 + (8 + 100) * easeOutBack(q); }
+      el.style.opacity = Math.min(1, p * 3);
+      el.style.transform = `translateX(${-x}px)`;
+    }},
+    spring: { dur: 1.2, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 2);
+      el.style.transform = `scale(${0.7 + 0.3 * easeOutElastic(p)})`;
+    }},
+    bounce: { dur: 1.2, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 2);
+      el.style.transform = `translateY(${(1 - easeOutBounce(p)) * -120}px)`;
+    }},
+    pulse: { dur: 0.9, apply: (el, p) => { el.style.opacity = 1; el.style.transform = `scale(${1 + 0.08 * Math.sin(p * Math.PI)})`; }},
+    typewriter: { dur: 1.5, apply: (el, p) => {
+      if (!el.dataset.fullText) el.dataset.fullText = el.textContent;
+      const txt = el.dataset.fullText;
+      const n = Math.floor(txt.length * easeOutCubic(p));
+      el.textContent = txt.slice(0, n); el.style.opacity = 1;
+    }},
+    wordReveal: { dur: 1.8, apply: (el, p) => {
+      if (!el.dataset.fullText) {
+        // Preserve inline HTML by wrapping each text node's words
+        el.dataset.fullText = el.innerHTML;
+        const words = el.innerHTML.split(/(\s+)/);
+        el.innerHTML = words.map((w, i) => /\S/.test(w) ? `<span class="wr-w" style="opacity:0">${w}</span>` : w).join('');
+        el.dataset.wordCount = el.querySelectorAll('.wr-w').length;
+      }
+      el.style.opacity = 1;
+      const n = parseInt(el.dataset.wordCount, 10);
+      const shown = Math.floor(n * easeOutCubic(p));
+      el.querySelectorAll('.wr-w').forEach((w, i) => { w.style.opacity = i < shown ? 1 : 0; });
+    }},
+    gradientSweep: { dur: 2.0, apply: (el, p) => {
+      el.style.opacity = Math.min(1, p * 3);
+      const fill = el.querySelector('.gradient-fill');
+      if (fill) fill.style.backgroundPosition = `${100 - p * 100}% 50%`;
+    }},
+    counter: { dur: 1.8, apply: (el, p) => {
+      const to = parseFloat(el.dataset.to) || 0;
+      const decimals = parseInt(el.dataset.decimals || '0', 10);
+      const suffix = el.dataset.suffix || '';
+      const val = to * easeOutQuint(p);
+      el.textContent = val.toLocaleString(undefined,
+        { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix;
+      el.style.opacity = 1;
+    }},
+    glow: { dur: 1.6, apply: (el, p) => {
+      el.style.opacity = 1;
+      const intensity = 0.5 + 0.5 * Math.sin(p * Math.PI * 2);
+      el.style.boxShadow = `0 0 ${30 + intensity * 60}px rgba(201, 79, 46, ${0.4 + intensity * 0.4})`;
+    }},
+    highlight: { dur: 0.8, apply: (el, p) => {
+      const e = easeOutCubic(p);
+      el.style.opacity = 1;
+      el.style.backgroundImage = `linear-gradient(90deg, #FFE066 ${e*100}%, transparent ${e*100}%)`;
+      el.style.backgroundRepeat = 'no-repeat';
+      el.style.backgroundSize = '100% 38%';
+      el.style.backgroundPosition = '0 88%';
+    }},
+    particles: { dur: 14, apply: (el, p) => {
+      el.style.opacity = 1;
+      const seed = parseFloat(el.getAttribute('x')) || 0;
+      const drift = Math.sin(p * Math.PI * 2 + seed * 0.01) * 18;
+      const dy = -p * 40;
+      el.setAttribute('transform', `translate(${drift}, ${dy})`);
+      el.style.opacity = (Math.sin(p * Math.PI) * 0.9).toFixed(3);
+    }},
+    pathdraw: { dur: 1.0, apply: (el, p) => {
+      if (!el.dataset.len) { try { el.dataset.len = el.getTotalLength(); } catch(e) { el.dataset.len = 1000; } }
+      const len = parseFloat(el.dataset.len);
+      el.style.strokeDasharray = len;
+      el.style.strokeDashoffset = len * (1 - easeInOutCubic(p));
+      el.style.opacity = 1;
+    }},
+    irisIn: { dur: 1.4, apply: (el, p) => {
+      const e = easeInOutCubic(p);
+      el.style.opacity = 1;
+      el.style.clipPath = `circle(${e * 100}% at 50% 50%)`;
+    }}
+  };
+
+  /* === Boilerplate === */
+  const deck = document.getElementById('deck');
+  const playControls = document.getElementById('playControls');
+  const playBtn = document.getElementById('playBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const jumpBtn = document.getElementById('jumpBtn');
+  const jumpMenu = document.getElementById('jumpMenu');
+  const progress = document.getElementById('playProgress');
+  const voAudio = document.getElementById('voAudio');
+  const allSlides = [...document.querySelectorAll('.slide')];
+  let currentSlide = 0;
+  let rafId = 0;
+
+  /* === Synthetic clock — lets the deck preview before the MP3 exists.
+     Activated when the audio errors or has no source after 1.2s. While
+     active, getTime() returns a performance.now()-derived timeline
+     instead of voAudio.currentTime. Play/pause/reset both branches.
+  ============================================================ */
+  let useSyntheticClock = false;
+  let syntheticTime = 0;
+  let syntheticPlaying = false;
+  let syntheticPlayStart = 0;
+
+  function getTime() {
+    if (useSyntheticClock) {
+      return syntheticPlaying
+        ? syntheticTime + (performance.now() - syntheticPlayStart) / 1000
+        : syntheticTime;
+    }
+    return voAudio.currentTime;
+  }
+  function setTime(t) {
+    if (useSyntheticClock) {
+      syntheticTime = t;
+      if (syntheticPlaying) syntheticPlayStart = performance.now();
+    } else {
+      voAudio.currentTime = t;
+    }
+  }
+  function activateSynthetic(reason) {
+    if (useSyntheticClock) return;
+    useSyntheticClock = true;
+    // Small badge so it's clear we're in preview mode
+    const badge = document.createElement('div');
+    badge.textContent = 'PREVIEW (no audio)';
+    badge.style.cssText = 'position:fixed;top:12px;left:12px;z-index:9999;font:600 10px/1 "JetBrains Mono",monospace;letter-spacing:.14em;background:rgba(201,79,46,.92);color:#fff;padding:6px 10px;border-radius:6px;opacity:.85';
+    document.body.appendChild(badge);
+    console.info('Storyboard: synthetic clock active (' + reason + ')');
+  }
+  voAudio.addEventListener('error', () => activateSynthetic('audio error'));
+  setTimeout(() => {
+    if (voAudio.readyState === 0 && !voAudio.duration) activateSynthetic('no audio source loaded');
+  }, 1200);
+
+  /* === CALIBRATION MODE — live retiming
+     Drift between word-count seeds and the real audio is normal. Use this
+     mode to retime by ear:
+       T  enter / exit calibration mode
+       M  mark current audio time as the next slide's start
+       Backspace  undo the last mark
+       A  apply captured cues (rewrites in-memory TIMINGS + saves)
+       E  export TIMINGS to clipboard for permanent paste
+       Esc exit without applying
+     Calibration auto-loads from localStorage on subsequent visits.
+  ============================================================ */
+  const CALIB = {
+    active: false,
+    cues: [],
+    badge: null,
+    key() { return 'storyboard-calib::' + location.pathname; },
+    start() {
+      this.active = true;
+      this.cues = [0];
+      this.ensureBadge();
+      this.update();
+    },
+    exitMode() {
+      this.active = false;
+      if (this.badge) { this.badge.remove(); this.badge = null; }
+    },
+    mark(t) {
+      if (!this.active) return;
+      if (this.cues.length >= TIMINGS.length) return;
+      if (t <= this.cues[this.cues.length - 1]) t = this.cues[this.cues.length - 1] + 0.1;
+      this.cues.push(parseFloat(t.toFixed(2)));
+      this.update();
+    },
+    undo() {
+      if (!this.active || this.cues.length <= 1) return;
+      this.cues.pop();
+      this.update();
+    },
+    apply() {
+      const n = Math.min(this.cues.length, TIMINGS.length);
+      for (let i = 0; i < n; i++) TIMINGS[i].time = this.cues[i];
+      ANIMS.length = 0;
+      resolveAnims();
+      jumpMenu.innerHTML = '';
+      buildJumpMenu();
+      applyAnimsAt(getTime());
+      // Save with the source-file hash captured at boot. If the file's TIMINGS
+      // change later (e.g., re-run aaf_to_timings.py), the next boot's hash
+      // won't match and this calibration is discarded automatically.
+      try {
+        localStorage.setItem(this.key(), JSON.stringify({
+          sourceHash: INITIAL_TIMINGS_HASH,
+          cues: this.cues
+        }));
+      } catch (e) {}
+      this.flash('APPLIED · ' + n + ' cues');
+    },
+    exportCues() {
+      const txt = 'const TIMINGS = [\n' +
+        this.cues.map((t, i) => `  { time: ${t.toFixed(2).padStart(7)}, slide: ${(i+1).toString().padStart(2)} }`).join(',\n') +
+        '\n];';
+      console.log(txt);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(
+          () => this.flash('COPIED — paste into storyboard.html'),
+          () => this.flash('EXPORT logged to console')
+        );
+      } else {
+        this.flash('EXPORT logged to console');
+      }
+    },
+    loadSaved() {
+      try {
+        const saved = localStorage.getItem(this.key());
+        if (!saved) return false;
+        const parsed = JSON.parse(saved);
+        // New format: { sourceHash, cues } — discard if the file's TIMINGS changed.
+        // Old format: a bare array (no hash) — discard silently.
+        if (!parsed || !parsed.sourceHash || !Array.isArray(parsed.cues)) {
+          console.info('Storyboard: discarding old-format calibration (no source hash).');
+          localStorage.removeItem(this.key());
+          return false;
+        }
+        if (parsed.sourceHash !== INITIAL_TIMINGS_HASH) {
+          console.info('Storyboard: file TIMINGS changed since calibration was saved — discarding stale calibration.');
+          localStorage.removeItem(this.key());
+          return false;
+        }
+        const cues = parsed.cues;
+        if (!cues.length) return false;
+        this.cues = cues;
+        const n = Math.min(cues.length, TIMINGS.length);
+        for (let i = 0; i < n; i++) TIMINGS[i].time = cues[i];
+        ANIMS.length = 0;
+        resolveAnims();
+        console.info('Storyboard: loaded saved calibration (' + n + ' cues)');
+        return true;
+      } catch (e) { return false; }
+    },
+    clearSaved() {
+      try { localStorage.removeItem(this.key()); } catch (e) {}
+    },
+    ensureBadge() {
+      if (this.badge) return;
+      const b = document.createElement('div');
+      b.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;font:600 12px/1.5 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;background:rgba(201,79,46,.96);color:#fff;padding:10px 18px;border-radius:8px;text-align:center;min-width:420px;box-shadow:0 4px 16px rgba(0,0,0,0.35);';
+      document.body.appendChild(b);
+      this.badge = b;
+    },
+    update() {
+      if (!this.badge) return;
+      const n = this.cues.length;
+      const total = TIMINGS.length;
+      const label = n >= total
+        ? 'ALL CAPTURED — [A]pply · [E]xport · [Esc] exit'
+        : 'CALIBRATION · captured ' + n + '/' + total + ' · next: slide ' + (n+1);
+      this.badge.innerHTML = label + '<br><span style="opacity:.85;font-weight:400;letter-spacing:.03em;">[M] mark · [Bksp] undo · [A]pply · [E]xport · [Esc] exit</span>';
+    },
+    flash(msg) {
+      if (!this.badge) {
+        // brief toast if not in mode
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;font:600 12px/1.4 "JetBrains Mono",monospace;letter-spacing:.06em;background:rgba(10,132,120,.95);color:#fff;padding:10px 18px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.35);';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2000);
+      } else {
+        const old = this.badge.innerHTML;
+        this.badge.innerHTML = '<strong>' + msg + '</strong>';
+        setTimeout(() => { if (this.badge) this.update(); }, 1500);
+      }
+    }
+  };
+
+  function scaleToFit() {
+    const sx = window.innerWidth / 1920;
+    const sy = window.innerHeight / 1080;
+    const s = Math.min(sx, sy);
+    deck.style.transform = `translate3d(0,0,0) scale(${s})`;
+  }
+  scaleToFit();
+  window.addEventListener('resize', scaleToFit);
+
+  /* === Animation scheduling === */
+  const ANIMS = [];
+  function resolveAnims() {
+    const cueFor = {};
+    TIMINGS.forEach(t => { cueFor[t.slide] = t.time; });
+    document.querySelectorAll('.anim').forEach(el => {
+      const slideEl = el.closest('.slide');
+      const slideN = slideEl ? parseInt(slideEl.dataset.slide || '0', 10) : 0;
+      const cue = cueFor[slideN] ?? 0;
+      let t;
+      if (el.dataset.t !== undefined) t = parseFloat(el.dataset.t);
+      else if (el.dataset.tRel !== undefined) t = cue + parseFloat(el.dataset.tRel);
+      else t = cue;
+      const presetName = el.dataset.anim || 'fadeIn';
+      const preset = PRESETS[presetName] || PRESETS.fadeIn;
+      const dur = el.dataset.dur !== undefined ? parseFloat(el.dataset.dur) : preset.dur;
+      ANIMS.push({ el, t, dur, preset, name: presetName });
+    });
+  }
+  function applyAnimsAt(time) {
+    for (const a of ANIMS) {
+      if (time < a.t) { a.el.style.opacity = 0; a.el.classList.remove('anim-played'); }
+      else if (time >= a.t && time <= a.t + a.dur) {
+        a.preset.apply(a.el, Math.max(0, Math.min(1, (time - a.t) / a.dur)));
+      } else if (!a.el.classList.contains('anim-played')) {
+        a.preset.apply(a.el, 1); a.el.classList.add('anim-played');
+      }
+    }
+  }
+
+  /* Copy button toggle on slide 8 — flips to "Copied!" near the end */
+  function updateCopyButton(time) {
+    const btn = document.getElementById('copyBtn');
+    if (!btn) return;
+    // copy fires near the end of the typewriter (slide cue 74.5 + 6.6 = 81.1)
+    if (time >= 81.0 && !btn.classList.contains('copied')) {
+      btn.classList.add('copied');
+      btn.textContent = 'Copied ✓';
+    } else if (time < 80.5 && btn.classList.contains('copied')) {
+      btn.classList.remove('copied');
+      btn.textContent = 'Copy';
+    }
+  }
+
+  /* === Word hits === */
+  const wordHitState = new WeakMap();
+  function applyWordHits(time) {
+    for (const h of WORD_HITS) {
+      if (time >= h.time && time <= h.time + 0.6) {
+        const el = document.querySelector(h.sel);
+        if (!el) continue;
+        if (wordHitState.get(el) === h.time) continue;
+        wordHitState.set(el, h.time);
+        const preset = PRESETS[h.hit] || PRESETS.pulse;
+        const start = performance.now();
+        function frame() {
+          const p = Math.min(1, (performance.now() - start) / 600);
+          preset.apply(el, p);
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+    }
+  }
+
+  /* === Scene transitions === */
+  const TRANSITION = document.getElementById('transitionOverlay');
+  function playTransition(kind) {
+    if (!kind || kind === 'cut') return;
+    TRANSITION.className = 'transition-overlay ' + kind;
+    if (kind === 'dissolve' || kind === 'flash') {
+      TRANSITION.style.opacity = '1';
+      TRANSITION.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 550, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+    } else if (kind === 'whipPan') {
+      TRANSITION.style.opacity = '1';
+      TRANSITION.animate(
+        [{ transform: 'translateX(-100%)', opacity: 1 }, { transform: 'translateX(100%)', opacity: 1 }],
+        { duration: 550, easing: 'cubic-bezier(0.7, 0, 0.3, 1)', fill: 'forwards' }
+      ).onfinish = () => { TRANSITION.style.opacity = '0'; };
+    } else if (kind === 'wipe') {
+      TRANSITION.style.opacity = '1';
+      TRANSITION.animate(
+        [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)', offset: 0.5 }, { clipPath: 'inset(0 0 0 100%)' }],
+        { duration: 600, easing: 'cubic-bezier(0.7, 0, 0.3, 1)', fill: 'forwards' }
+      ).onfinish = () => { TRANSITION.style.opacity = '0'; };
+    } else if (kind === 'blocks') {
+      TRANSITION.style.opacity = '1';
+      TRANSITION.animate(
+        [{ opacity: 1, transform: 'scaleY(1)' }, { opacity: 1, transform: 'scaleY(0.05)' }, { opacity: 0, transform: 'scaleY(0.05)' }],
+        { duration: 550, easing: 'cubic-bezier(0.85, 0, 0.15, 1)', fill: 'forwards' }
+      );
+    }
+  }
+
+  /* === UI === */
+  function buildJumpMenu() {
+    const frag = document.createDocumentFragment();
+    TIMINGS.forEach((cue, idx) => {
+      const btn = document.createElement('button');
+      btn.dataset.slide = cue.slide;
+      const mm = Math.floor(cue.time / 60).toString().padStart(2, '0');
+      const ss = Math.floor(cue.time % 60).toString().padStart(2, '0');
+      btn.innerHTML =
+        '<span class="jm-num">' + String(cue.slide).padStart(2, '0') + '</span>' +
+        '<span class="jm-title">' + (SLIDE_LABELS[idx] || ('Slide ' + cue.slide)) + '</span>' +
+        '<span class="jm-num" style="min-width:38px;text-align:right;opacity:.6;">' + mm + ':' + ss + '</span>';
+      frag.appendChild(btn);
+    });
+    jumpMenu.appendChild(frag);
+  }
+  function updateActiveMenu(n) {
+    jumpMenu.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('is-active', parseInt(b.dataset.slide, 10) === n);
+    });
+  }
+  function getDuration() {
+    if (useSyntheticClock) return FALLBACK_DURATION;
+    return (voAudio && voAudio.duration && isFinite(voAudio.duration)) ? voAudio.duration : FALLBACK_DURATION;
+  }
+  function jumpToSlide(n) {
+    const cue = TIMINGS.find(t => t.slide === n);
+    if (!cue) return;
+    setTime(cue.time + 0.01);
+    const slide = allSlides[n - 1];
+    if (slide) deck.scrollTo({ top: slide.offsetTop, behavior: 'smooth' });
+    currentSlide = n;
+    updateActiveMenu(n);
+    progress.style.width = (cue.time / getDuration() * 100) + '%';
+    progress.classList.add('is-active');
+    applyAnimsAt(getTime());
+    updateCopyButton(getTime());
+  }
+  jumpBtn.addEventListener('click', (e) => { e.stopPropagation(); jumpMenu.classList.toggle('is-open'); });
+  jumpMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-slide]'); if (!btn) return;
+    jumpToSlide(parseInt(btn.dataset.slide, 10));
+    jumpMenu.classList.remove('is-open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!jumpMenu.contains(e.target) && e.target !== jumpBtn) jumpMenu.classList.remove('is-open');
+  });
+
+  function isPlaying() {
+    return useSyntheticClock ? syntheticPlaying : (!voAudio.paused && !voAudio.ended);
+  }
+
+  function tick() {
+    const elapsed = getTime();
+    let target = TIMINGS[0].slide;
+    for (const t of TIMINGS) { if (elapsed >= t.time) target = t.slide; else break; }
+    if (target !== currentSlide) {
+      const arriving = allSlides[target - 1];
+      const trans = arriving?.dataset.transitionIn || 'cut';
+      playTransition(trans);
+      currentSlide = target;
+      if (arriving) deck.scrollTo({ top: arriving.offsetTop, behavior: 'smooth' });
+      updateActiveMenu(currentSlide);
+    }
+    applyAnimsAt(elapsed);
+    applyWordHits(elapsed);
+    updateCopyButton(elapsed);
+    progress.style.width = Math.min(elapsed / getDuration() * 100, 100) + '%';
+
+    // Auto-stop the synthetic clock when we reach the end of the timeline
+    if (useSyntheticClock && elapsed >= getDuration()) {
+      syntheticPlaying = false;
+      syntheticTime = getDuration();
+      playControls.classList.remove('is-playing');
+      return;
+    }
+    if (isPlaying()) rafId = requestAnimationFrame(tick);
+  }
+
+  function play() {
+    if (useSyntheticClock) {
+      syntheticPlayStart = performance.now();
+      syntheticPlaying = true;
+      playControls.classList.add('is-playing');
+      progress.classList.add('is-active');
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+      return;
+    }
+    voAudio.play().then(() => {
+      playControls.classList.add('is-playing');
+      progress.classList.add('is-active');
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    }).catch(err => console.warn('Audio play blocked:', err));
+  }
+  function pause() {
+    if (useSyntheticClock) {
+      syntheticTime = getTime();
+      syntheticPlaying = false;
+      playControls.classList.remove('is-playing');
+      cancelAnimationFrame(rafId);
+      return;
+    }
+    voAudio.pause();
+    playControls.classList.remove('is-playing');
+    cancelAnimationFrame(rafId);
+  }
+  function reset() {
+    pause();
+    setTime(0);
+    currentSlide = 0;
+    progress.style.width = '0%';
+    progress.classList.remove('is-active');
+    deck.scrollTo({ top: 0, behavior: 'smooth' });
+    ANIMS.forEach(a => { a.el.classList.remove('anim-played'); a.el.style.opacity = 0; });
+    applyAnimsAt(0);
+    const btn = document.getElementById('copyBtn');
+    if (btn) { btn.classList.remove('copied'); btn.textContent = 'Copy'; }
+  }
+
+  voAudio.addEventListener('play',  () => playControls.classList.add('is-playing'));
+  voAudio.addEventListener('pause', () => playControls.classList.remove('is-playing'));
+  voAudio.addEventListener('ended', () => { playControls.classList.remove('is-playing'); progress.style.width = '100%'; });
+  voAudio.addEventListener('timeupdate', () => { if (voAudio.paused && !useSyntheticClock) { applyAnimsAt(voAudio.currentTime); updateCopyButton(voAudio.currentTime); } });
+  voAudio.addEventListener('seeked',     () => { if (!useSyntheticClock) { applyAnimsAt(voAudio.currentTime); updateCopyButton(voAudio.currentTime); } });
+
+  playBtn.addEventListener('click', () => (isPlaying() ? pause() : play()));
+  resetBtn.addEventListener('click', reset);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    // Calibration shortcuts (active in or out of calib mode for some)
+    if (e.code === 'KeyT') {
+      e.preventDefault();
+      CALIB.active ? CALIB.exitMode() : CALIB.start();
+      return;
+    }
+    if (CALIB.active) {
+      if (e.code === 'KeyM') { e.preventDefault(); CALIB.mark(getTime()); return; }
+      if (e.code === 'Backspace') { e.preventDefault(); CALIB.undo(); return; }
+      if (e.code === 'KeyA') { e.preventDefault(); CALIB.apply(); return; }
+      if (e.code === 'KeyE') { e.preventDefault(); CALIB.exportCues(); return; }
+      if (e.code === 'Escape') { e.preventDefault(); CALIB.exitMode(); return; }
+    }
+    if (e.code === 'Space')       { e.preventDefault(); isPlaying() ? pause() : play(); }
+    else if (e.code === 'KeyR' || e.code === 'Home') { e.preventDefault(); reset(); }
+    else if (e.code === 'KeyJ')   { e.preventDefault(); jumpMenu.classList.toggle('is-open'); }
+    else if (e.code === 'Escape') { jumpMenu.classList.remove('is-open'); }
+    else if (e.code === 'ArrowRight') {
+      e.preventDefault();
+      const now = getTime();
+      const next = TIMINGS.find(t => t.time > now + 0.1);
+      if (next) jumpToSlide(next.slide);
+    } else if (e.code === 'ArrowLeft') {
+      e.preventDefault();
+      const now = getTime();
+      const past = [...TIMINGS].reverse().find(t => t.time < now - 0.5);
+      if (past) jumpToSlide(past.slide);
+    } else if (e.code === 'BracketLeft' || e.code === 'Comma') {
+      // Nudge the CURRENT slide's cue earlier by 0.25s
+      e.preventDefault();
+      const cue = TIMINGS.find(t => t.slide === currentSlide);
+      if (cue && cue.slide > 1) {
+        cue.time = Math.max(0, cue.time - 0.25);
+        ANIMS.length = 0; resolveAnims();
+        jumpMenu.innerHTML = ''; buildJumpMenu();
+        applyAnimsAt(getTime());
+        CALIB.flash('Slide ' + cue.slide + ' cue: ' + cue.time.toFixed(2) + 's');
+      }
+    } else if (e.code === 'BracketRight' || e.code === 'Period') {
+      // Nudge the CURRENT slide's cue later by 0.25s
+      e.preventDefault();
+      const cue = TIMINGS.find(t => t.slide === currentSlide);
+      if (cue && cue.slide > 1) {
+        cue.time = cue.time + 0.25;
+        ANIMS.length = 0; resolveAnims();
+        jumpMenu.innerHTML = ''; buildJumpMenu();
+        applyAnimsAt(getTime());
+        CALIB.flash('Slide ' + cue.slide + ' cue: ' + cue.time.toFixed(2) + 's');
+      }
+    }
+  });
+
+  window.STORYBOARD = {
+    cues: TIMINGS, labels: SLIDE_LABELS,
+    seek(t) {
+      setTime(t);
+      let target = TIMINGS[0].slide;
+      for (const cue of TIMINGS) { if (t >= cue.time) target = cue.slide; else break; }
+      if (target !== currentSlide) {
+        currentSlide = target;
+        const slide = allSlides[currentSlide - 1];
+        if (slide) deck.scrollTo({ top: slide.offsetTop, behavior: 'auto' });
+        updateActiveMenu(currentSlide);
+      }
+      applyAnimsAt(t);
+      updateCopyButton(t);
+    },
+    currentSlide: () => currentSlide,
+    play, pause, reset,
+    presets: Object.keys(PRESETS),
+    isSynthetic: () => useSyntheticClock
+  };
+
+  buildJumpMenu();
+  resolveAnims();
+  // Auto-load saved calibration so a tuned deck persists across reloads
+  if (CALIB.loadSaved()) {
+    // Rebuild jump menu with corrected times
+    jumpMenu.innerHTML = '';
+    buildJumpMenu();
+    CALIB.flash('Loaded saved calibration');
+  }
+  applyAnimsAt(0);
+
+  // Console-friendly handle
+  window.STORYBOARD.calib = CALIB;
+  </script>
+
+</body>
+</html>
