@@ -298,6 +298,107 @@
      data-loop-amp, data-loop-period control magnitude / speed.
      Loops compose ON TOP of the settled entrance transform by appending.
   =========================================================================== */
+
+  /* ===== RAW-MOTION PACK (v0.5): kinetic type, annotations, exits, ambient ===== */
+  Object.assign(PRESETS, {
+    lineReveal: { dur: 1.4, apply: (el,p,c) => {
+      if(!el.dataset.lrInit){
+        el.dataset.lrInit='1';
+        const lines = el.innerHTML.split(/<br\s*\/?>/i);
+        el.innerHTML = lines.map(seg => '<span class="lr-line" style="display:block;overflow:hidden;padding-bottom:0.04em"><span class="lr-inner" style="display:inline-block;transform:translateY(110%);will-change:transform">'+seg+'</span></span>').join('');
+        el.dataset.lrN = el.querySelectorAll('.lr-inner').length;
+      }
+      el.style.opacity=1;
+      const n=parseInt(el.dataset.lrN,10), stagger=0.16, span=(1-(n-1)*stagger);
+      el.querySelectorAll('.lr-inner').forEach((inner,i)=>{
+        const lp=Math.max(0,Math.min(1,(p-i*stagger)/span)), e=E.outQuint(lp);
+        inner.style.transform='translateY('+((1-e)*110)+'%)';
+      });
+    }},
+    wordSwap: { dur: 3.0, apply: (el,p,c) => {
+      if(!el.dataset.wsInit){
+        el.dataset.wsInit='1'; el.style.position='relative'; el.style.minHeight='1.1em';
+        const words=(el.dataset.words||el.textContent).split('|').map(w=>w.trim());
+        el.dataset.wsN=words.length;
+        el.innerHTML=words.map((w,i)=>'<span class="ws-w" data-i="'+i+'" style="position:absolute;left:0;right:0;top:0;opacity:0;will-change:transform,opacity">'+w+'</span>').join('');
+      }
+      el.style.opacity=1;
+      const n=parseInt(el.dataset.wsN,10), seg=1/n, active=Math.min(n-1,Math.floor(p/seg)), local=(p-active*seg)/seg;
+      el.querySelectorAll('.ws-w').forEach((w,i)=>{
+        if(i!==active){ w.style.opacity=0; w.style.transform='scale(0.8)'; return; }
+        let o,sc;
+        if(local<0.3){ const e=E.outBack(local/0.3); o=e; sc=0.7+0.3*e; }
+        else if(local>0.82 && i<n-1){ const e=(local-0.82)/0.18; o=1-e; sc=1+0.15*e; }
+        else { o=1; sc=1; }
+        w.style.opacity=o; w.style.transform='scale('+sc+')';
+      });
+    }},
+    underlineDraw: { dur: 0.7, apply: (el,p,c) => { _annDraw(el,'underline'); el.style.opacity=1; _annStroke(el,(c.ease||E.outCubic)(p)); }},
+    circleScribble:{ dur: 0.9, apply: (el,p,c) => { _annDraw(el,'circle');    el.style.opacity=1; _annStroke(el,(c.ease||E.outCubic)(p)); }},
+    boxDraw:       { dur: 0.8, apply: (el,p,c) => { _annDraw(el,'box');       el.style.opacity=1; _annStroke(el,(c.ease||E.outCubic)(p)); }},
+    strikethrough: { dur: 0.5, apply: (el,p,c) => { _annDraw(el,'strike');    el.style.opacity=1; _annStroke(el,(c.ease||E.outCubic)(p)); }},
+    aurora: { dur: 9999, apply: (el,p,c) => {
+      el.style.opacity=Math.min(1,p*40); const t=c.time||0;
+      const a1=(50+Math.sin(t*0.13)*30)+'% '+(40+Math.cos(t*0.11)*25)+'%';
+      const a2=(50+Math.cos(t*0.09)*35)+'% '+(60+Math.sin(t*0.14)*22)+'%';
+      const a3=(30+Math.sin(t*0.07)*25)+'% '+(70+Math.cos(t*0.10)*20)+'%';
+      const c1=el.dataset.c1||'var(--accent,#7C5CFF)', c2=el.dataset.c2||'var(--accent2,#19E3B1)', c3=el.dataset.c3||'var(--accent3,#FF5C8A)';
+      el.style.backgroundImage='radial-gradient(40% 40% at '+a1+', '+c1+', transparent 70%),radial-gradient(45% 45% at '+a2+', '+c2+', transparent 70%),radial-gradient(35% 35% at '+a3+', '+c3+', transparent 70%)';
+      el.style.filter='blur(60px) saturate(1.1)';
+    }},
+    constellation: { dur: 9999, apply: (el,p,c) => {
+      if(el.tagName!=='CANVAS') return;
+      if(!el.dataset.cInit){
+        el.dataset.cInit='1'; el.width=el.offsetWidth||1920; el.height=el.offsetHeight||1080;
+        const N=parseInt(el.dataset.count||'60',10), W=el.width, H=el.height;
+        el._pts=Array.from({length:N},(_,i)=>{ const s1=(i*9301+49297)%233280/233280, s2=(i*4099+7919)%233280/233280; return {x:s1*W,y:s2*H,vx:(s1-0.5)*14,vy:(s2-0.5)*14}; });
+        el._lastT=c.time||0;
+      }
+      el.style.opacity=Math.min(1,p*40);
+      const g=el.getContext('2d'), W=el.width, H=el.height, t=c.time||0;
+      let dt=t-(el._lastT||t); if(dt<0||dt>0.2) dt=0.016; el._lastT=t;
+      const col=el.dataset.color||'124,92,255', pts=el._pts;
+      g.clearRect(0,0,W,H);
+      for(const pt of pts){ pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; if(pt.x<0||pt.x>W)pt.vx*=-1; if(pt.y<0||pt.y>H)pt.vy*=-1; pt.x=Math.max(0,Math.min(W,pt.x)); pt.y=Math.max(0,Math.min(H,pt.y)); }
+      g.strokeStyle='rgba('+col+',0.18)'; g.lineWidth=1.5;
+      for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){ const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.hypot(dx,dy); if(d<220){ g.globalAlpha=(1-d/220)*0.6; g.beginPath(); g.moveTo(pts[i].x,pts[i].y); g.lineTo(pts[j].x,pts[j].y); g.stroke(); } }
+      g.globalAlpha=1; g.fillStyle='rgba('+col+',0.9)';
+      for(const pt of pts){ g.beginPath(); g.arc(pt.x,pt.y,3,0,6.283); g.fill(); }
+    }},
+  });
+
+  function _annDraw(el, kind){
+    if(el.dataset.annInit) return; el.dataset.annInit='1';
+    if(getComputedStyle(el).position==='static') el.style.position='relative';
+    const w=el.offsetWidth||200, h=el.offsetHeight||60;
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 '+w+' '+h);
+    svg.style.cssText='position:absolute;left:-6%;top:-12%;width:112%;height:128%;overflow:visible;pointer-events:none;z-index:5';
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    const col=el.dataset.annColor||'var(--accent,#7C5CFF)';
+    const sw=parseFloat(el.dataset.annWeight||((kind==='underline'||kind==='strike')?'5':'4'));
+    let d;
+    if(kind==='underline'){ const y=h*0.96; d='M '+(w*0.02)+' '+y+' C '+(w*0.3)+' '+(y+4)+', '+(w*0.6)+' '+(y-5)+', '+(w*0.98)+' '+(y-1); }
+    else if(kind==='strike'){ const y=h*0.52; d='M '+(w*0.02)+' '+(y+2)+' C '+(w*0.35)+' '+(y-3)+', '+(w*0.65)+' '+(y+4)+', '+(w*0.98)+' '+(y-1); }
+    else if(kind==='box'){ const r=10; d='M '+r+' 2 L '+(w-r)+' 4 Q '+w+' 2 '+w+' '+r+' L '+(w-2)+' '+(h-r)+' Q '+w+' '+h+' '+(w-r)+' '+(h-2)+' L '+r+' '+(h-3)+' Q 2 '+h+' 2 '+(h-r)+' L 4 '+r+' Q 2 2 '+r+' 2 Z'; }
+    else { const cx=w/2, cy=h/2, rx=w*0.56, ry=h*0.62; d='M '+(cx-rx*0.3)+' '+(cy+ry)+' C '+(cx-rx)+' '+(cy+ry)+', '+(cx-rx)+' '+(cy-ry)+', '+cx+' '+(cy-ry*0.95)+' C '+(cx+rx)+' '+(cy-ry)+', '+(cx+rx)+' '+(cy+ry)+', '+(cx-rx*0.1)+' '+(cy+ry*0.96)+' C '+(cx-rx*0.8)+' '+(cy+ry*0.8)+', '+(cx-rx*0.85)+' '+(cy-ry*0.4)+', '+(cx-rx*0.2)+' '+(cy-ry*0.7); }
+    path.setAttribute('d',d); path.setAttribute('fill','none'); path.setAttribute('stroke',col);
+    path.setAttribute('stroke-width',sw); path.setAttribute('stroke-linecap','round'); path.setAttribute('stroke-linejoin','round');
+    svg.appendChild(path); el.appendChild(svg); el._annPath=path;
+    try{ el._annLen=path.getTotalLength(); }catch(e){ el._annLen=600; }
+  }
+  function _annStroke(el, e){ const path=el._annPath; if(!path) return; const len=el._annLen; path.style.strokeDasharray=len; path.style.strokeDashoffset=len*(1-e); }
+
+  const EXITS = {
+    fadeOut:      (el,e)=>{ el.style.opacity=1-e; },
+    slideOutLeft: (el,e)=>{ el.style.opacity=1-e; el.style.transform='translateX('+(-e*140)+'px)'; },
+    slideOutRight:(el,e)=>{ el.style.opacity=1-e; el.style.transform='translateX('+(e*140)+'px)'; },
+    slideOutUp:   (el,e)=>{ el.style.opacity=1-e; el.style.transform='translateY('+(-e*140)+'px)'; },
+    slideOutDown: (el,e)=>{ el.style.opacity=1-e; el.style.transform='translateY('+(e*140)+'px)'; },
+    scaleOut:     (el,e)=>{ el.style.opacity=1-e; el.style.transform='scale('+(1-e*0.25)+')'; },
+    blurOut:      (el,e)=>{ el.style.opacity=1-e; el.style.filter='blur('+(e*22)+'px)'; },
+  };
+
   const LOOPS = {
     float:   (t,amp,per) => `translateY(${Math.sin(t/per*Math.PI*2)*amp}px)`,
     sway:    (t,amp,per) => `rotate(${Math.sin(t/per*Math.PI*2)*amp}deg)`,
@@ -316,6 +417,7 @@
   let deck, allSlides=[], currentSlide=0, rafId=0;
   let voAudio=null;
   const ANIMS=[]; const LOOP_ELS=[];
+  let EXIT_SCHED=[];
   let analyser=null, audioCtx=null, freqData=null;
 
   /* Synthetic clock (preview without audio) */
@@ -371,6 +473,7 @@
     // Continuous loop registered to start after entrance settles
     if (el.dataset.loop) {
       LOOP_ELS.push({ el, type:el.dataset.loop, amp:parseFloat(el.dataset.loopAmp||'10'), per:parseFloat(el.dataset.loopPeriod||'3'), startAt:t+dur, baseTransform:'' });
+    if(el.dataset.exit && EXITS[el.dataset.exit]){ let xt; if(el.dataset.exitT!==undefined) xt=parseFloat(el.dataset.exitT); else if(el.dataset.exitAt!==undefined) xt=cueTime+parseFloat(el.dataset.exitAt); else xt=t+dur+2; EXIT_SCHED.push({el,t:xt,dur:el.dataset.exitDur!==undefined?parseFloat(el.dataset.exitDur):0.7,fx:EXITS[el.dataset.exit],ease:resolveEase(el)}); }
     }
   }
 
@@ -419,6 +522,7 @@
         a.el.classList.add('anim-played');
       }
     }
+    for(const x of EXIT_SCHED){ if(time<x.t) continue; const e=(x.ease||EASE.outCubic)(Math.max(0,Math.min(1,(time-x.t)/x.dur))); x.fx(x.el,e); }
     applyLoops(time);
   }
 
