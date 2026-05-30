@@ -8,11 +8,13 @@ A skill for [Claude Code](https://claude.com/claude-code) that produces playable
 input → /storyboard → concept.md → script.md → storyboard.html → record → video
 ```
 
+**▶ See the flagship reel:** [`examples/showcase/showcase.mp4`](examples/showcase/showcase.mp4) — a ~90s deck that demos the entire engine (cinematic transitions, charts, code typing, annotations, kinetic type, confetti/badges, a UI demo, and a CTA). Or open [`examples/showcase/showcase.html`](examples/showcase/showcase.html) and press Space.
+
 ---
 
 ## Why this exists
 
-Most "AI video" tools either compose stock footage or render boring slides. This one treats Claude as the *animator*: it reads your input, drafts a concept, writes ElevenLabs-ready narration, then **choreographs every beat** using a 36-preset audio-driven animation engine, scene transitions, and per-word visual hits — all inside a self-contained 1920×1080 HTML file you can screen-record.
+Most "AI video" tools either compose stock footage or render boring slides. This one treats Claude as the *animator*: it reads your input, drafts a concept, writes ElevenLabs-ready narration, then **choreographs every beat** using a ~95-preset audio-driven animation engine, 17 cinematic scene transitions, and per-word visual hits — all inside a self-contained 1920×1080 HTML file you can screen-record.
 
 The "playable document" pattern is the unlock. Animations sync to your voice-over by **audio clock**, not by counting frames. Scrub the audio and everything redraws. Calibrate by ear, or extract sample-accurate cues from an AAF.
 
@@ -22,16 +24,17 @@ The "playable document" pattern is the unlock. Animations sync to your voice-ove
 - **`/storyboard adopt <html-or-url>`** — wrap your existing HTML for narration without touching its styles
 - **`/storyboard generate`** — opt-in ElevenLabs call that renders the MP3 + word timestamps and writes exact `TIMINGS` (no AAF needed)
 - **`/storyboard render`** — opt-in headless-Chromium + ffmpeg render to a finished 1920×1080 MP4. No manual screen capture needed.
-- **36 animation presets** driven by the audio clock: spring, anticipate, overshoot, bounce, ken-burns, typewriter, wordReveal, gradientSweep, counter, pathdraw, motionPath, particles, confetti, Lottie support, more
-- **6 scene transitions**: cut, dissolve, whipPan, wipe, flash, blocks
+- **~95 animation presets** driven by the audio clock: spring, anticipate, overshoot, bounce, ken-burns, typewriter, wordReveal/wordSwap, letterSpring, scramble, counter, charts (barGrow/gauge/pieSlice/chartArea), connectorDraw diagrams, syntax-highlighted codeType, hand-drawn annotations (circleScribble/underlineDraw/strikethrough), a synthetic-cursor UI demo (cursorTour/typeInto/clickRipple), a fun pack (confettiBurst, fireworks, badgeUnlock, ratingStars, floatEmojis, trophyShine…), cinematic grade (rackFocus/vignette/filmGrain/multiplane), Lottie support, and more
+- **17 cinematic scene transitions** (no scroll): cut, crossDissolve, pushLeft/Right/Up/Down, coverLeft, revealRight, zoomIn/Out, flip3D, spinZoom, whipPan, blurThrough, irisOpen, barWipe, glitch, flash, blocks
+- **Composable motion**: `data-stagger` cascades, `data-then` chains, named `data-ease`, physical `data-spring`, ambient `data-loop`, and `data-exit` — choreograph rich sequences from a handful of attributes
 - **Calibration tool baked into every deck** — press `T` to enter calibration, tap `M` at each slide change, `A` to apply, `E` to export. Hash-aware auto-save means your tuning persists across reloads but invalidates when you re-extract from a new audio source.
 - **Sample-accurate sync** from any DAW via the `aaf_to_timings.py` extractor (Pro Tools, Logic, Reaper, Premiere — anything that exports AAF)
 - **Preview before VO exists** — synthetic clock activates when no audio is loaded so you can review the deck during authoring
 
 ## See it in action
 
-- **`examples/showcase/`** — the v0.3 capability reel. Ten beats that each demo a new power: per-letter gradient titles, one-instruction staggers, 3D card flips, data-viz charts that draw on the clock, a shared-element morph across a cut, and a keyframed camera push-in. Open `examples/showcase/showcase.html` (synthetic clock plays it with no audio) or browse the `frame_*.png` captures.
-- **`examples/stripe-radar/`** — a complete 150-second product pitch: 16 presets, AAF-driven sync, full concept → script → build → render pipeline.
+- **`examples/showcase/`** — the **flagship reel** ([`showcase.mp4`](examples/showcase/showcase.mp4)). Fourteen beats in ~90 seconds, each demoing a different power: a per-letter spring title, `wordSwap` phrase hits, one-instruction staggers, 3D card flips, data-viz charts + a gauge that draw on the clock, a flow diagram with auto-arrowheads, syntax-highlighted code typing, hand-drawn annotations, kinetic masked type, a confetti-and-badge payoff, rating stars + floating reactions, and a synthetic-cursor UI demo — each slide arriving on a different cinematic transition. Open `examples/showcase/showcase.html` (the synthetic clock plays the whole thing with no audio) or watch the rendered MP4.
+- **`examples/stripe-radar/`** — a complete 150-second product pitch: AAF-driven sync, full concept → script → build → render pipeline.
 
 ## Install
 

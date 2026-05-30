@@ -1,257 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Storyboard Engine — Showcase</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:'Space Grotesk',system-ui,sans-serif}
-    .stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .deck{width:1920px;height:1080px;transform-origin:center;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none;will-change:transform;backface-visibility:hidden}
-    .deck::-webkit-scrollbar{display:none}
-
-    :root{
-      --bg:#05060a; --ink:#F4F6FF; --ink-soft:#9aa3c0;
-      --accent:#7C5CFF; --accent2:#19E3B1; --accent3:#FF5C8A; --gold:#FFD166;
-      --highlight:#FFD166;
-    }
-
-    .slide{width:1920px;height:1080px;scroll-snap-align:start;scroll-snap-stop:always;position:relative;overflow:hidden;
-      background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:110px;contain:layout paint;transform:translateZ(0)}
-    .anim{opacity:0;will-change:transform,opacity,filter}
-
-    .gradient-fill{background:linear-gradient(110deg,var(--accent),var(--accent2),var(--accent3));background-size:240% 100%;background-position:0% 50%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
-
-    /* glow grid backdrop */
-    .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,255,.06) 1px,transparent 1px);background-size:64px 64px;z-index:0}
-    .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;z-index:0}
-
-    .center{position:relative;z-index:2;text-align:center;max-width:1500px}
-    .eyebrow{font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.4em;text-transform:uppercase;color:var(--accent2);margin-bottom:44px}
-    .mega{font-size:170px;line-height:.95;font-weight:700;letter-spacing:-.04em}
-    .big{font-size:120px;line-height:1.0;font-weight:700;letter-spacing:-.03em}
-    .h2{font-size:84px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin-bottom:56px}
-    .sub{font-size:34px;line-height:1.4;color:var(--ink-soft);margin-top:40px;max-width:1100px;margin-left:auto;margin-right:auto}
-
-    /* chips row (stagger demo) */
-    .chips{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-top:56px}
-    .chip{font-family:'JetBrains Mono',monospace;font-size:24px;padding:16px 30px;border-radius:999px;border:1px solid rgba(124,92,255,.4);background:rgba(124,92,255,.10);color:var(--ink)}
-
-    /* 3D card row (flip demo) */
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;width:100%;max-width:1500px}
-    .card3d{aspect-ratio:4/5;border-radius:24px;padding:44px;display:flex;flex-direction:column;justify-content:flex-end;
-      background:linear-gradient(160deg,rgba(124,92,255,.18),rgba(25,227,177,.10));border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 80px rgba(0,0,0,.5)}
-    .card3d .k{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--accent2);letter-spacing:.1em}
-    .card3d .t{font-size:40px;font-weight:600;margin-top:14px;line-height:1.1}
-
-    /* data-viz: bar chart */
-    .chart{width:100%;max-width:1400px}
-    .bars{display:flex;align-items:flex-end;gap:48px;height:560px;padding:0 40px;border-bottom:2px solid rgba(255,255,255,.12)}
-    .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
-    .bar{width:100%;border-radius:14px 14px 0 0;background:linear-gradient(180deg,var(--accent),var(--accent3))}
-    .bar.b2{background:linear-gradient(180deg,var(--accent2),var(--accent))}
-    .bar-label{font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--ink-soft);margin-top:22px}
-    .bar-val{font-size:30px;font-weight:700;margin-bottom:16px}
-
-    /* data-viz: donut */
-    .donut-wrap{display:flex;align-items:center;gap:90px;width:100%;max-width:1400px;justify-content:center}
-    .donut{width:460px;height:460px;transform:rotate(-90deg)}
-    .donut .track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:38}
-    .donut .arc{fill:none;stroke:var(--accent2);stroke-width:38;stroke-linecap:round}
-    .donut-num{font-size:150px;font-weight:700;font-variant-numeric:tabular-nums}
-
-    /* shared element */
-    .hero-card{width:560px;border-radius:28px;padding:48px;background:linear-gradient(150deg,var(--accent),var(--accent3));box-shadow:0 30px 90px rgba(124,92,255,.5)}
-    .hero-card .label{font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.2em;opacity:.85}
-    .hero-card .name{font-size:64px;font-weight:700;line-height:1.0;margin-top:14px}
-
-    /* camera scene */
-    .camera{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-origin:center}
-    .map{position:relative;width:1400px;height:760px;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(circle at 30% 40%,rgba(124,92,255,.2),transparent 40%),radial-gradient(circle at 70% 70%,rgba(25,227,177,.18),transparent 40%)}
-    .pin{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--accent3);box-shadow:0 0 0 8px rgba(255,92,138,.25)}
-
-    .cta-pill{display:inline-block;margin-top:60px;padding:30px 60px;border-radius:18px;font-size:34px;font-weight:700;color:#06070c;background:var(--accent2)}
-
-    /* transitions overlay default */
-    .transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
-    .transition-overlay.dissolve{background:#05060a}.transition-overlay.flash{background:#fff}
-    .transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#05060a 50%,transparent);transform:translateX(-100%)}
-    .transition-overlay.wipe{background:var(--accent);clip-path:inset(0 100% 0 0)}.transition-overlay.blocks{background:var(--accent3)}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboard Engine — Flagship Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:'Space Grotesk',system-ui,sans-serif}
+.stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
+:root{--bg:#05060a;--ink:#F4F6FF;--ink-soft:#9aa3c0;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166;--highlight:#FFD166}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:110px;contain:layout paint}
+.anim{opacity:0;will-change:transform,opacity,filter}
+.gradient-fill{background:linear-gradient(110deg,var(--accent),var(--accent2),var(--accent3));background-size:240% 100%;background-position:0% 50%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,255,.06) 1px,transparent 1px);background-size:64px 64px;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0}
+.bleed{position:absolute;inset:0;z-index:0}
+.center{position:relative;z-index:2;text-align:center;max-width:1560px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent2);margin-bottom:46px}
+.mega{font-size:184px;line-height:.94;font-weight:700;letter-spacing:-.04em}
+.big{font-size:120px;line-height:1.02;font-weight:700;letter-spacing:-.03em}
+.h2{font-size:88px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin-bottom:54px}
+.sub{font-size:36px;line-height:1.4;color:var(--ink-soft);margin-top:42px;max-width:1150px;margin-left:auto;margin-right:auto}
+.chips{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-top:60px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:25px;padding:16px 30px;border-radius:999px;border:1px solid rgba(124,92,255,.45);background:rgba(124,92,255,.10);color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:44px;width:100%;max-width:1560px}
+.card3d{aspect-ratio:4/5;border-radius:26px;padding:46px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(160deg,rgba(124,92,255,.20),rgba(25,227,177,.10));border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.card3d .k{font-family:'JetBrains Mono',monospace;font-size:21px;color:var(--accent2);letter-spacing:.1em}
+.card3d .t{font-size:42px;font-weight:600;margin-top:14px;line-height:1.1}
+.chart{width:100%;max-width:1500px}
+.bars{display:flex;align-items:flex-end;gap:54px;height:560px;padding:0 50px;border-bottom:2px solid rgba(255,255,255,.12)}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar{width:100%;border-radius:16px 16px 0 0;background:linear-gradient(180deg,var(--accent),var(--accent3))}
+.bar.b2{background:linear-gradient(180deg,var(--accent2),var(--accent))}
+.bar-label{font-family:'JetBrains Mono',monospace;font-size:26px;color:var(--ink-soft);margin-top:24px}
+.bar-val{font-size:34px;font-weight:700;margin-bottom:18px}
+.code{background:#0b1020;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:54px;font:36px/1.6 'JetBrains Mono',monospace;color:#E2E8F0;width:1500px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.ann{font-size:80px;font-weight:700;line-height:1.8;text-align:center}
+.kw{color:var(--accent2)}
+.flow-svg{width:1500px;height:360px;overflow:visible}
+.node{font-size:36px}
+.app{width:1100px;height:600px;background:#0b0e1a;border:1px solid rgba(255,255,255,.12);border-radius:18px;position:relative;padding:46px}
+.field{width:640px;height:66px;border:2px solid rgba(255,255,255,.2);border-radius:12px;font-size:28px;color:#fff;background:#0c0e16;padding:0 20px;display:flex;align-items:center;color:#9aa3c0}
+.btn{margin-top:34px;width:280px;height:68px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700}
+.cta-pill{display:inline-block;margin-top:60px;padding:32px 64px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2)}
+.transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
+.transition-overlay.dissolve{background:#05060a}.transition-overlay.flash{background:#fff}
+.transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#05060a 50%,transparent);transform:translateX(-100%)}
+.transition-overlay.wipe{background:var(--accent);clip-path:inset(0 100% 0 0)}.transition-overlay.blocks{background:var(--accent3)}
+</style>
 </head>
 <body>
-  <div class="stage">
-    <div class="deck" id="deck">
+<div class="stage"><div class="deck" id="deck">
 
-      <!-- 1 — HERO: letterSpring + gradientSweep + ambient float -->
-      <section class="slide" data-slide="1" data-transition-in="cut">
-        <div class="grid-bg"></div>
-        <div class="orb" style="width:700px;height:700px;background:var(--accent);top:-200px;left:-150px"></div>
-        <div class="orb" style="width:600px;height:600px;background:var(--accent2);bottom:-200px;right:-100px"></div>
-        <div class="center">
-          <p class="eyebrow anim" data-anim="scramble" data-t-rel="0.2" data-dur="1.2">storyboard engine · v0.3</p>
-          <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="1.2" data-dur="1.8" data-loop="float" data-loop-amp="10" data-loop-period="4">Motion that<br>composes.</h1>
-          <p class="sub anim" data-anim="fadeUp" data-t-rel="3.0" data-dur="1.0" data-ease="outBack">Stagger. Chain. Spring. Loop. 3D. Charts. Camera. One audio clock.</p>
-        </div>
-      </section>
-
-      <!-- 2 — STAGGER: chips cascade in via one container instruction -->
-      <section class="slide" data-slide="2" data-transition-in="pushLeft">
-        <div class="grid-bg"></div>
-        <div class="center">
-          <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.8">One line staggers a whole row.</h2>
-          <div class="chips anim-group" data-anim="tiltIn" data-stagger="0.12" data-t-rel="1.0" data-dur="0.8">
-            <span class="chip">data-stagger</span><span class="chip">data-then</span><span class="chip">data-ease</span>
-            <span class="chip">data-spring</span><span class="chip">data-loop</span><span class="chip">3D flips</span>
-            <span class="chip">bar charts</span><span class="chip">donuts</span><span class="chip">shared-element</span>
-            <span class="chip">camera rig</span><span class="chip">beat-sync</span><span class="chip">scramble</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3 — 3D card flips, staggered -->
-      <section class="slide" data-slide="3" data-transition-in="flip3D">
-        <div class="grid-bg"></div>
-        <div class="cards anim-group" data-anim="flipInY" data-stagger="0.18" data-t-rel="0.4" data-dur="1.1">
-          <div class="card3d"><span class="k">PRINCIPLE 01</span><span class="t">Anticipation before action</span></div>
-          <div class="card3d"><span class="k">PRINCIPLE 02</span><span class="t">Follow-through &amp; overlap</span></div>
-          <div class="card3d"><span class="k">PRINCIPLE 03</span><span class="t">Slow in, slow out</span></div>
-        </div>
-      </section>
-
-      <!-- 4 — DATA-VIZ: bar chart grows on the clock -->
-      <section class="slide" data-slide="4" data-transition-in="zoomIn">
-        <div class="grid-bg"></div>
-        <div class="chart">
-          <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.8" style="text-align:center">Bars grow in sync with the voice.</h2>
-          <div class="bars">
-            <div class="bar-col">
-              <span class="bar-val anim" data-anim="counter" data-t-rel="1.2" data-dur="1.4" data-to="38" data-suffix="%">0</span>
-              <div class="bar anim" data-anim="barGrow" data-t-rel="1.0" data-dur="1.2" data-ease="outBack" style="height:38%"></div>
-              <span class="bar-label">2023</span>
-            </div>
-            <div class="bar-col">
-              <span class="bar-val anim" data-anim="counter" data-t-rel="1.5" data-dur="1.4" data-to="61" data-suffix="%">0</span>
-              <div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.3" data-dur="1.2" data-ease="outBack" style="height:61%"></div>
-              <span class="bar-label">2024</span>
-            </div>
-            <div class="bar-col">
-              <span class="bar-val anim" data-anim="counter" data-t-rel="1.8" data-dur="1.4" data-to="89" data-suffix="%">0</span>
-              <div class="bar anim" data-anim="barGrow" data-t-rel="1.6" data-dur="1.2" data-ease="outBack" style="height:89%"></div>
-              <span class="bar-label">2025</span>
-            </div>
-            <div class="bar-col">
-              <span class="bar-val anim" data-anim="counter" data-t-rel="2.1" data-dur="1.4" data-to="100" data-suffix="%">0</span>
-              <div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.9" data-dur="1.2" data-ease="outBack" style="height:100%"></div>
-              <span class="bar-label">2026</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5 — DATA-VIZ: donut sweep + counter -->
-      <section class="slide" data-slide="5" data-transition-in="irisOpen">
-        <div class="grid-bg"></div>
-        <div class="donut-wrap">
-          <svg class="donut" viewBox="0 0 400 400">
-            <circle class="track" cx="200" cy="200" r="160"></circle>
-            <circle class="arc anim" data-anim="donutSweep" data-t-rel="0.6" data-dur="1.8" data-pct="73" cx="200" cy="200" r="160"></circle>
-          </svg>
-          <div>
-            <div class="donut-num gradient-fill anim" data-anim="counter" data-t-rel="0.8" data-dur="1.8" data-to="73" data-suffix="%">0</div>
-            <p class="sub anim" data-anim="wordReveal" data-t-rel="1.6" data-dur="1.6" style="margin-left:0;text-align:left">of the work is choosing the right curve. The engine ships 20 named eases plus tunable springs.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- 6 — SHARED ELEMENT (card appears here, morphs to slide 7) -->
-      <section class="slide" data-slide="6" data-transition-in="pushUp">
-        <div class="grid-bg"></div>
-        <div class="center">
-          <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">watch this card</p>
-          <div class="hero-card anim" data-anim="spring" data-t-rel="0.8" data-dur="1.2" data-shared-id="hero" style="margin:40px auto 0">
-            <span class="label">SHARED ELEMENT</span>
-            <div class="name">It morphs across the cut.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 7 — SHARED ELEMENT lands top-left, content flows around -->
-      <section class="slide" data-slide="7" data-transition-in="crossDissolve">
-        <div class="grid-bg"></div>
-        <div style="position:relative;z-index:2;width:100%;max-width:1500px">
-          <div class="hero-card" data-shared-id="hero" style="width:380px;transform:scale(.7);transform-origin:top left">
-            <span class="label">SHARED ELEMENT</span>
-            <div class="name" style="font-size:44px">Same node. New frame.</div>
-          </div>
-          <h2 class="h2 anim" data-anim="slideInRight" data-t-rel="0.9" data-dur="1.0" style="margin-top:60px">FLIP technique — no duplicate markup.</h2>
-        </div>
-      </section>
-
-      <!-- 8 — CAMERA RIG: push in on a pin -->
-      <section class="slide" data-slide="8" data-transition-in="zoomOut">
-        <div class="grid-bg"></div>
-        <div class="camera" data-camera="0=>scale:1,x:0,y:0; 2.5=>scale:1.8,x:-260,y:-120; 5.5=>scale:1,x:0,y:0">
-          <div class="map">
-            <div class="pin" style="left:30%;top:38%"></div>
-            <div class="pin" style="left:62%;top:64%;background:var(--accent2);box-shadow:0 0 0 8px rgba(25,227,177,.25)"></div>
-            <div class="pin" style="left:48%;top:30%;background:var(--gold);box-shadow:0 0 0 8px rgba(255,209,102,.25)"></div>
-          </div>
-        </div>
-        <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.3" data-dur="0.6" style="position:absolute;bottom:90px;left:0;right:0;z-index:3">camera rig · dolly + pan keyframes</p>
-      </section>
-
-      <!-- 9 — CHAIN + LOOP: entrance then continuous breathe, beat-reactive -->
-      <section class="slide" data-slide="9" data-transition-in="glitch">
-        <div class="grid-bg"></div>
-        <div class="orb" style="width:760px;height:760px;background:var(--accent3);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
-        <div class="center">
-          <h2 class="big anim" data-anim="scaleIn" data-t-rel="0.4" data-dur="1.0" data-then="pulse@1.6" data-loop="breathe" data-loop-amp="3" data-loop-period="3.5">Enter. Then live.</h2>
-          <p class="sub anim" data-anim="fadeUp" data-t-rel="1.4" data-dur="0.9">data-then chains the next move. data-loop keeps it breathing. data-loop="beat" reacts to the music.</p>
-        </div>
-      </section>
-
-      <!-- 10 — CTA -->
-      <section class="slide" data-slide="10" data-transition-in="spinZoom">
-        <div class="grid-bg"></div>
-        <div class="orb" style="width:680px;height:680px;background:var(--accent);bottom:-220px;left:50%;transform:translateX(-50%)"></div>
-        <div class="center">
-          <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">open source · MIT</p>
-          <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.7" data-dur="1.6">Make the reel.</h1>
-          <p class="sub anim" data-anim="wordReveal" data-t-rel="2.2" data-dur="1.6">Claude is the animator. You bring the idea.</p>
-          <span class="cta-pill anim" data-anim="spring" data-t-rel="3.4" data-dur="1.0" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
-        </div>
-      </section>
-
+  <!-- 1 HERO -->
+  <section class="slide" data-slide="1" data-transition-in="cut">
+    <div class="grid-bg"></div>
+    <div class="orb" style="width:760px;height:760px;background:var(--accent);top:-220px;left:-160px"></div>
+    <div class="orb" style="width:640px;height:640px;background:var(--accent2);bottom:-220px;right:-120px"></div>
+    <div class="center">
+      <p class="eyebrow anim" data-anim="scramble" data-t-rel="0.2" data-dur="1.2">storyboard · for claude code</p>
+      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="1.2" data-dur="1.8" data-loop="float" data-loop-amp="9" data-loop-period="4.5">Ideas into<br>motion.</h1>
+      <p class="sub anim" data-anim="fadeUp" data-t-rel="3.2" data-dur="1.0" data-ease="outBack">A URL or a brief becomes a narrated, screen-recordable video.</p>
     </div>
-  </div>
+  </section>
 
-  <div class="transition-overlay" id="transitionOverlay"></div>
-  <audio id="voAudio" preload="metadata" src="VO Showcase.mp3"></audio>
+  <!-- 2 wordSwap tagline -->
+  <section class="slide" data-slide="2" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div class="center"><h1 class="mega gradient-fill anim" data-anim="wordSwap" data-t-rel="0.3" data-dur="4.2" data-words="Concept.|Script.|Reel."></h1></div>
+  </section>
 
-  <script src="../../skill/storyboard-engine.js"></script>
-  <script>
-    // Declare TIMINGS as a const so the timing tools (audit_deck.py,
-    // aaf_to_timings.py, elevenlabs_generate.py, compress_anim_timings.py)
-    // can read/rewrite it, then hand it to the engine.
-    const TIMINGS = [
-      { time:  0.0, slide:  1 },
-      { time:  9.0, slide:  2 },
-      { time: 17.0, slide:  3 },
-      { time: 25.0, slide:  4 },
-      { time: 34.0, slide:  5 },
-      { time: 43.0, slide:  6 },
-      { time: 49.0, slide:  7 },
-      { time: 56.0, slide:  8 },
-      { time: 65.0, slide:  9 },
-      { time: 73.0, slide: 10 }
-    ];
-    const SLIDE_LABELS = ['Hero','Stagger','3D flips','Bar chart','Donut','Shared element','Shared lands','Camera rig','Chain + loop','CTA'];
-    Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 82 });
-  </script>
+  <!-- 3 stagger chips -->
+  <section class="slide" data-slide="3" data-transition-in="pushLeft">
+    <div class="grid-bg"></div>
+    <div class="center">
+      <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.8">95 presets. 17 transitions. One audio clock.</h2>
+      <div class="chips anim-group" data-anim="tiltIn" data-stagger="0.10" data-t-rel="1.0" data-dur="0.8">
+        <span class="chip">stagger</span><span class="chip">spring</span><span class="chip">3D flip</span><span class="chip">charts</span>
+        <span class="chip">diagrams</span><span class="chip">code typing</span><span class="chip">annotations</span><span class="chip">confetti</span>
+        <span class="chip">camera rig</span><span class="chip">cinematic grade</span><span class="chip">beat-sync</span><span class="chip">UI demos</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 3D flip cards -->
+  <section class="slide" data-slide="4" data-transition-in="flip3D">
+    <div class="grid-bg"></div>
+    <div class="cards anim-group" data-anim="flipInY" data-stagger="0.18" data-t-rel="0.4" data-dur="1.1">
+      <div class="card3d"><span class="k">01 · COMPOSE</span><span class="t">Stagger, chain &amp; spring</span></div>
+      <div class="card3d"><span class="k">02 · DIRECT</span><span class="t">Cinematic transitions</span></div>
+      <div class="card3d"><span class="k">03 · DELIGHT</span><span class="t">Charts, code &amp; confetti</span></div>
+    </div>
+  </section>
+
+  <!-- 5 bar chart -->
+  <section class="slide" data-slide="5" data-transition-in="zoomIn">
+    <div class="grid-bg"></div>
+    <div class="chart">
+      <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.8" style="text-align:center">Data builds as the voice cites it.</h2>
+      <div class="bars">
+        <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.2" data-dur="1.4" data-to="38" data-suffix="%">0</span><div class="bar anim" data-anim="barGrow" data-t-rel="1.0" data-dur="1.2" data-ease="outBack" style="height:38%"></div><span class="bar-label">Q1</span></div>
+        <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.5" data-dur="1.4" data-to="61" data-suffix="%">0</span><div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.3" data-dur="1.2" data-ease="outBack" style="height:61%"></div><span class="bar-label">Q2</span></div>
+        <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.8" data-dur="1.4" data-to="84" data-suffix="%">0</span><div class="bar anim" data-anim="barGrow" data-t-rel="1.6" data-dur="1.2" data-ease="outBack" style="height:84%"></div><span class="bar-label">Q3</span></div>
+        <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="2.1" data-dur="1.4" data-to="100" data-suffix="%">0</span><div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.9" data-dur="1.2" data-ease="outBack" style="height:100%"></div><span class="bar-label">Q4</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 gauge + donut -->
+  <section class="slide" data-slide="6" data-transition-in="irisOpen">
+    <div class="grid-bg"></div>
+    <svg width="1500" height="520" viewBox="0 0 1500 520" style="position:relative;z-index:2">
+      <path d="M 120 470 A 230 230 0 0 1 580 470" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="34"/>
+      <path class="anim" data-anim="chartArea" data-t-rel="0.4" data-dur="1.3" d="M 120 470 A 230 230 0 0 1 580 470" fill="none" stroke="var(--accent2)" stroke-width="34" stroke-linecap="round"/>
+      <g transform="translate(0,160)"><line class="anim" data-anim="gauge" data-t-rel="0.6" data-dur="1.4" data-from="-90" data-to="54" x1="350" y1="310" x2="350" y2="135" stroke="#fff" stroke-width="9" stroke-linecap="round" style="transform-origin:350px 310px"/></g>
+      <circle class="anim" data-anim="pieSlice" data-t-rel="0.7" data-dur="1.4" data-pct="73" cx="1120" cy="250" r="150" fill="none" stroke="var(--accent3)" stroke-width="64" transform="rotate(-90 1120 250)"/>
+      <circle class="anim" data-anim="pieSlice" data-t-rel="1.2" data-dur="1.4" data-pct="27" data-offset="73" cx="1120" cy="250" r="150" fill="none" stroke="var(--accent)" stroke-width="64" transform="rotate(-90 1120 250)"/>
+    </svg>
+  </section>
+
+  <!-- 7 diagram flow -->
+  <section class="slide" data-slide="7" data-transition-in="wipe">
+    <div class="grid-bg"></div>
+    <svg class="flow-svg" style="position:relative;z-index:2">
+      <g class="anim" data-anim="scaleIn" data-t-rel="0.2" data-dur="0.7"><rect x="40" y="130" width="280" height="120" rx="16" fill="rgba(124,92,255,.2)" stroke="var(--accent)" stroke-width="2"/><text class="node" x="180" y="200" fill="#fff" text-anchor="middle">Input</text></g>
+      <path class="anim" data-anim="connectorDraw" data-t-rel="1.0" data-dur="0.7" data-arrow="end" d="M 320 190 L 620 190" fill="none" stroke="var(--accent2)" stroke-width="4"/>
+      <g class="anim" data-anim="scaleIn" data-t-rel="1.5" data-dur="0.7"><rect x="630" y="130" width="280" height="120" rx="16" fill="rgba(25,227,177,.18)" stroke="var(--accent2)" stroke-width="2"/><text class="node" x="770" y="200" fill="#fff" text-anchor="middle">Animate</text></g>
+      <path class="anim" data-anim="connectorDraw" data-t-rel="2.1" data-dur="0.7" data-arrow="end" d="M 910 190 L 1210 190" fill="none" stroke="var(--accent3)" stroke-width="4"/>
+      <g class="anim" data-anim="scaleIn" data-t-rel="2.6" data-dur="0.7"><rect x="1220" y="130" width="240" height="120" rx="16" fill="rgba(255,92,138,.18)" stroke="var(--accent3)" stroke-width="2"/><text class="node" x="1340" y="200" fill="#fff" text-anchor="middle">MP4</text></g>
+    </svg>
+  </section>
+
+  <!-- 8 code typing -->
+  <section class="slide" data-slide="8" data-transition-in="flash">
+    <div class="grid-bg"></div>
+    <div style="position:relative;z-index:2;width:1500px">
+      <pre class="code anim" data-anim="codeType" data-t-rel="0.3" data-dur="3.6">const reel = storyboard(idea)
+  .script({ voice: "Adam" })
+  .animate()      // 95 presets
+  .render();      // -> reel.mp4</pre>
+    </div>
+  </section>
+
+  <!-- 9 annotations -->
+  <section class="slide" data-slide="9" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div class="center ann">
+      Claude is the <span class="kw anim" data-anim="circleScribble" data-t-rel="0.5" data-dur="0.9">animator</span>.<br>
+      Not a <span class="anim" data-anim="strikethrough" data-t-rel="1.6" data-dur="0.5">slideshow</span>.<br>
+      <span class="anim" data-anim="underlineDraw" data-t-rel="2.4" data-dur="0.7">It choreographs every beat.</span>
+    </div>
+  </section>
+
+  <!-- 10 kinetic statement -->
+  <section class="slide" data-slide="10" data-transition-in="whipPan">
+    <div class="grid-bg"></div>
+    <div class="center"><h1 class="big gradient-fill anim" data-anim="lineReveal" data-t-rel="0.3" data-dur="1.8">Every word lands<br>on the beat<br>it's spoken.</h1></div>
+  </section>
+
+  <!-- 11 fun: confetti + badge -->
+  <section class="slide" data-slide="11" data-transition-in="flash">
+    <div class="grid-bg"></div>
+    <div class="bleed anim" data-anim="confettiBurst" data-t-rel="0.1" data-dur="2.0" style="display:flex;align-items:center;justify-content:center"></div>
+    <div class="center">
+      <div class="anim" data-anim="badgeUnlock" data-t-rel="0.3" data-dur="1.5" style="width:240px;height:240px;margin:0 auto 30px;border-radius:50%;background:linear-gradient(140deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:120px">🏆</div>
+      <h2 class="big anim" data-anim="spring" data-t-rel="0.6" data-dur="1.2">Payoff moments pop.</h2>
+    </div>
+  </section>
+
+  <!-- 12 fun: rating + rocket -->
+  <section class="slide" data-slide="12" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div class="bleed anim" data-anim="floatEmojis" data-t-rel="0" data-dur="9999" data-emojis="❤️,⭐,🎉,🔥"></div>
+    <div class="center">
+      <div class="anim" data-anim="ratingStars" data-t-rel="0.3" data-dur="1.3" data-count="5" style="justify-content:center;margin-bottom:20px"></div>
+      <h2 class="big anim" data-anim="fadeUp" data-t-rel="1.4" data-dur="0.9">Dazzle, when it's earned.</h2>
+    </div>
+  </section>
+
+  <!-- 13 UI demo -->
+  <section class="slide" data-slide="13" data-transition-in="pushUp">
+    <div class="grid-bg"></div>
+    <div class="app">
+      <div style="font-size:38px;font-weight:700;margin-bottom:30px">Demo a product — no screen recording</div>
+      <div id="rx-field" class="field">rule name…</div>
+      <div id="rx-btn" class="btn">Ship it</div>
+    </div>
+    <div class="anim" data-anim="cursorTour" data-t-rel="0" data-dur="9999" data-stops="#rx-field@1.2:type=block-card-testing, #rx-btn@4.2:click" style="opacity:0"></div>
+  </section>
+
+  <!-- 14 CTA -->
+  <section class="slide" data-slide="14" data-transition-in="whipPan">
+    <div class="grid-bg"></div>
+    <div class="orb" style="width:700px;height:700px;background:var(--accent);bottom:-240px;left:50%;transform:translateX(-50%)"></div>
+    <div class="bleed anim" data-anim="confettiBurst" data-t-rel="3.4" data-dur="2.2" style="display:flex;align-items:center;justify-content:center"></div>
+    <div class="center">
+      <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">open source · MIT</p>
+      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.7" data-dur="1.6">Make the reel.</h1>
+      <p class="sub anim" data-anim="wordReveal" data-t-rel="2.2" data-dur="1.6">github.com/gRAYESS123/storyboard-claude</p>
+      <span class="cta-pill anim" data-anim="spring" data-t-rel="3.2" data-dur="1.0" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
+    </div>
+  </section>
+
+</div></div>
+
+<div class="transition-overlay" id="transitionOverlay"></div>
+<audio id="voAudio" preload="metadata" src="VO Showcase.mp3"></audio>
+
+<script src="storyboard-engine.js"></script>
+<script>
+const TIMINGS = [
+  { time:  0.0, slide:  1 },
+  { time:  9.0, slide:  2 },
+  { time: 15.0, slide:  3 },
+  { time: 22.0, slide:  4 },
+  { time: 29.0, slide:  5 },
+  { time: 37.0, slide:  6 },
+  { time: 44.0, slide:  7 },
+  { time: 51.0, slide:  8 },
+  { time: 58.0, slide:  9 },
+  { time: 64.0, slide: 10 },
+  { time: 70.0, slide: 11 },
+  { time: 76.0, slide: 12 },
+  { time: 82.0, slide: 13 },
+  { time: 89.0, slide: 14 }
+];
+const SLIDE_LABELS = ['Hero','Concept→Script→Reel','Capabilities','3D cards','Bar chart','Gauge+Donut','Flow','Code typing','Annotations','Kinetic','Confetti+Badge','Rating+Float','UI demo','CTA'];
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 97 });
+</script>
 </body>
 </html>

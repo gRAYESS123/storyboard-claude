@@ -24,11 +24,33 @@ Usage:
 """
 import argparse
 import asyncio
+import http.server
 import shutil
+import socket
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
+
+
+# ---------------------------------------------------------------------------
+# Embedded HTTP server — serves the HTML directory over localhost so
+# headless Chromium can load audio (file:// blocks audio in headless mode)
+# ---------------------------------------------------------------------------
+class _QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *a): pass   # suppress per-request log noise
+
+def _start_server(directory: Path):
+    """Start a temporary HTTP server in a daemon thread. Returns (port, server)."""
+    with socket.socket() as s:
+        s.bind(('', 0))
+        port = s.getsockname()[1]
+    handler = lambda *a, **kw: _QuietHandler(*a, directory=str(directory), **kw)
+    srv = http.server.HTTPServer(('127.0.0.1', port), handler)
+    t = threading.Thread(target=srv.serve_forever, daemon=True)
+    t.start()
+    return port, srv
 
 try:
     from playwright.async_api import async_playwright
@@ -52,14 +74,19 @@ except ImportError:
         )
 
 
-async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str = 'high') -> None:
+async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'high', no_audio: bool = False, duration_override=None) -> None:
     tmp_dir = out_mp4.parent / '.render-tmp'
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(parents=True)
 
+    # Serve the storyboard dir over HTTP so headless Chromium can load audio
+    srv_port, srv = _start_server(html_path.parent)
+    page_url = f"http://127.0.0.1:{srv_port}/{html_path.name}"
+    print(f"[ok] Local HTTP server on port {srv_port}")
+
     print(f"[ in] HTML  : {html_path}")
-    print(f"[ in] Audio : {audio_path}")
+    print(f"[ in] Audio : {audio_path if not no_audio else '(none - silent render)'}")
     print(f"[out] MP4   : {out_mp4}")
     print()
 
@@ -71,7 +98,7 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
         probe_browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
         probe_ctx = await probe_browser.new_context(viewport={'width': 1920, 'height': 1080})
         probe_page = await probe_ctx.new_page()
-        await probe_page.goto(html_path.as_uri())
+        await probe_page.goto(page_url)
         try:
             await probe_page.wait_for_selector('.deck', timeout=5000)
             deck_dims = await probe_page.evaluate(
@@ -107,39 +134,61 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
         page = await context.new_page()
 
         recording_start = time.perf_counter()
-        await page.goto(html_path.as_uri())
+        await page.goto(page_url)
 
-        # Wait for engine + audio metadata
-        print("[..] Loading deck + waiting for audio metadata...")
-        try:
-            await page.wait_for_function(
-                "window.Storyboard && document.getElementById('voAudio') && document.getElementById('voAudio').readyState >= 2",
-                timeout=20000,
-            )
-        except Exception:
-            sys.exit("Engine or audio failed to initialize within 20s. "
-                     "Check the HTML opens correctly in a normal browser.")
+        # Hide UI chrome (controls / preview badge / jump menu) for a clean reel
+        await page.add_style_tag(content=".play-controls,#sb-preview-badge,.jump-menu,.play-progress{display:none!important}")
 
-        duration = await page.evaluate("document.getElementById('voAudio').duration")
-        if not duration or duration <= 0:
-            sys.exit("Could not read audio duration. Is the MP3 referenced by the HTML present?")
-        print(f"[ok] Audio duration: {duration:.2f}s")
-
-        # Reset deck to t=0, ensure animations are at the initial frame
-        await page.evaluate("Storyboard.reset()")
-        await asyncio.sleep(0.4)
-
-        # Press play and record the lead-in offset for ffmpeg trim
-        play_start = time.perf_counter()
-        lead_in = play_start - recording_start
-        print(f"[ok] Lead-in before play(): {lead_in:.3f}s")
-
-        await page.evaluate("document.getElementById('voAudio').play()")
-
-        # Hold for full duration + a tail to let final animations settle
         TAIL_SEC = 0.6
-        print(f"[..] Recording for {duration + TAIL_SEC:.2f}s...")
-        await asyncio.sleep(duration + TAIL_SEC)
+        if no_audio:
+            # Silent render: drive the engine's synthetic clock (no VO needed)
+            print("[..] No audio — driving via synthetic clock...")
+            try:
+                await page.wait_for_function("window.Storyboard", timeout=20000)
+            except Exception:
+                sys.exit("Engine failed to initialize within 20s.")
+            await asyncio.sleep(1.6)  # let the synthetic clock activate (missing-audio timeout)
+            if duration_override:
+                duration = float(duration_override)
+            else:
+                last = await page.evaluate(
+                    "(()=>{const c=window.Storyboard&&window.Storyboard.cues;"
+                    "return c&&c.length?c[c.length-1].time:0;})()")
+                duration = float(last) + 8.0
+            print(f"[ok] Timeline duration: {duration:.2f}s")
+            await page.evaluate("Storyboard.reset()")
+            await asyncio.sleep(0.4)
+            play_start = time.perf_counter()
+            lead_in = play_start - recording_start
+            print(f"[ok] Lead-in before play(): {lead_in:.3f}s")
+            await page.evaluate("Storyboard.play()")
+            print(f"[..] Recording for {duration + TAIL_SEC:.2f}s...")
+            await asyncio.sleep(duration + TAIL_SEC)
+        else:
+            # Wait for engine + audio metadata
+            print("[..] Loading deck + waiting for audio metadata...")
+            try:
+                await page.wait_for_function(
+                    "window.Storyboard && document.getElementById('voAudio') && document.getElementById('voAudio').readyState >= 2",
+                    timeout=20000,
+                )
+            except Exception:
+                sys.exit("Engine or audio failed to initialize within 20s. "
+                         "Check the HTML opens correctly in a normal browser.")
+
+            duration = await page.evaluate("document.getElementById('voAudio').duration")
+            if not duration or duration <= 0:
+                sys.exit("Could not read audio duration. Is the MP3 referenced by the HTML present?")
+            print(f"[ok] Audio duration: {duration:.2f}s")
+
+            await page.evaluate("Storyboard.reset()")
+            await asyncio.sleep(0.4)
+            play_start = time.perf_counter()
+            lead_in = play_start - recording_start
+            print(f"[ok] Lead-in before play(): {lead_in:.3f}s")
+            await page.evaluate("document.getElementById('voAudio').play()")
+            print(f"[..] Recording for {duration + TAIL_SEC:.2f}s...")
+            await asyncio.sleep(duration + TAIL_SEC)
 
         await context.close()
         await browser.close()
@@ -155,23 +204,19 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
     print(f"[..] Encoding MP4 (quality={quality})...")
     crf = '18' if quality == 'high' else '23'
     preset = 'medium' if quality == 'high' else 'veryfast'
-    cmd = [
-        FFMPEG, '-y',
-        '-ss', f'{lead_in:.3f}',
-        '-i', str(webm),
-        '-i', str(audio_path),
-        '-map', '0:v:0',
-        '-map', '1:a:0',
-        '-c:v', 'libx264',
-        '-preset', preset,
-        '-crf', crf,
-        '-pix_fmt', 'yuv420p',
-        '-c:a', 'aac',
-        '-b:a', '192k',
-        '-shortest',
-        '-movflags', '+faststart',
-        str(out_mp4),
-    ]
+    if no_audio:
+        cmd = [
+            FFMPEG, '-y', '-ss', f'{lead_in:.3f}', '-i', str(webm),
+            '-map', '0:v:0', '-c:v', 'libx264', '-preset', preset, '-crf', crf,
+            '-pix_fmt', 'yuv420p', '-an', '-movflags', '+faststart', str(out_mp4),
+        ]
+    else:
+        cmd = [
+            FFMPEG, '-y', '-ss', f'{lead_in:.3f}', '-i', str(webm), '-i', str(audio_path),
+            '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'libx264', '-preset', preset, '-crf', crf,
+            '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest',
+            '-movflags', '+faststart', str(out_mp4),
+        ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
         print("\n[ERROR] ffmpeg failed:\n")
@@ -179,6 +224,7 @@ async def render(html_path: Path, audio_path: Path, out_mp4: Path, quality: str 
         sys.exit(1)
 
     shutil.rmtree(tmp_dir)
+    srv.shutdown()
 
     size_mb = out_mp4.stat().st_size / 1_048_576
     print(f"\n[OK] Wrote {out_mp4.name} ({size_mb:.1f} MB)")
@@ -191,25 +237,31 @@ def main():
     ap.add_argument('--out', default=None, help='Output MP4 path (default: storyboard.mp4 next to HTML)')
     ap.add_argument('--quality', choices=['high', 'fast'], default='high',
                     help='high = crf 18, medium preset (best); fast = crf 23, veryfast preset (lower size)')
+    ap.add_argument('--no-audio', action='store_true',
+                    help='Silent render: drive the synthetic clock, encode video-only (no VO/MP3 needed)')
+    ap.add_argument('--duration', type=float, default=None,
+                    help='Override timeline length in seconds (no-audio mode; default = last cue + 8s)')
     args = ap.parse_args()
 
     html = Path(args.html).resolve()
     if not html.exists():
         sys.exit(f"HTML not found: {html}")
 
-    if args.audio:
-        audio = Path(args.audio).resolve()
-    else:
-        candidates = sorted(html.parent.glob('*.mp3'))
-        if not candidates:
-            sys.exit("No MP3 found next to the HTML. Pass --audio explicitly.")
-        audio = candidates[0]
-    if not audio.exists():
-        sys.exit(f"Audio not found: {audio}")
+    audio = None
+    if not args.no_audio:
+        if args.audio:
+            audio = Path(args.audio).resolve()
+        else:
+            candidates = sorted(html.parent.glob('*.mp3'))
+            if not candidates:
+                sys.exit("No MP3 found next to the HTML. Pass --audio, or use --no-audio for a silent render.")
+            audio = candidates[0]
+        if not audio.exists():
+            sys.exit(f"Audio not found: {audio}")
 
     out = Path(args.out).resolve() if args.out else html.parent / (html.stem + '.mp4')
 
-    asyncio.run(render(html, audio, out, quality=args.quality))
+    asyncio.run(render(html, audio, out, quality=args.quality, no_audio=args.no_audio, duration_override=args.duration))
 
 
 if __name__ == '__main__':

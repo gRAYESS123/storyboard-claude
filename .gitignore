@@ -49,3 +49,6 @@ reference.md
 # Scratch render/test frames
 examples/**/frame_*.png
 examples/**/trans_*.png
+
+# Keep the flagship reel (hero demo) despite the *.mp4 ignore
+!examples/showcase/showcase.mp4
