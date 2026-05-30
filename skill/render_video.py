@@ -75,7 +75,9 @@ except ImportError:
 
 
 async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'high', no_audio: bool = False, duration_override=None) -> None:
-    tmp_dir = out_mp4.parent / '.render-tmp'
+    # Per-output temp dir so concurrent renders into the same folder don't collide
+    # (a fixed '.render-tmp' lets two renders clobber each other's WebM frames).
+    tmp_dir = out_mp4.parent / ('.render-tmp-' + out_mp4.stem)
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(parents=True)

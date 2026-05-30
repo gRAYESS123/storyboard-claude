@@ -850,8 +850,9 @@
     // Continuous loop registered to start after entrance settles
     if (el.dataset.loop) {
       LOOP_ELS.push({ el, type:el.dataset.loop, amp:parseFloat(el.dataset.loopAmp||'10'), per:parseFloat(el.dataset.loopPeriod||'3'), startAt:t+dur, baseTransform:'' });
-    if(el.dataset.exit && EXITS[el.dataset.exit]){ let xt; if(el.dataset.exitT!==undefined) xt=parseFloat(el.dataset.exitT); else if(el.dataset.exitAt!==undefined) xt=cueTime+parseFloat(el.dataset.exitAt); else xt=t+dur+2; EXIT_SCHED.push({el,t:xt,dur:el.dataset.exitDur!==undefined?parseFloat(el.dataset.exitDur):0.7,fx:EXITS[el.dataset.exit],ease:resolveEase(el)}); }
     }
+    // Exit animation (data-exit + data-exit-at | data-exit-t). Independent of loop.
+    if(el.dataset.exit && EXITS[el.dataset.exit]){ let xt; if(el.dataset.exitT!==undefined) xt=parseFloat(el.dataset.exitT); else if(el.dataset.exitAt!==undefined) xt=cueTime+parseFloat(el.dataset.exitAt); else xt=t+dur+2; EXIT_SCHED.push({el,t:xt,dur:el.dataset.exitDur!==undefined?parseFloat(el.dataset.exitDur):0.7,fx:EXITS[el.dataset.exit],ease:resolveEase(el)}); }
   }
 
   function resolveSchedule() {

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboard Engine — Capability Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:'Space Grotesk',system-ui,sans-serif}
+.stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
+:root{--bg:#05060a;--ink:#F4F6FF;--ink-soft:#9aa3c0;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166;--highlight:#FFD166}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:96px 110px;contain:layout paint}
+.anim{opacity:0;will-change:transform,opacity,filter}
+.gradient-fill{background:linear-gradient(110deg,var(--accent),var(--accent2),var(--accent3));background-size:240% 100%;background-position:0% 50%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,255,.06) 1px,transparent 1px);background-size:64px 64px;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0}
+.bleed{position:absolute;inset:0;z-index:0}
+.center{position:relative;z-index:2;text-align:center;max-width:1640px}
+.kicker{position:absolute;top:60px;left:110px;font-family:'JetBrains Mono',monospace;font-size:21px;letter-spacing:.34em;text-transform:uppercase;color:var(--accent2);z-index:6}
+.kicker .num{color:var(--ink-soft)}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent2);margin-bottom:38px}
+.mega{font-size:172px;line-height:.94;font-weight:700;letter-spacing:-.04em}
+.big{font-size:118px;line-height:1.02;font-weight:700;letter-spacing:-.03em}
+.h2{font-size:74px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin-bottom:14px;position:relative;z-index:2}
+.sub{font-size:32px;line-height:1.4;color:var(--ink-soft);margin-top:30px;max-width:1200px;margin-left:auto;margin-right:auto;position:relative;z-index:2}
+.count-note{font-family:'JetBrains Mono',monospace;font-size:30px;color:var(--ink-soft);margin-top:30px;position:relative;z-index:2}
+.sec-head{position:relative;z-index:2;text-align:center;margin-bottom:46px}
+/* grids of spec cells */
+.grid{display:grid;gap:24px;width:100%;max-width:1640px;position:relative;z-index:2}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.spec{background:rgba(124,92,255,.08);border:1px solid rgba(124,92,255,.28);border-radius:18px;padding:28px 20px;min-height:138px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.spec .nm{font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--ink);font-weight:600}
+.spec .tag{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--accent2);letter-spacing:.06em;opacity:.85}
+.fx{position:relative;width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:74px;overflow:visible}
+.tline{font-size:50px;font-weight:600;line-height:1.5;text-align:center;position:relative;z-index:2}
+/* easing race */
+.ease-row{display:grid;grid-template-columns:240px 1fr;align-items:center;gap:30px;margin:10px 0;width:1500px;position:relative;z-index:2}
+.ease-name{font-family:'JetBrains Mono',monospace;font-size:23px;color:var(--accent2);text-align:right}
+.ease-track{height:28px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden}
+.ease-bar{height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:8px;position:relative;z-index:2;max-width:1640px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:23px;padding:14px 26px;border-radius:999px;border:1px solid rgba(124,92,255,.45);background:rgba(124,92,255,.10);color:var(--ink)}
+/* cards 3d */
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;width:100%;max-width:1640px;position:relative;z-index:2}
+.card3d{aspect-ratio:3/4;border-radius:22px;padding:30px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(160deg,rgba(124,92,255,.22),rgba(25,227,177,.10));border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.card3d .nm{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink)}
+.card3d .tag{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--accent2);margin-top:6px}
+/* chart */
+.bars{display:flex;align-items:flex-end;gap:48px;height:480px;padding:0 40px;border-bottom:2px solid rgba(255,255,255,.12);position:relative;z-index:2;width:1400px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar{width:100%;border-radius:14px 14px 0 0;background:linear-gradient(180deg,var(--accent),var(--accent3))}
+.bar.b2{background:linear-gradient(180deg,var(--accent2),var(--accent))}
+.bar-label{font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--ink-soft);margin-top:20px}
+.bar-val{font-size:32px;font-weight:700;margin-bottom:16px}
+.code{background:#0b1020;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:48px;font:34px/1.6 'JetBrains Mono',monospace;color:#E2E8F0;width:1480px;box-shadow:0 30px 80px rgba(0,0,0,.5);position:relative;z-index:2}
+.app{width:1080px;height:520px;background:#0b0e1a;border:1px solid rgba(255,255,255,.12);border-radius:18px;position:relative;padding:44px;z-index:2}
+.field{width:620px;height:64px;border:2px solid rgba(255,255,255,.2);border-radius:12px;font-size:27px;background:#0c0e16;padding:0 18px;display:flex;align-items:center;color:#9aa3c0}
+.btn{margin-top:30px;width:260px;height:64px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700}
+.cta-pill{display:inline-block;margin-top:54px;padding:30px 60px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2)}
+.flow-svg{width:1480px;height:300px;overflow:visible;position:relative;z-index:2}
+.node{font-size:34px}
+.transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
+.transition-overlay.dissolve{background:#05060a}.transition-overlay.flash{background:#fff}
+.transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#05060a 50%,transparent);transform:translateX(-100%)}
+.transition-overlay.wipe{background:var(--accent);clip-path:inset(0 100% 0 0)}.transition-overlay.blocks{background:var(--accent3)}
+</style>
+</head>
+<body>
+<div class="stage"><div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide" data-slide="1" data-transition-in="cut">
+    <div class="bleed anim" data-anim="aurora" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="filmGrain" data-t-rel="0" data-dur="9999" data-grain-opacity="0.05"></div>
+    <div class="center">
+      <p class="eyebrow anim" data-anim="scramble" data-t-rel="0.2" data-dur="1.2">storyboard · capability gallery</p>
+      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="1.0" data-dur="1.8" data-loop="float" data-loop-amp="8" data-loop-period="4.6">Everything<br>it can do.</h1>
+      <p class="count-note"><span class="anim" data-anim="counter" data-t-rel="2.6" data-dur="1.8" data-to="101">0</span> presets · 21 transitions · 8 loops · one audio clock</p>
+    </div>
+  </section>
+
+  <!-- 2 ENTRANCES (basics) -->
+  <section class="slide" data-slide="2" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div class="kicker">Entrances <span class="num">· 01</span></div>
+    <div class="sec-head"><h2 class="h2">Entrances</h2><p class="sub">The bread-and-butter reveals — each cell animates in with its own preset.</p></div>
+    <div class="grid g4">
+      <div class="spec anim" data-anim="fadeIn"      data-t-rel="0.3" data-dur="0.9"><span class="nm">fadeIn</span><span class="tag">opacity</span></div>
+      <div class="spec anim" data-anim="fadeUp"      data-t-rel="0.5" data-dur="0.9"><span class="nm">fadeUp</span><span class="tag">rise + fade</span></div>
+      <div class="spec anim" data-anim="fadeDown"    data-t-rel="0.7" data-dur="0.9"><span class="nm">fadeDown</span><span class="tag">drop + fade</span></div>
+      <div class="spec anim" data-anim="scaleIn"     data-t-rel="0.9" data-dur="0.9"><span class="nm">scaleIn</span><span class="tag">grow</span></div>
+      <div class="spec anim" data-anim="slideInLeft" data-t-rel="1.1" data-dur="0.9"><span class="nm">slideInLeft</span><span class="tag">enter →</span></div>
+      <div class="spec anim" data-anim="slideInRight"data-t-rel="1.3" data-dur="0.9"><span class="nm">slideInRight</span><span class="tag">← enter</span></div>
+      <div class="spec anim" data-anim="reveal"      data-t-rel="1.5" data-dur="1.0"><span class="nm">reveal</span><span class="tag">wipe mask</span></div>
+      <div class="spec anim" data-anim="irisIn"      data-t-rel="1.7" data-dur="1.0"><span class="nm">irisIn</span><span class="tag">circle mask</span></div>
+    </div>
+  </section>
+
+  <!-- 3 PHYSICS / 12 PRINCIPLES -->
+  <section class="slide" data-slide="3" data-transition-in="pushLeft">
+    <div class="grid-bg"></div>
+    <div class="kicker">Physics <span class="num">· 02</span></div>
+    <div class="sec-head"><h2 class="h2">Physics &amp; the 12 principles</h2><p class="sub">Anticipation, follow-through, squash &amp; stretch — weight, not just easing.</p></div>
+    <div class="grid g4">
+      <div class="spec anim" data-anim="anticipate" data-t-rel="0.3" data-dur="1.1"><span class="nm">anticipate</span><span class="tag">wind-up</span></div>
+      <div class="spec anim" data-anim="overshoot"  data-t-rel="0.5" data-dur="1.0"><span class="nm">overshoot</span><span class="tag">past + settle</span></div>
+      <div class="spec anim" data-anim="spring"     data-t-rel="0.7" data-dur="1.2"><span class="nm">spring</span><span class="tag">elastic</span></div>
+      <div class="spec anim" data-anim="bounce"     data-t-rel="0.9" data-dur="1.2"><span class="nm">bounce</span><span class="tag">drop + bob</span></div>
+      <div class="spec anim" data-anim="wobble"     data-t-rel="1.1" data-dur="0.9"><span class="nm">wobble</span><span class="tag">rotary</span></div>
+      <div class="spec anim" data-anim="shake"      data-t-rel="1.3" data-dur="0.6"><span class="nm">shake</span><span class="tag">jitter</span></div>
+      <div class="spec anim" data-anim="squash"     data-t-rel="1.5" data-dur="0.7"><span class="nm">squash</span><span class="tag">stretch</span></div>
+      <div class="spec anim" data-anim="pulse"      data-t-rel="1.7" data-dur="0.9"><span class="nm">pulse</span><span class="tag">heartbeat</span></div>
+    </div>
+  </section>
+
+  <!-- 4 3D -->
+  <section class="slide" data-slide="4" data-transition-in="flip3D">
+    <div class="grid-bg"></div>
+    <div class="kicker">3D <span class="num">· 03</span></div>
+    <div class="sec-head"><h2 class="h2">Perspective &amp; 3D</h2><p class="sub">Real <code>perspective()</code> rotations — cards that flip, tilt and fly through Z.</p></div>
+    <div class="cards">
+      <div class="card3d anim" data-anim="flipInX"     data-t-rel="0.4" data-dur="1.1"><span class="nm">flipInX</span><span class="tag">rotateX</span></div>
+      <div class="card3d anim" data-anim="flipInY"     data-t-rel="0.6" data-dur="1.1"><span class="nm">flipInY</span><span class="tag">rotateY</span></div>
+      <div class="card3d anim" data-anim="cardFlip"    data-t-rel="0.8" data-dur="1.3"><span class="nm">cardFlip</span><span class="tag">180° turn</span></div>
+      <div class="card3d anim" data-anim="tiltIn"      data-t-rel="1.0" data-dur="1.1"><span class="nm">tiltIn</span><span class="tag">3D tilt</span></div>
+      <div class="card3d anim" data-anim="zoomThrough" data-t-rel="1.2" data-dur="1.2"><span class="nm">zoomThrough</span><span class="tag">fly past</span></div>
+    </div>
+  </section>
+
+  <!-- 5 TEXT REVEALS -->
+  <section class="slide" data-slide="5" data-transition-in="fade">
+    <div class="grid-bg"></div>
+    <div class="kicker">Text <span class="num">· 04</span></div>
+    <div class="sec-head"><h2 class="h2">Text reveals</h2></div>
+    <div class="center" style="display:flex;flex-direction:column;gap:26px">
+      <div class="tline anim" data-anim="typewriter"  data-t-rel="0.3" data-dur="1.8">typewriter — types itself out</div>
+      <div class="tline anim" data-anim="scramble"    data-t-rel="0.6" data-dur="1.6">scramble — settles from noise</div>
+      <div class="tline anim" data-anim="wordReveal"  data-t-rel="1.0" data-dur="1.8">wordReveal brings in one word at a time</div>
+      <div class="tline anim" data-anim="tracking"    data-t-rel="1.6" data-dur="1.2">tracking eases the letter-spacing</div>
+      <div class="tline anim" data-anim="splitReveal" data-t-rel="2.0" data-dur="1.2">splitReveal opens from the middle</div>
+      <div class="tline gradient-fill anim" data-anim="gradientSweep" data-t-rel="2.4" data-dur="2.0">gradientSweep washes color across</div>
+    </div>
+  </section>
+
+  <!-- 6 KINETIC / DISPLAY TYPE -->
+  <section class="slide" data-slide="6" data-transition-in="whipPan">
+    <div class="grid-bg"></div>
+    <div class="kicker">Kinetic type <span class="num">· 05</span></div>
+    <div class="center">
+      <h1 class="big gradient-fill anim" data-anim="letterSpring" data-t-rel="0.3" data-dur="1.6">letterSpring</h1>
+      <div class="tline anim" data-anim="lineReveal" data-t-rel="1.4" data-dur="1.6" style="font-size:64px;font-weight:700;margin:22px 0">lineReveal lifts<br>each line on a mask</div>
+      <h2 class="anim" data-anim="wordSwap" data-t-rel="2.6" data-dur="3.6" data-words="assemble.|neonOn.|rgbGlitch.|textMask." style="font-size:70px;font-weight:700;min-height:1.2em"></h2>
+      <div class="grid g4" style="margin-top:36px;max-width:1500px">
+        <div class="spec"><div class="tline anim" data-anim="assemble"  data-t-rel="3.0" data-dur="1.4" style="font-size:38px">assemble</div></div>
+        <div class="spec"><div class="tline anim" data-anim="neonOn"    data-t-rel="3.4" data-dur="1.3" style="font-size:38px">neonOn</div></div>
+        <div class="spec"><div class="tline anim" data-anim="rgbGlitch" data-t-rel="3.8" data-dur="1.0" style="font-size:38px">rgbGlitch</div></div>
+        <div class="spec"><div class="tline gradient-fill anim" data-anim="textMask" data-t-rel="4.2" data-dur="1.8" style="font-size:38px">textMask</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 EASING & SPRING -->
+  <section class="slide" data-slide="7" data-transition-in="pushUp">
+    <div class="grid-bg"></div>
+    <div class="kicker">Easing <span class="num">· 06</span></div>
+    <div class="sec-head"><h2 class="h2">Easing &amp; spring</h2><p class="sub">Same start, same finish — drop <code>data-ease</code> or a physical <code>data-spring</code> on any element.</p></div>
+    <div style="position:relative;z-index:2">
+      <div class="ease-row"><span class="ease-name">linear</span>    <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="linear"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outQuad</span>   <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outQuad"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outCubic</span>  <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outCubic"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outExpo</span>   <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outExpo"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outBack</span>   <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outBack"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outElastic</span><div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outElastic"></div></div></div>
+      <div class="ease-row"><span class="ease-name">outBounce</span> <div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-ease="outBounce"></div></div></div>
+      <div class="ease-row"><span class="ease-name">spring 200,9</span><div class="ease-track"><div class="ease-bar anim" data-anim="barGrow" data-dir="h" data-t-rel="0.6" data-dur="1.8" data-spring="200,9"></div></div></div>
+    </div>
+  </section>
+
+  <!-- 8 STAGGER & CHAIN -->
+  <section class="slide" data-slide="8" data-transition-in="pushRight">
+    <div class="grid-bg"></div>
+    <div class="kicker">Compose <span class="num">· 07</span></div>
+    <div class="sec-head"><h2 class="h2">Stagger &amp; chain</h2><p class="sub">One <code>data-stagger</code> cascades children. <code>data-then</code> sequences moves on a single element.</p></div>
+    <div class="chips anim-group" data-anim="tiltIn" data-stagger="0.07" data-t-rel="0.4" data-dur="0.8">
+      <span class="chip">data-stagger</span><span class="chip">data-then</span><span class="chip">data-ease</span><span class="chip">data-spring</span>
+      <span class="chip">data-loop</span><span class="chip">data-exit</span><span class="chip">data-t-rel</span><span class="chip">data-dur</span>
+      <span class="chip">data-transition-in</span><span class="chip">data-camera</span><span class="chip">data-plane</span><span class="chip">data-shared-id</span>
+    </div>
+    <div style="margin-top:54px;position:relative;z-index:2">
+      <span class="chip anim" data-anim="spring" data-t-rel="1.8" data-dur="1.0" data-then="pulse@1.4; shake@2.4" style="font-size:30px;padding:22px 40px">fadeIn → pulse → shake  <span style="color:var(--accent2)">(data-then chain)</span></span>
+    </div>
+  </section>
+
+  <!-- 9 LOOPS -->
+  <section class="slide" data-slide="9" data-transition-in="zoomIn">
+    <div class="grid-bg"></div>
+    <div class="kicker">Ambient loops <span class="num">· 08</span></div>
+    <div class="sec-head"><h2 class="h2">Continuous loops</h2><p class="sub">After the entrance settles, <code>data-loop</code> keeps a layer alive — forever.</p></div>
+    <div class="grid g3" style="max-width:1300px">
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="0.3" data-dur="0.7" data-loop="float"   data-loop-amp="16" data-loop-period="2.6"><span class="nm">float</span><span class="tag">drift Y</span></div>
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="0.5" data-dur="0.7" data-loop="breathe" data-loop-amp="6"  data-loop-period="2.4"><span class="nm">breathe</span><span class="tag">scale</span></div>
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="0.7" data-dur="0.7" data-loop="sway"    data-loop-amp="6"  data-loop-period="2.8"><span class="nm">sway</span><span class="tag">rotate ±</span></div>
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="0.9" data-dur="0.7" data-loop="orbit"   data-loop-amp="18" data-loop-period="3.0"><span class="nm">orbit</span><span class="tag">circular</span></div>
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="1.1" data-dur="0.7" data-loop="rotate"  data-loop-amp="1"  data-loop-period="6.0"><span class="nm">rotate</span><span class="tag">spin</span></div>
+      <div class="spec anim" data-anim="scaleIn" data-t-rel="1.3" data-dur="0.7" data-loop="pulse"   data-loop-amp="10" data-loop-period="1.6"><span class="nm">pulse</span><span class="tag">throb</span></div>
+    </div>
+  </section>
+
+  <!-- 10 COUNTERS -->
+  <section class="slide" data-slide="10" data-transition-in="barWipe">
+    <div class="grid-bg"></div>
+    <div class="kicker">Numbers <span class="num">· 09</span></div>
+    <div class="sec-head"><h2 class="h2">Counters</h2><p class="sub">Numbers roll up on the clock — prefix, suffix, decimals, thousands.</p></div>
+    <div class="grid g4" style="max-width:1500px">
+      <div class="spec"><div class="nm" style="font-size:72px;color:var(--accent2)"><span class="anim" data-anim="counter" data-t-rel="0.4" data-dur="1.8" data-to="1284000">0</span></div><span class="tag">thousands</span></div>
+      <div class="spec"><div class="nm" style="font-size:72px;color:var(--accent2)"><span class="anim" data-anim="counter" data-t-rel="0.6" data-dur="1.8" data-to="49" data-prefix="$">0</span></div><span class="tag">prefix $</span></div>
+      <div class="spec"><div class="nm" style="font-size:72px;color:var(--accent2)"><span class="anim" data-anim="counter" data-t-rel="0.8" data-dur="1.8" data-to="99.8" data-decimals="1" data-suffix="%">0</span></div><span class="tag">decimals + %</span></div>
+      <div class="spec"><div class="nm" style="font-size:72px;color:var(--accent2)"><span class="anim" data-anim="counter" data-t-rel="1.0" data-dur="1.8" data-to="4.9" data-decimals="1">0</span></div><span class="tag">rating</span></div>
+    </div>
+  </section>
+
+  <!-- 11 BAR CHART -->
+  <section class="slide" data-slide="11" data-transition-in="coverLeft">
+    <div class="grid-bg"></div>
+    <div class="kicker">Data-viz <span class="num">· 10</span></div>
+    <div class="sec-head"><h2 class="h2">Bar chart</h2><p class="sub"><code>barGrow</code> bars + <code>counter</code> values, built in sequence.</p></div>
+    <div class="bars">
+      <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.0" data-dur="1.4" data-to="38" data-suffix="%">0</span><div class="bar anim"    data-anim="barGrow" data-t-rel="0.8" data-dur="1.1" data-ease="outBack" style="height:38%"></div><span class="bar-label">Q1</span></div>
+      <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.3" data-dur="1.4" data-to="61" data-suffix="%">0</span><div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.1" data-dur="1.1" data-ease="outBack" style="height:61%"></div><span class="bar-label">Q2</span></div>
+      <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.6" data-dur="1.4" data-to="84" data-suffix="%">0</span><div class="bar anim"    data-anim="barGrow" data-t-rel="1.4" data-dur="1.1" data-ease="outBack" style="height:84%"></div><span class="bar-label">Q3</span></div>
+      <div class="bar-col"><span class="bar-val anim" data-anim="counter" data-t-rel="1.9" data-dur="1.4" data-to="100" data-suffix="%">0</span><div class="bar b2 anim" data-anim="barGrow" data-t-rel="1.7" data-dur="1.1" data-ease="outBack" style="height:100%"></div><span class="bar-label">Q4</span></div>
+    </div>
+  </section>
+
+  <!-- 12 GAUGE / DONUT / PIE -->
+  <section class="slide" data-slide="12" data-transition-in="irisOpen">
+    <div class="grid-bg"></div>
+    <div class="kicker">Data-viz <span class="num">· 11</span></div>
+    <div class="sec-head"><h2 class="h2">Gauge · donut · arc</h2><p class="sub"><code>gauge</code> needle, <code>pieSlice</code> segments, <code>chartArea</code> &amp; <code>donutSweep</code> rings.</p></div>
+    <svg width="1500" height="470" viewBox="0 0 1500 470" style="position:relative;z-index:2">
+      <!-- gauge -->
+      <path d="M 90 400 A 200 200 0 0 1 490 400" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="30"/>
+      <path class="anim" data-anim="chartArea" data-t-rel="0.4" data-dur="1.3" d="M 90 400 A 200 200 0 0 1 490 400" fill="none" stroke="var(--accent2)" stroke-width="30" stroke-linecap="round"/>
+      <line class="anim" data-anim="gauge" data-t-rel="0.7" data-dur="1.4" data-from="-90" data-to="58" x1="290" y1="400" x2="290" y2="240" stroke="#fff" stroke-width="8" stroke-linecap="round" style="transform-origin:290px 400px"/>
+      <text x="290" y="455" fill="var(--ink-soft)" text-anchor="middle" font-family="JetBrains Mono" font-size="26">gauge</text>
+      <!-- pie / donut -->
+      <circle class="anim" data-anim="pieSlice" data-t-rel="0.8" data-dur="1.4" data-pct="64" cx="780" cy="230" r="140" fill="none" stroke="var(--accent3)" stroke-width="58" transform="rotate(-90 780 230)"/>
+      <circle class="anim" data-anim="pieSlice" data-t-rel="1.3" data-dur="1.4" data-pct="36" data-offset="64" cx="780" cy="230" r="140" fill="none" stroke="var(--accent)" stroke-width="58" transform="rotate(-90 780 230)"/>
+      <text x="780" y="430" fill="var(--ink-soft)" text-anchor="middle" font-family="JetBrains Mono" font-size="26">pieSlice</text>
+      <!-- donutSweep -->
+      <circle cx="1230" cy="230" r="140" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="36"/>
+      <circle class="anim" data-anim="donutSweep" data-t-rel="1.0" data-dur="1.6" data-pct="78" cx="1230" cy="230" r="140" fill="none" stroke="var(--gold)" stroke-width="36" stroke-linecap="round" transform="rotate(-90 1230 230)"/>
+      <text x="1230" y="430" fill="var(--ink-soft)" text-anchor="middle" font-family="JetBrains Mono" font-size="26">donutSweep</text>
+    </svg>
+  </section>
+
+  <!-- 13 DIAGRAM -->
+  <section class="slide" data-slide="13" data-transition-in="revealRight">
+    <div class="grid-bg"></div>
+    <div class="kicker">Diagrams <span class="num">· 12</span></div>
+    <div class="sec-head"><h2 class="h2">Flow diagrams</h2><p class="sub"><code>connectorDraw</code> draws the path and pops an arrowhead; nodes <code>scaleIn</code>.</p></div>
+    <svg class="flow-svg">
+      <g class="anim" data-anim="scaleIn" data-t-rel="0.2" data-dur="0.7"><rect x="30" y="110" width="280" height="110" rx="16" fill="rgba(124,92,255,.2)" stroke="var(--accent)" stroke-width="2"/><text class="node" x="170" y="175" fill="#fff" text-anchor="middle">Input</text></g>
+      <path class="anim" data-anim="connectorDraw" data-t-rel="0.9" data-dur="0.7" data-arrow="end" d="M 310 165 L 600 165" fill="none" stroke="var(--accent2)" stroke-width="4"/>
+      <g class="anim" data-anim="scaleIn" data-t-rel="1.4" data-dur="0.7"><rect x="610" y="110" width="280" height="110" rx="16" fill="rgba(25,227,177,.18)" stroke="var(--accent2)" stroke-width="2"/><text class="node" x="750" y="175" fill="#fff" text-anchor="middle">Animate</text></g>
+      <path class="anim" data-anim="connectorDraw" data-t-rel="2.0" data-dur="0.7" data-arrow="end" d="M 890 165 L 1180 165" fill="none" stroke="var(--accent3)" stroke-width="4"/>
+      <g class="anim" data-anim="scaleIn" data-t-rel="2.5" data-dur="0.7"><rect x="1190" y="110" width="250" height="110" rx="16" fill="rgba(255,92,138,.18)" stroke="var(--accent3)" stroke-width="2"/><text class="node" x="1315" y="175" fill="#fff" text-anchor="middle">MP4</text></g>
+    </svg>
+  </section>
+
+  <!-- 14 SVG DRAW & MOTION PATH -->
+  <section class="slide" data-slide="14" data-transition-in="blurThrough">
+    <div class="grid-bg"></div>
+    <div class="kicker">Vector <span class="num">· 13</span></div>
+    <div class="sec-head"><h2 class="h2">Path draw &amp; motion path</h2><p class="sub"><code>pathdraw</code>/<code>lineDraw</code> stroke a path on; <code>motionPath</code> rides a dot along it.</p></div>
+    <svg width="1500" height="380" viewBox="0 0 1500 380" style="position:relative;z-index:2">
+      <path id="mp" d="M 60 300 C 420 40, 1020 540, 1440 120" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="3"/>
+      <path class="anim" data-anim="pathdraw" data-t-rel="0.4" data-dur="1.8" d="M 60 300 C 420 40, 1020 540, 1440 120" fill="none" stroke="var(--accent2)" stroke-width="6" stroke-linecap="round"/>
+      <circle class="anim" data-anim="motionPath" data-path="#mp" data-t-rel="0.6" data-dur="2.2" r="18" fill="var(--accent3)"/>
+    </svg>
+    <div style="width:1200px;position:relative;z-index:2;margin-top:30px">
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--ink-soft);margin-bottom:10px"><span>comparisonBar — last year</span><span>76%</span></div>
+      <div style="height:34px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden"><div class="anim" data-anim="comparisonBar" data-t-rel="1.2" data-dur="1.3" data-width="76" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:8px"></div></div>
+    </div>
+  </section>
+
+  <!-- 15 ANNOTATIONS -->
+  <section class="slide" data-slide="15" data-transition-in="spinZoom">
+    <div class="grid-bg"></div>
+    <div class="kicker">Annotation <span class="num">· 14</span></div>
+    <div class="sec-head"><h2 class="h2">Hand-drawn annotations</h2></div>
+    <div class="center" style="font-size:72px;font-weight:700;line-height:2">
+      Claude is the <span class="anim" data-anim="circleScribble" data-t-rel="0.4" data-dur="0.9" style="color:var(--accent2)">animator</span>.<br>
+      Not a <span class="anim" data-anim="strikethrough" data-t-rel="1.5" data-dur="0.5">slideshow</span> —
+      <span class="anim" data-anim="boxDraw" data-t-rel="2.1" data-dur="0.8">it directs</span>
+      <span class="anim" data-anim="underlineDraw" data-t-rel="2.9" data-dur="0.7">every beat</span>.
+    </div>
+  </section>
+
+  <!-- 16 CODE TYPING -->
+  <section class="slide" data-slide="16" data-transition-in="flash">
+    <div class="grid-bg"></div>
+    <div class="kicker">Code <span class="num">· 15</span></div>
+    <div class="sec-head"><h2 class="h2">Syntax-highlighted code typing</h2></div>
+    <pre class="code anim" data-anim="codeType" data-t-rel="0.3" data-dur="3.8">const reel = storyboard(idea)
+  .script({ voice: "Adam" })   // ElevenLabs SSML
+  .animate()                   // 101 presets, one clock
+  .render();                   // -> reel.mp4</pre>
+  </section>
+
+  <!-- 17 UI DEMO -->
+  <section class="slide" data-slide="17" data-transition-in="pushDown">
+    <div class="grid-bg"></div>
+    <div class="kicker">UI demo <span class="num">· 16</span></div>
+    <div class="sec-head"><h2 class="h2">Demo a product — no screen recording</h2><p class="sub">A synthetic cursor moves, <code>typeInto</code> fills fields, <code>clickRipple</code> taps.</p></div>
+    <div class="app">
+      <div style="font-size:30px;font-weight:700;margin-bottom:24px">New rule</div>
+      <div id="cap-field" class="field">rule name…</div>
+      <div style="margin-top:24px"><span style="font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink-soft)">condition</span></div>
+      <div class="field anim" data-anim="typeInto" data-text="amount > $500 AND new_card" data-t-rel="0.6" data-dur="1.8" style="margin-top:8px"></div>
+      <div id="cap-btn" class="btn">Ship it</div>
+      <div class="anim" data-anim="clickRipple" data-t-rel="5.0" data-dur="0.6" style="position:absolute;left:190px;bottom:60px;width:70px;height:70px"></div>
+    </div>
+    <div class="anim" data-anim="cursorTour" data-t-rel="0" data-dur="9999" data-stops="#cap-field@93.6:type=block-card-testing, #cap-btn@96.2:click" style="opacity:0"></div>
+  </section>
+
+  <!-- 18 CAMERA RIG + MULTIPLANE -->
+  <section class="slide" data-slide="18" data-transition-in="zoomOut">
+    <div class="camera" data-camera="0.8=>scale:1.4,x:-150,y:60; 3.4=>scale:1.0,x:0,y:0" style="position:absolute;inset:0;z-index:1">
+      <div class="grid-bg"></div>
+      <div data-plane="0.35" style="position:absolute;inset:0"><div class="orb" style="width:620px;height:620px;background:var(--accent);top:-160px;left:-120px"></div><div class="orb" style="width:520px;height:520px;background:var(--accent2);bottom:-160px;right:-100px"></div></div>
+      <div data-plane="1.0" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><h1 class="big gradient-fill">Camera rig</h1></div>
+      <div data-plane="1.9" style="position:absolute;left:50%;bottom:150px;transform:translateX(-50%)"><span class="chip" style="font-size:26px">data-plane parallax · foreground</span></div>
+    </div>
+    <div class="kicker">Camera <span class="num">· 17</span></div>
+    <div style="position:absolute;bottom:60px;left:0;right:0;text-align:center;z-index:5"><p class="sub" style="margin:0">A <code>.camera</code> keyframed by <code>data-camera</code> pushes in; layered <code>data-plane</code> depths move at different rates.</p></div>
+  </section>
+
+  <!-- 19 CINEMATIC GRADE -->
+  <section class="slide" data-slide="19" data-transition-in="blocks">
+    <div class="grid-bg"></div>
+    <div class="orb" style="width:760px;height:760px;background:var(--accent);top:-200px;right:-160px"></div>
+    <div class="kicker">The grade <span class="num">· 18</span></div>
+    <div class="center" style="display:flex;flex-direction:column;gap:30px">
+      <h2 class="h2 anim" data-anim="rackFocus" data-t-rel="0.4" data-dur="1.4" style="margin:0">rackFocus pulls into focus</h2>
+      <p class="sub anim" data-anim="defocus" data-t-rel="1.6" data-dur="1.4" style="margin:0">…while this layer recedes with defocus</p>
+      <p class="tline anim" data-anim="focusBlur" data-t-rel="2.6" data-dur="1.4" style="font-size:40px">focusBlur · vignette · cinematicGrade · filmGrain</p>
+    </div>
+    <div class="bleed anim" data-anim="cinematicGrade" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="vignette" data-t-rel="0.3" data-dur="1.8"></div>
+    <div class="bleed anim" data-anim="filmGrain" data-t-rel="0" data-dur="9999" data-grain-opacity="0.08"></div>
+  </section>
+
+  <!-- 20 ATMOSPHERE -->
+  <section class="slide" data-slide="20" data-transition-in="glitch">
+    <div class="bleed anim" data-anim="aurora" data-t-rel="0" data-dur="9999" data-c1="var(--accent)" data-c2="var(--accent2)" data-c3="var(--accent3)"></div>
+    <canvas class="bleed anim" data-anim="constellation" data-t-rel="0" data-dur="9999" data-count="64" data-color="124,92,255" style="z-index:1"></canvas>
+    <div class="kicker">Atmosphere <span class="num">· 19</span></div>
+    <div class="sec-head" style="margin-bottom:30px"><h2 class="h2">Living backgrounds</h2><p class="sub"><code>aurora</code> + <code>constellation</code> behind, with <code>glow</code>, <code>flicker</code>, <code>rays</code> &amp; <code>particles</code>.</p></div>
+    <div class="grid g4" style="max-width:1400px">
+      <div class="spec anim" data-anim="glow"    data-t-rel="0.4" data-dur="1.6" data-loop="breathe" data-loop-amp="4" data-loop-period="2.2"><span class="nm">glow</span></div>
+      <div class="spec anim" data-anim="flicker" data-t-rel="0.7" data-dur="1.2"><span class="nm">flicker</span></div>
+      <div class="spec"><svg class="anim" data-anim="particles" data-t-rel="0" data-dur="9999" width="180" height="120" style="overflow:visible"><circle class="p" cx="90" cy="90" r="6" fill="var(--accent2)"/><circle class="p" cx="60" cy="90" r="5" fill="var(--accent)"/><circle class="p" cx="120" cy="90" r="5" fill="var(--accent3)"/><circle class="p" cx="90" cy="90" r="4" fill="var(--gold)"/></svg><span class="tag">particles</span></div>
+      <div class="spec"><div class="fx anim" data-anim="rays" data-t-rel="0.5" data-dur="1.4" data-loop="rotate" data-loop-period="9" style="font-size:70px">☀️</div><span class="tag">rays</span></div>
+    </div>
+  </section>
+
+  <!-- 21 FUN: CELEBRATIONS -->
+  <section class="slide" data-slide="21" data-transition-in="flash">
+    <div class="bleed anim" data-anim="confettiRain" data-t-rel="0" data-dur="9999"></div>
+    <div class="kicker">Fun pack <span class="num">· 20</span></div>
+    <div class="sec-head"><h2 class="h2">Celebrations</h2><p class="sub">Owned, brand-colored, render-safe — no external assets.</p></div>
+    <div class="grid g3" style="max-width:1400px">
+      <div class="spec"><div class="fx anim" data-anim="confettiBurst" data-t-rel="0.2" data-dur="1.8"></div><span class="nm">confettiBurst</span></div>
+      <div class="spec"><div class="fx anim" data-anim="fireworks"     data-t-rel="0.4" data-dur="2.6"></div><span class="nm">fireworks</span></div>
+      <div class="spec"><div class="fx anim" data-anim="partyPopper"   data-t-rel="0.6" data-dur="1.6"></div><span class="nm">partyPopper</span></div>
+      <div class="spec"><div class="fx anim" data-anim="burstLines"    data-t-rel="0.8" data-dur="0.7"></div><span class="nm">burstLines</span></div>
+      <div class="spec"><div class="fx anim" data-anim="sparkle"       data-t-rel="0" data-dur="9999"></div><span class="nm">sparkle</span></div>
+      <div class="spec"><div class="fx anim" data-anim="rocketLaunch"  data-t-rel="1.0" data-dur="1.6"></div><span class="nm">rocketLaunch</span></div>
+    </div>
+  </section>
+
+  <!-- 22 FUN: REWARDS & STATUS -->
+  <section class="slide" data-slide="22" data-transition-in="barWipeUp">
+    <div class="grid-bg"></div>
+    <div class="kicker">Fun pack <span class="num">· 21</span></div>
+    <div class="sec-head"><h2 class="h2">Rewards &amp; status</h2></div>
+    <div class="grid g4" style="max-width:1500px">
+      <div class="spec"><div class="fx anim" data-anim="badgeUnlock" data-t-rel="0.3" data-dur="1.5" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(140deg,var(--accent),var(--accent3));font-size:58px">🎖️</div><span class="nm">badgeUnlock</span></div>
+      <div class="spec"><div class="fx anim" data-anim="trophyShine" data-t-rel="0.5" data-dur="1.4"></div><span class="nm">trophyShine</span></div>
+      <div class="spec"><div class="fx anim" data-anim="ratingStars" data-t-rel="0.7" data-dur="1.3" data-count="5"></div><span class="nm">ratingStars</span></div>
+      <div class="spec"><div class="fx anim" data-anim="starPop"     data-t-rel="0.9" data-dur="0.9" style="width:110px;height:110px"></div><span class="nm">starPop</span></div>
+      <div class="spec"><div class="fx anim" data-anim="checkDraw"   data-t-rel="1.1" data-dur="0.9" style="width:110px;height:110px"></div><span class="nm">checkDraw</span></div>
+      <div class="spec"><div class="fx anim" data-anim="crossDraw"   data-t-rel="1.3" data-dur="0.7" style="width:110px;height:110px"></div><span class="nm">crossDraw</span></div>
+      <div class="spec"><div class="fx anim" data-anim="thumbsUp"    data-t-rel="1.5" data-dur="0.9"></div><span class="nm">thumbsUp</span></div>
+      <div class="spec"><div class="fx anim" data-anim="coinFlip"    data-t-rel="1.7" data-dur="1.2" style="width:110px;height:110px"></div><span class="nm">coinFlip</span></div>
+    </div>
+  </section>
+
+  <!-- 23 FUN: REACTIONS & LOADERS -->
+  <section class="slide" data-slide="23" data-transition-in="crossDissolve">
+    <div class="bleed anim" data-anim="floatEmojis" data-t-rel="0" data-dur="9999" data-emojis="❤️,⭐,🎉,🔥,👍"></div>
+    <div class="kicker">Fun pack <span class="num">· 22</span></div>
+    <div class="sec-head"><h2 class="h2">Reactions &amp; loaders</h2></div>
+    <div class="grid g4" style="max-width:1500px">
+      <div class="spec"><div class="fx anim" data-anim="heartBeat"   data-t-rel="0.3" data-dur="1.2"></div><span class="nm">heartBeat</span></div>
+      <div class="spec"><div class="fx anim" data-anim="emojiPop"    data-t-rel="0.5" data-dur="0.9" data-emoji="🎊"></div><span class="nm">emojiPop</span></div>
+      <div class="spec"><div class="fx anim" data-anim="lightbulb"   data-t-rel="0.7" data-dur="1.2"></div><span class="nm">lightbulb</span></div>
+      <div class="spec"><div class="fx anim" data-anim="pulseRings"  data-t-rel="0" data-dur="9999"></div><span class="nm">pulseRings</span></div>
+      <div class="spec"><div class="fx anim" data-anim="waveform"    data-t-rel="0" data-dur="9999" data-bars="16"></div><span class="nm">waveform</span></div>
+      <div class="spec"><div class="fx anim" data-anim="spinner"     data-t-rel="0" data-dur="9999" style="width:100px;height:100px"></div><span class="nm">spinner</span></div>
+      <div class="spec"><div class="fx anim" data-anim="dotsLoader"  data-t-rel="0" data-dur="9999"></div><span class="nm">dotsLoader</span></div>
+      <div class="spec"><div class="fx anim" data-anim="shimmerSweep" data-t-rel="0.4" data-dur="1.4" style="background:rgba(124,92,255,.18);border-radius:12px">shimmer</div><span class="nm">shimmerSweep</span></div>
+    </div>
+  </section>
+
+  <!-- 24 EXITS -->
+  <section class="slide" data-slide="24" data-transition-in="pushDown">
+    <div class="grid-bg"></div>
+    <div class="kicker">Exits <span class="num">· 23</span></div>
+    <div class="sec-head"><h2 class="h2">Exit animations</h2><p class="sub">Enter, hold, then leave — <code>data-exit</code> + <code>data-exit-at</code>. Watch them go.</p></div>
+    <div class="grid g4" style="max-width:1500px">
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.7" data-exit="fadeOut"       data-exit-at="2.6" data-exit-dur="0.7"><span class="nm">fadeOut</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="0.5" data-dur="0.7" data-exit="slideOutLeft"  data-exit-at="2.8" data-exit-dur="0.7"><span class="nm">slideOutLeft</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="0.7" data-dur="0.7" data-exit="slideOutRight" data-exit-at="3.0" data-exit-dur="0.7"><span class="nm">slideOutRight</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="0.9" data-dur="0.7" data-exit="slideOutUp"    data-exit-at="3.2" data-exit-dur="0.7"><span class="nm">slideOutUp</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="1.1" data-dur="0.7" data-exit="slideOutDown"  data-exit-at="3.4" data-exit-dur="0.7"><span class="nm">slideOutDown</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="1.3" data-dur="0.7" data-exit="scaleOut"      data-exit-at="3.6" data-exit-dur="0.7"><span class="nm">scaleOut</span></div>
+      <div class="spec anim" data-anim="fadeUp" data-t-rel="1.5" data-dur="0.7" data-exit="blurOut"       data-exit-at="3.8" data-exit-dur="0.7"><span class="nm">blurOut</span></div>
+      <div class="spec anim" data-anim="spring" data-t-rel="1.7" data-dur="0.9"><span class="nm">(stays)</span></div>
+    </div>
+  </section>
+
+  <!-- 25 TRANSITIONS CATALOG -->
+  <section class="slide" data-slide="25" data-transition-in="zoomIn">
+    <div class="grid-bg"></div>
+    <div class="kicker">Transitions <span class="num">· 24</span></div>
+    <div class="sec-head"><h2 class="h2">21 scene transitions</h2><p class="sub">Slides animate against each other — never a scroll. Every slide here arrived on a different one.</p></div>
+    <div class="chips anim-group" data-anim="scaleIn" data-stagger="0.05" data-t-rel="0.3" data-dur="0.6">
+      <span class="chip">cut</span><span class="chip">crossDissolve</span><span class="chip">fade</span><span class="chip">pushLeft</span><span class="chip">pushRight</span>
+      <span class="chip">pushUp</span><span class="chip">pushDown</span><span class="chip">coverLeft</span><span class="chip">revealRight</span><span class="chip">zoomIn</span>
+      <span class="chip">zoomOut</span><span class="chip">flip3D</span><span class="chip">spinZoom</span><span class="chip">whipPan</span><span class="chip">blurThrough</span>
+      <span class="chip">irisOpen</span><span class="chip">barWipe</span><span class="chip">barWipeUp</span><span class="chip">glitch</span><span class="chip">flash</span><span class="chip">blocks</span>
+    </div>
+  </section>
+
+  <!-- 26 SYNC & CALIBRATION -->
+  <section class="slide" data-slide="26" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div class="kicker">Sync <span class="num">· 25</span></div>
+    <div class="sec-head"><h2 class="h2">It all rides the audio clock</h2><p class="sub">Animations key off <code>&lt;audio&gt;.currentTime</code> — scrub and everything redraws.</p></div>
+    <div class="grid g3" style="max-width:1500px">
+      <div class="spec" style="min-height:200px"><span class="nm anim" data-anim="fadeUp" data-t-rel="0.4" data-dur="0.8">data-t-rel</span><span class="tag">time, relative to the slide cue</span></div>
+      <div class="spec" style="min-height:200px"><span class="nm anim" data-anim="fadeUp" data-t-rel="0.7" data-dur="0.8">calibrate by ear</span><span class="tag">press T · tap M · A to apply · E to export</span></div>
+      <div class="spec" style="min-height:200px"><span class="nm anim" data-anim="fadeUp" data-t-rel="1.0" data-dur="0.8">AAF → TIMINGS</span><span class="tag">sample-accurate cues from any DAW</span></div>
+    </div>
+  </section>
+
+  <!-- 27 STYLES & PIPELINE -->
+  <section class="slide" data-slide="27" data-transition-in="fade">
+    <div class="grid-bg"></div>
+    <div class="kicker">Direction <span class="num">· 26</span></div>
+    <div class="sec-head"><h2 class="h2">Signature styles &amp; the pipeline</h2><p class="sub">Pick a look in the concept phase; the whole deck inherits its palette, type &amp; motion.</p></div>
+    <div class="chips anim-group" data-anim="tiltIn" data-stagger="0.08" data-t-rel="0.4" data-dur="0.8" style="margin-bottom:40px">
+      <span class="chip">kurzgesagt</span><span class="chip">apple-keynote</span><span class="chip">documentary</span><span class="chip">bold-editorial</span>
+      <span class="chip">data-journalism</span><span class="chip">neon-tech</span><span class="chip">playful-pop</span>
+    </div>
+    <p class="tline anim" data-anim="wordReveal" data-t-rel="1.6" data-dur="2.0" style="font-size:38px;color:var(--ink-soft)">concept → script → build → generate (ElevenLabs) → render (MP4)</p>
+  </section>
+
+  <!-- 28 FINALE -->
+  <section class="slide" data-slide="28" data-transition-in="whipPan">
+    <div class="bleed anim" data-anim="aurora" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="confettiBurst" data-t-rel="3.2" data-dur="2.4" style="display:flex;align-items:center;justify-content:center"></div>
+    <div class="bleed anim" data-anim="filmGrain" data-t-rel="0" data-dur="9999" data-grain-opacity="0.05"></div>
+    <div class="center">
+      <p class="eyebrow anim" data-anim="fadeIn" data-t-rel="0.2" data-dur="0.6">open source · MIT</p>
+      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.6" data-dur="1.6">All of it.<br>One clock.</h1>
+      <p class="sub anim" data-anim="wordReveal" data-t-rel="2.2" data-dur="1.6">github.com/gRAYESS123/storyboard-claude</p>
+      <span class="cta-pill anim" data-anim="spring" data-t-rel="3.0" data-dur="1.0" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
+    </div>
+  </section>
+
+</div></div>
+
+<div class="transition-overlay" id="transitionOverlay"></div>
+<audio id="voAudio" preload="metadata"></audio>
+
+<script src="storyboard-engine.js"></script>
+<script>
+const TIMINGS = [
+  { time:   0.0, slide:  1 }, { time:   6.0, slide:  2 }, { time:  11.0, slide:  3 },
+  { time:  16.0, slide:  4 }, { time:  21.0, slide:  5 }, { time:  27.0, slide:  6 },
+  { time:  34.0, slide:  7 }, { time:  40.0, slide:  8 }, { time:  46.0, slide:  9 },
+  { time:  51.0, slide: 10 }, { time:  56.0, slide: 11 }, { time:  62.0, slide: 12 },
+  { time:  68.0, slide: 13 }, { time:  74.0, slide: 14 }, { time:  80.0, slide: 15 },
+  { time:  86.0, slide: 16 }, { time:  92.0, slide: 17 }, { time: 100.0, slide: 18 },
+  { time: 106.0, slide: 19 }, { time: 112.0, slide: 20 }, { time: 118.0, slide: 21 },
+  { time: 124.0, slide: 22 }, { time: 130.0, slide: 23 }, { time: 136.0, slide: 24 },
+  { time: 143.0, slide: 25 }, { time: 148.0, slide: 26 }, { time: 153.0, slide: 27 },
+  { time: 158.0, slide: 28 }
+];
+const SLIDE_LABELS = ['Title','Entrances','Physics','3D','Text reveals','Kinetic type','Easing & spring','Stagger & chain','Loops','Counters','Bar chart','Gauge/Donut','Diagram','Path & motion','Annotations','Code typing','UI demo','Camera rig','Cinematic grade','Atmosphere','Fun: celebrate','Fun: rewards','Fun: reactions','Exits','Transitions','Sync','Styles','Finale'];
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 165 });
+</script>
+</body>
+</html>

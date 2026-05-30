@@ -33,7 +33,11 @@ The "playable document" pattern is the unlock. Animations sync to your voice-ove
 
 ## See it in action
 
-- **`examples/showcase/`** — the **flagship reel** ([`showcase.mp4`](examples/showcase/showcase.mp4)). Fourteen beats in ~90 seconds, each demoing a different power: a per-letter spring title, `wordSwap` phrase hits, one-instruction staggers, 3D card flips, data-viz charts + a gauge that draw on the clock, a flow diagram with auto-arrowheads, syntax-highlighted code typing, hand-drawn annotations, kinetic masked type, a confetti-and-badge payoff, rating stars + floating reactions, and a synthetic-cursor UI demo — each slide arriving on a different cinematic transition. Open `examples/showcase/showcase.html` (the synthetic clock plays the whole thing with no audio) or watch the rendered MP4.
+- **`examples/showcase/`** — two silent demo decks:
+  - **The flagship reel** ([`showcase.mp4`](examples/showcase/showcase.mp4)) — fourteen beats in ~90 seconds, each demoing a different power: a per-letter spring title, `wordSwap` phrase hits, one-instruction staggers, 3D card flips, data-viz charts + a gauge that draw on the clock, a flow diagram with auto-arrowheads, syntax-highlighted code typing, hand-drawn annotations, kinetic masked type, a confetti-and-badge payoff, rating stars + floating reactions, and a synthetic-cursor UI demo — each slide on a different cinematic transition.
+  - **The capability gallery** ([`capabilities.mp4`](examples/showcase/capabilities.mp4)) — a ~28-section kitchen-sink catalog that demos *every* family the engine has: entrances, physics, 3D, text & kinetic type, easing/spring, staggers & chains, loops, charts, diagrams, motion paths, annotations, code, the camera rig + multiplane, the cinematic grade, living backgrounds, the full fun pack, exits, and all 21 transitions.
+
+  Open either `.html` (the synthetic clock plays it with no audio) or watch the rendered MP4.
 - **`examples/stripe-radar/`** — a complete 150-second product pitch: AAF-driven sync, full concept → script → build → render pipeline.
 
 ## Install

@@ -46,9 +46,12 @@ playthrough/
 skill/reference.md
 reference.md
 
-# Scratch render/test frames
+# Scratch render/test frames + temp dirs from render_video.py
 examples/**/frame_*.png
 examples/**/trans_*.png
+.render-tmp*/
+**/.render-tmp*/
 
-# Keep the flagship reel (hero demo) despite the *.mp4 ignore
+# Keep the demo videos (hero reel + capability gallery) despite any *.mp4 ignore
 !examples/showcase/showcase.mp4
+!examples/showcase/capabilities.mp4
