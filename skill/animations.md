@@ -648,3 +648,72 @@ Moving connected-dot network on a `<canvas>`. `data-count` (dots, default 60), `
 <canvas class="bleed anim" data-anim="constellation" data-t-rel="0" data-dur="9999" data-count="70" data-color="124,92,255"></canvas>
 ```
 The canvas sizes itself to its layout box on first frame. Great tech/AI/data ambient.
+
+
+---
+
+# Advanced pack (v0.6): charts, diagrams, UI demo, code
+
+## Charts (data-explainer)
+
+| Preset | What it does | Key attrs |
+|---|---|---|
+| `chartArea` | Reveals a line/area SVG path left-to-right (clip sweep) | use on `<path>` |
+| `pieSlice` | Sweeps one pie/donut arc on an SVG `<circle>` | `data-pct`, `data-offset` (stack slices) |
+| `gauge` | Rotates a needle from one angle to another | `data-from`, `data-to` (deg), set `transform-origin` |
+| `barTo` | Morphs a bar's height between two values (data update) | `data-from`, `data-to` (%) |
+
+Existing `barGrow`, `donutSweep`, `counter`, `comparisonBar` (v0.3) still apply. Compose:
+- **Line chart**: an SVG `<path>` for the line via `chartArea` (or `pathdraw`) + dots via staggered `scaleIn`.
+- **Stacked bars**: multiple `barGrow` bars in a column, staggered; or `barTo` for "value updates to..." moments.
+- **Pie/donut**: several `pieSlice` circles sharing center, each with `data-pct` and a cumulative `data-offset`.
+- **Gauge**: a background arc (`chartArea`) + a `gauge` needle.
+
+```html
+<!-- two-segment donut -->
+<circle class="anim" data-anim="pieSlice" data-t-rel="0.4" data-pct="64" cx="200" cy="200" r="150"
+        fill="none" stroke="var(--accent3)" stroke-width="60" transform="rotate(-90 200 200)"/>
+<circle class="anim" data-anim="pieSlice" data-t-rel="0.8" data-pct="36" data-offset="64" cx="200" cy="200" r="150"
+        fill="none" stroke="var(--accent)" stroke-width="60" transform="rotate(-90 200 200)"/>
+```
+
+## Diagrams & flows
+
+`connectorDraw` draws an SVG path between nodes; `data-arrow="end"` auto-adds an arrowhead at completion.
+
+```html
+<g class="anim" data-anim="scaleIn" data-t-rel="0.2">...node box...</g>
+<path class="anim" data-anim="connectorDraw" data-t-rel="1.0" data-arrow="end"
+      d="M 320 205 L 600 205" fill="none" stroke="var(--accent2)" stroke-width="4"/>
+<g class="anim" data-anim="scaleIn" data-t-rel="1.6">...next node...</g>
+```
+
+Compose: **process flow** = nodes (`scaleIn`, staggered) + `connectorDraw` between them, in narration order. **Timeline** = one long `connectorDraw` spine + dots (`scaleIn`) + labels. **Tree/org** = parent node, then branch connectors drawing down to children.
+
+## UI demo simulation (no screen recording)
+
+`cursorTour` drives a synthetic cursor across mock UI, clicking and typing. One driver element, an internal timeline.
+
+```html
+<!-- build a mock UI with real ids, then: -->
+<div class="anim" data-anim="cursorTour" data-t-rel="0" data-dur="9999"
+     data-stops="#field@1.0:type=card-testing, #deploy-btn@4.0:click"></div>
+```
+`data-stops` = comma-separated `selector@time[:click|:type=text]`. The cursor glides between targets (eased), ripples on click, and types into fields. Times are absolute audio seconds. Also: `clickRipple` (standalone ripple), `typeInto` (type into one field).
+
+## Text & code FX
+
+| Preset | Effect |
+|---|---|
+| `assemble` | Letters fly in from scattered positions to form the word |
+| `rgbGlitch` | RGB-split jitter that settles to clean text |
+| `neonOn` | Flickers on like a neon sign, then steady glow (`data-neon` color) |
+| `textMask` | Gradient or image shows through the letters + a sheen sweep (`data-img` for an image) |
+| `codeType` | Types code with live syntax highlighting (keywords/strings/numbers/comments/functions) |
+
+```html
+<h1 class="anim" data-anim="assemble" data-t-rel="0.3" data-dur="1.5">Assemble.</h1>
+<h1 class="anim" data-anim="neonOn" data-t-rel="0.3" data-neon="#19E3B1">LIVE</h1>
+<pre class="anim" data-anim="codeType" data-t-rel="0.3" data-dur="3.5">function block(charge){ ... }</pre>
+```
+`codeType` tokenizes on init and reveals character-by-character; keep snippets short (≤ ~12 lines) so it reads. For gradient/letter effects that wrap spans, see the v0.5 note about not combining with `wordReveal`.

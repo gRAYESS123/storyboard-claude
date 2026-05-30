@@ -424,3 +424,14 @@ Any beat over ~8s with a static background looks frozen. Drop an `aurora` (soft 
 6. Signature motion + emotional arc (earlier sections) — coherence.
 
 If a draft feels "templated," it's almost always missing 2, 3, or 4.
+
+
+---
+
+# v0.6 craft notes — charts, flows, demos, code
+
+- **Build data, don't show it.** A chart that's already drawn wastes the beat. Use `chartArea`/`pieSlice`/`gauge`/`barGrow` so the figure *grows as the narrator cites it*, and pair every number with a `counter`. For "it changed" moments use `barTo` (value morph) rather than a fresh bar.
+- **Flows reveal in narration order.** Draw node → connector → node, each on its own beat, with `connectorDraw data-arrow="end"`. Never show the whole diagram at once; the build *is* the explanation.
+- **UI demos beat screen recordings** for clarity: `cursorTour` lets you stage the exact happy path, type real example input, and click the one button that matters — no cursor hunting, no UI chrome you don't want. Sync the stop times to the VO ("type the rule name… and deploy").
+- **Reserve the loud text FX.** `rgbGlitch`/`assemble`/`neonOn` are hero-moment tools (title card, the one big word). `codeType` is for dev/technical content — let it finish typing before the narrator moves on. `textMask` is a premium title treatment; one per video.
+- **Quality ladder, extended:** transitions (v0.4) → living backgrounds (v0.5) → kinetic type + annotations (v0.5) → **data that builds / flows that draw / demos that click (v0.6)** → signature motion + emotional arc. Match the new tools to content type: data-journalism leans on charts, explainers on flows, SaaS on UI demos, dev on codeType.
