@@ -375,7 +375,7 @@
   }
 
   function resolveSchedule() {
-    ANIMS.length=0; LOOP_ELS.length=0;
+    ANIMS.length=0; LOOP_ELS.length=0; EXIT_SCHED.length=0;
     const cueFor={}; TIMINGS.forEach(t=>{cueFor[t.slide]=t.time;});
     // Containers with data-stagger distribute start times to children
     document.querySelectorAll('.anim-group[data-stagger]').forEach(group=>{

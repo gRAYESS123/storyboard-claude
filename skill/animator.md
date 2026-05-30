@@ -396,3 +396,31 @@ A common mistake is animating every beat at energy 5 — it flattens to noise. T
 # Pick a style first
 
 Before choosing presets per beat, pick ONE signature style from `styles.md` (kurzgesagt / apple-keynote / documentary / bold-editorial / data-journalism / neon-tech, or a derived one). The style hands you a palette, a motion vocabulary, a signature emphasis preset, and a transition pair. Author within it. Coherence across all beats reads as craft; a different look per beat reads as a template someone filled in.
+
+---
+
+# Raw-motion craft (v0.5) — use these to lift quality
+
+These are the moves that separate "slides with animation" from "motion design."
+
+## Kinetic typography on heroes
+A plain `fadeUp` title is fine; a `lineReveal` (lines rising behind a mask) or `wordSwap` (phrases hitting center in rhythm) is *cinematic*. Use one on the hook and the CTA. Sync `wordSwap` so each phrase lands exactly as the narrator says it — that lockstep of word-and-motion is the single biggest "premium" tell. Reserve for 1–2 hero moments; don't kinetic-type every title.
+
+## Annotate what the narrator emphasizes
+When the VO stresses a word ("these are *real* attributes," "no *fakes*"), draw a hand annotation on it at that exact moment: `circleScribble`, `underlineDraw`, `boxDraw`, `strikethrough`. It mimics a person pointing at the screen — instantly more credible and human. Pull the hit time from the word timestamps. 2–4 annotations across a video; more reads as clutter.
+
+## Declutter with exits
+The old engine made everything accumulate. Now: on a talky beat with several points, give each a `data-exit` so it leaves before the next arrives (`slideOutLeft` at the next point's cue). One idea on screen at a time reads as confident; five stacked reads as a wall. Use exits on list/explanation beats, never on a final summary where you *want* everything visible.
+
+## Fill long beats with a living background
+Any beat over ~8s with a static background looks frozen. Drop an `aurora` (soft gradient drift) or `constellation` (connected-dot network) behind the content. They're cheap, deterministic, and add the "alive" quality. Match colors to the style (`data-c1/c2/c3` for aurora, `data-color` for constellation). One ambient layer per slide, behind everything.
+
+## The quality ladder (apply in order of payoff)
+1. Right transition per beat (v0.4) — no more scroll.
+2. A living background on every long beat — kills "frozen."
+3. Kinetic type on the 2 hero beats — premium tell.
+4. Annotations on the 2–4 emphasized words — human + credible.
+5. Exits on talky beats — confident, uncluttered.
+6. Signature motion + emotional arc (earlier sections) — coherence.
+
+If a draft feels "templated," it's almost always missing 2, 3, or 4.

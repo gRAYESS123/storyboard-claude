@@ -572,3 +572,79 @@ Each style in `styles.md` has a recommended transition pair — use those for co
 ## Shared-element still composes
 
 `data-shared-id` morphs ride *on top of* whatever `data-transition-in` you choose — e.g. a `crossDissolve` while a card flies from its old position to its new one. They layer.
+
+---
+
+# Raw-motion pack (v0.5)
+
+Higher-craft motion: kinetic typography, hand-drawn annotations, exit animations, and living backgrounds.
+
+## Kinetic typography
+
+### `lineReveal`
+Each line rises up from behind a clip mask, staggered. Splits on `<br>`. The premium title move.
+```html
+<h1 class="anim" data-anim="lineReveal" data-t-rel="0.2" data-dur="1.6">Lines rise<br>behind a mask.</h1>
+```
+
+### `wordSwap`
+Sequential phrases hit center one after another — VO-synced punchy hero lines. Phrases via `data-words="A|B|C"`; each scales in, holds, scales out as the next arrives (the last one holds).
+```html
+<h1 class="anim" data-anim="wordSwap" data-t-rel="0.2" data-dur="4.5" data-words="Faster.|Simpler.|Yours."></h1>
+```
+Set `data-dur` to span the phrase (≈ seconds-per-phrase × count). Sync to the narration saying each word.
+
+## Hand-drawn annotations (draw-on emphasis)
+
+Draw a rough marker onto a word/element as the narrator emphasizes it — the classic explainer device. The element should wrap just the phrase you're annotating. Stroke color from `data-ann-color` (default `--accent`), weight from `data-ann-weight`.
+
+| Preset | Mark |
+|---|---|
+| `underlineDraw` | Hand-drawn underline sweeping in |
+| `circleScribble` | Loose scribble-circle around the phrase |
+| `boxDraw` | Rough rounded box (add padding to the element) |
+| `strikethrough` | Crossed-out line |
+
+```html
+Real <span class="anim" data-anim="circleScribble" data-t-rel="0.4" data-dur="0.9">attributes</span>.
+No <span class="anim" data-anim="strikethrough" data-t-rel="1.4">fakes</span>.
+<span class="anim" data-anim="underlineDraw" data-t-rel="2.2">Copy-ready</span> output.
+<span class="anim" data-anim="boxDraw" data-t-rel="3.0" style="display:inline-block;padding:6px 16px">20 patterns</span>
+```
+Annotations create an absolutely-positioned SVG over the element's box (the element is set `position:relative`), so wrap a tight inline-block span around exactly what you want marked.
+
+## Exit animations
+
+Elements can now **leave**, so content cycles within a long beat instead of piling up. Add `data-exit` plus a time: `data-exit-at` (relative to the slide cue) or `data-exit-t` (absolute). Optional `data-exit-dur` (default 0.7).
+
+| Exit | Effect |
+|---|---|
+| `fadeOut` | Opacity to 0 |
+| `slideOutLeft/Right/Up/Down` | Slides off + fades |
+| `scaleOut` | Shrinks + fades |
+| `popOut` | Quick anticipate-then-shrink |
+| `blurOut` | Blurs out + fades |
+
+```html
+<h2 class="anim" data-anim="fadeUp" data-t-rel="0.2" data-exit="slideOutLeft" data-exit-at="1.6">First point leaves…</h2>
+<h2 class="anim" data-anim="fadeUp" data-t-rel="2.0">…so the second is clean.</h2>
+```
+Exits run after entrances, so they always win once their window opens. Use them to keep frames uncluttered on talky beats — show a point, let it leave, bring the next.
+
+## Living backgrounds (continuous ambient)
+
+Use on a full-bleed element behind content. They run the whole beat (driven by the audio clock, so they're deterministic in render).
+
+### `aurora`
+Soft drifting gradient clouds. Colors from `data-c1/c2/c3` (default the accent trio).
+```html
+<div class="bleed anim" data-anim="aurora" data-t-rel="0" data-dur="9999"></div>
+```
+(`.bleed { position:absolute; inset:0; z-index:0 }` — put content above with a higher z-index.)
+
+### `constellation`
+Moving connected-dot network on a `<canvas>`. `data-count` (dots, default 60), `data-color` (R,G,B, default violet).
+```html
+<canvas class="bleed anim" data-anim="constellation" data-t-rel="0" data-dur="9999" data-count="70" data-color="124,92,255"></canvas>
+```
+The canvas sizes itself to its layout box on first frame. Great tech/AI/data ambient.
