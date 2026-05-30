@@ -766,3 +766,58 @@ Keep a settled element imperceptibly alive so the frame never looks frozen. A mi
 <h1 class="anim" data-anim="spring" data-t-rel="0.3" data-hold="breathe">Alive</h1>
 ```
 `data-hold="breathe|float|sway"`. Tiny defaults (breathe ≈2.5%, float ≈4px, period 6s). It's the loop system at whisper amplitude — add to any hero on screen >4s. (For a stronger continuous loop, use `data-loop` instead.)
+
+
+---
+
+# Fun pack (v0.7): owned dazzle effects + Lottie on demand
+
+Brand-colored, dependency-free, render-safe effects. Drop `<div class="anim" data-anim="X">` — most generate their own children. Colors pull from `--accent/--accent2/--accent3/--gold`.
+
+## One-shot effects (driven by progress)
+
+| Preset | Effect | Notes |
+|---|---|---|
+| `confettiBurst` | Radial confetti explosion | self-fills 54 pieces; gravity |
+| `fireworks` | Multiple staggered bursts | 4 clusters |
+| `checkDraw` | Success check + circle draw-on | mint |
+| `crossDraw` | Error X + circle draw-on | pink |
+| `starPop` | Star springs + spins in | gold |
+| `heartBeat` | Heart pops + double-thump | `data-emoji` to override |
+| `coinFlip` | 3D-flipping gold coin | `data-face` ($ default) |
+| `trophyShine` | Trophy scales in | `data-emoji` |
+| `badgeUnlock` | Badge + expanding ring | wrap your badge content |
+| `ratingStars` | N stars fill L→R + pop | `data-count` |
+| `emojiPop` | Any emoji bounces in | `data-emoji` |
+| `thumbsUp` | 👍 pops + wiggles | `data-emoji` |
+| `lightbulb` | 💡 flickers on + glows | idea moments |
+| `partyPopper` | 🎉 + streamer burst | |
+| `rocketLaunch` | 🚀 flies up with wobble | |
+| `burstLines` | Radial impact lines | emphasis / "pow" |
+| `shimmerSweep` | Light sheen sweeps across | put on any element |
+
+## Continuous loops (run the whole beat — `data-dur="9999"`)
+
+| Preset | Effect | Notes |
+|---|---|---|
+| `spinner` | Rotating arc loader | |
+| `dotsLoader` | 3 bouncing dots | typing/thinking |
+| `pulseRings` | Concentric expanding rings | |
+| `waveform` | Audio bars; **beat-reactive** if a track is loaded | `data-bars` |
+| `sparkle` | Twinkling stars scattered | magic/AI |
+| `confettiRain` | Confetti falls from top | full-bleed layer |
+| `floatEmojis` | Emoji reactions drift up | `data-emojis="❤️,🎉,⭐"` |
+
+## Lottie on demand (richer illustrated pieces)
+
+For things we don't own procedurally (mascots, weather, delivery, etc.), use the **100-entry index** + fetcher rather than bundling files:
+
+```bash
+python skill/lottie_fetch.py --list celebration       # browse
+python skill/lottie_fetch.py --search "rocket startup" # find (routes to owned preset if one exists)
+python skill/lottie_fetch.py show mascot-wave          # see recommendation
+python skill/lottie_fetch.py fetch <url> --out ./my-video --id mascot-wave
+```
+The fetcher validates the JSON is a real Lottie, saves it to `<project>/assets/lottie/<id>.json` (so renders stay offline-safe), and records the source + date in `assets/lottie/CREDITS.md`. **Always verify the source license before shipping.** Play it with the existing `data-anim="lottie" data-src="assets/lottie/<id>.json"`.
+
+Rule: **reach for the owned preset first** (46 of the 108 concepts have one — render-safe, brand-colored, never 404). Only fetch a Lottie when you need a specific illustrated look the engine can't draw.

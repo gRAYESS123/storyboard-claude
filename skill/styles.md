@@ -108,3 +108,21 @@ Each style has a coherent transition pair. Use these, not a random one per slide
 | `bold-editorial` | `cut` | `barWipe`, `pushLeft`, `blocks` | blurThrough, irisOpen |
 | `data-journalism` | `cut` | `flash` (on a data reveal), `crossDissolve` | flip3D, spinZoom, glitch |
 | `neon-tech` | `crossDissolve` | `glitch`, `whipPan`, `flip3D`, `zoomIn` | (anything goes — it's maximal) |
+
+
+---
+
+## `playful-pop` — maximal fun (v0.7)
+
+Loud, joyful, social-first. The "lean into playful" default.
+
+- **Palette**: bright multi-accent on a soft or dark bg (violet `#7C5CFF`, mint `#19E3B1`, hot pink `#FF5C8A`, gold `#FFD166`). Saturated, high-energy.
+- **Type**: rounded heavy display (Poppins, Baloo, Fredoka). Big, friendly.
+- **Motion vocabulary**: `spring`, `bounce`, `emojiPop`, `confettiBurst`, `partyPopper`, `starPop`, `ratingStars`, `floatEmojis` (loop), `pulseRings` (loop), `wobble`, `heartBeat`. Something is always celebrating or breathing.
+- **Signature emphasis**: `bounce` / `confettiBurst` on every payoff.
+- **Transitions**: `spinZoom`, `zoomIn`, `whipPan`, `irisOpen`. Kinetic and fun.
+- **Pacing**: fast, 5–8s beats. Frequent micro-delight.
+- **When**: social media, hype reels, app launches, anything aimed at a young/consumer audience or made to be shared.
+
+### Maximal-dazzle bias (when the user wants playful)
+For `playful-pop`, `kurzgesagt`, and `neon-tech`, bias toward: a fun-pack loop (`sparkle`/`floatEmojis`/`pulseRings`) on most beats, a celebration (`confettiBurst`/`fireworks`/`partyPopper`/`badgeUnlock`) on every genuine win, and emoji presets for quick reactions. Keep the ≤3-showy-*transitions* rule, but dazzle *effects* can fire more often here than in the restrained styles. Never let dazzle obscure the words — loops stay low-contrast, celebrations stay brief.

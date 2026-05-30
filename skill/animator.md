@@ -143,3 +143,17 @@ Watch it back (or scrub the frames) and ask:
 7. Could I remove 20% of the motion and make it *better*? (almost always yes — do it)
 
 If any answer is "no," it's not done. Senior work is iterated, not one-shot.
+
+
+---
+
+# v0.7 dazzle craft — fun, not gimmicky
+
+The fun pack makes videos *delightful* — but loud effects are seasoning, not the meal.
+
+- **One celebration per payoff.** `confettiBurst`/`fireworks`/`partyPopper`/`badgeUnlock` land on the win (the result, the CTA success, the "we did it" beat). Two in a row cancel each other out.
+- **Loaders & status are functional dazzle** — `spinner`, `dotsLoader`, `checkDraw`, `crossDraw`, `waveform` make process/UI beats feel alive and are safe to use freely (they read as "the product working," not confetti).
+- **Ambient loops fill, don't shout** — `sparkle`, `floatEmojis`, `confettiRain`, `pulseRings` behind content on energetic beats. Keep them low-contrast so they don't fight the message.
+- **Emoji presets are cheap delight** — `emojiPop`/`heartBeat`/`thumbsUp`/`rocketLaunch` are colorful, universal, zero-asset. Great for social/hype cuts; use `data-emoji` to fit the topic.
+- **Match dazzle to the style's energy** (see styles.md): `playful-pop`/`kurzgesagt`/`neon-tech` lean in; `apple-keynote`/`documentary`/`data-journalism` stay restrained (a single `checkDraw` or `counter`, not confetti).
+- **Extended quality ladder:** transitions → living bg → kinetic type + annotations → data/flows/demos/code → **payoff dazzle (fun pack) on the win**. The dazzle is the last 5%; it shines only because the 95% beneath it is solid.
