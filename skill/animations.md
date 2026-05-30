@@ -717,3 +717,52 @@ Compose: **process flow** = nodes (`scaleIn`, staggered) + `connectorDraw` betwe
 <pre class="anim" data-anim="codeType" data-t-rel="0.3" data-dur="3.5">function block(charge){ ... }</pre>
 ```
 `codeType` tokenizes on init and reveals character-by-character; keep snippets short (≤ ~12 lines) so it reads. For gradient/letter effects that wrap spans, see the v0.5 note about not combining with `wordReveal`.
+
+
+---
+
+# Senior composition pack (v0.7)
+
+Compositional tools for depth, focus, and a film grade — the difference between "a webpage" and "a shot."
+
+## Multiplane depth (`data-plane`)
+Stage layers at different depths inside a `.camera`. During any camera push/pan, each layer parallaxes by its depth factor, manufacturing true 3D depth (the Disney multiplane camera).
+
+```html
+<div class="camera" data-camera="0=>scale:1; 4.5=>scale:1.7,x:-180,y:-80">
+  <div class="plane" data-plane="0.3" ...>   <!-- background: drifts slowly -->
+  <div ...subject...>                         <!-- neutral plane ~1.0 -->
+  <div class="plane" data-plane="1.8" ...>   <!-- foreground: races past -->
+</div>
+```
+- `data-plane < 1` → background (lags the camera). `= 1` → moves with it. `> 1` → foreground (leads).
+- Put `data-plane` on **static layout layers** (backgrounds, decorative shapes), not on `.anim` elements — the parallax owns their transform.
+- No camera move = planes are static. Multiplane is driven by the camera rig.
+
+## Depth of field
+| Preset | Effect |
+|---|---|
+| `rackFocus` | Pulls an element from heavy blur + low brightness into sharp focus (the eye snaps to it) |
+| `defocus` | Pushes an element OUT of focus (blur + dim) — recede context a plane |
+
+Sharpness is hierarchy: the sharp element is the important one. Use `rackFocus` on an arriving subject, `defocus` on the context behind it.
+
+## The grade (make it look like film)
+| Preset | Effect | How to use |
+|---|---|---|
+| `cinematicGrade` | Full-frame vignette + corner falloff + multiply blend | Full-bleed `<div>` on top (z above content); one per slide that needs grading |
+| `vignette` | Just an edge-darkening that ramps in | Lighter alternative to cinematicGrade |
+| `filmGrain` | Animated fractal-noise grain (overlay blend) | One full-bleed layer; `data-grain-opacity="0.05"`–`"0.10"`. Unifies the whole deck's texture |
+
+```html
+<div class="anim" data-anim="cinematicGrade" data-t-rel="0" data-dur="9999"></div>
+<div class="anim" data-anim="filmGrain" data-t-rel="0" data-dur="9999" data-grain-opacity="0.07"></div>
+```
+(Both are continuous — `data-dur="9999"`. Put them last in the slide so they sit on top.)
+
+## Moving holds (`data-hold`)
+Keep a settled element imperceptibly alive so the frame never looks frozen. A micro-loop applied after the entrance settles.
+```html
+<h1 class="anim" data-anim="spring" data-t-rel="0.3" data-hold="breathe">Alive</h1>
+```
+`data-hold="breathe|float|sway"`. Tiny defaults (breathe ≈2.5%, float ≈4px, period 6s). It's the loop system at whisper amplitude — add to any hero on screen >4s. (For a stronger continuous loop, use `data-loop` instead.)

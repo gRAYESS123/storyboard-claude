@@ -572,6 +572,42 @@
     }},
   });
 
+  /* ===== SENIOR COMPOSITION PACK (v0.7) ===== */
+  Object.assign(PRESETS, {
+    rackFocus: { dur: 1.2, apply: (el,p,c) => {   // focus pull: snaps into sharp + brightens
+      const e=(c.ease||E.outCubic)(p);
+      el.style.opacity=Math.min(1,p*3);
+      el.style.filter='blur('+((1-e)*18)+'px) brightness('+(0.55+0.45*e)+')';
+      el.style.transform='scale('+(0.985+0.015*e)+')';
+    }},
+    defocus: { dur: 1.2, apply: (el,p,c) => {      // push OUT of focus (recede a layer)
+      const e=(c.ease||E.outCubic)(p);
+      el.style.opacity=1; el.style.filter='blur('+(e*16)+'px) brightness('+(1-0.35*e)+')';
+    }},
+    vignette: { dur: 1.6, apply: (el,p,c) => {     // edges darken in
+      const e=(c.ease||E.outCubic)(p);
+      el.style.opacity=1; el.style.position='absolute'; el.style.inset='0'; el.style.pointerEvents='none'; el.style.zIndex='38';
+      el.style.boxShadow='inset 0 0 '+(120+e*140)+'px '+(30+e*70)+'px rgba(0,0,0,'+(0.28+e*0.34)+')';
+    }},
+    cinematicGrade: { dur: 9999, apply: (el,p,c) => {  // full-frame film grade (vignette + corner falloff + tint)
+      el.style.opacity=1;
+      if(el.dataset.cgInit) return; el.dataset.cgInit='1';
+      el.style.position='absolute'; el.style.inset='0'; el.style.pointerEvents='none'; el.style.zIndex='39';
+      el.style.boxShadow='inset 0 0 220px 70px rgba(0,0,0,0.5)';
+      el.style.background='radial-gradient(125% 125% at 50% 32%, transparent 52%, rgba(0,0,0,0.42) 100%)';
+      el.style.mixBlendMode='multiply';
+    }},
+    filmGrain: { dur: 9999, apply: (el,p,c) => {   // animated grain via fractal-noise SVG data-uri
+      el.style.opacity = (el.dataset.grainOpacity||'0.06');
+      if(el.dataset.fgInit) return; el.dataset.fgInit='1';
+      el.style.position='absolute'; el.style.inset='0'; el.style.pointerEvents='none'; el.style.zIndex='41'; el.style.mixBlendMode='overlay';
+      const svg="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E";
+      el.style.backgroundImage="url(\""+svg+"\")"; el.style.backgroundSize='320px 320px';
+      let f=0; el._grain=setInterval(()=>{ f=(f+1)%6; el.style.backgroundPosition=(f*53%320)+'px '+(f*97%320)+'px'; }, 90);
+    }},
+  });
+
+
 
   const LOOPS = {
     float:   (t,amp,per) => `translateY(${Math.sin(t/per*Math.PI*2)*amp}px)`,
@@ -877,6 +913,10 @@
       const sc=a.scale+(b.scale-a.scale)*e, x=a.x+(b.x-a.x)*e, y=a.y+(b.y-a.y)*e;
       C.cam.style.transformOrigin='center center';
       C.cam.style.transform=`scale(${sc}) translate(${x}px,${y}px)`;
+      C.cam.querySelectorAll('[data-plane]').forEach(pl=>{
+        const f=parseFloat(pl.dataset.plane||'1');
+        pl.style.transform='translate('+(x*(f-1))+'px,'+(y*(f-1))+'px) scale('+(1+(sc-1)*(f-1))+')';
+      });
     }
   }
 

@@ -1,437 +1,145 @@
-# The animator brain
+# The animator's brain — senior direction
 
-This is the doc Claude reads during the `build` phase to *decide* what animation goes where. It's not a CSS reference — `animations.md` is that. This is the **judgment layer**: what makes a beat feel cinematic instead of slidey.
+You are not decorating slides. You are **directing motion** in service of a story told by a voice. Read this before you author a single `data-anim`. It is the difference between a deck that *has animations* and a film that *moves*.
 
-> Read this once before authoring any storyboard. Then re-read the relevant sections per beat as you build.
-
----
-
-## The job, plainly
-
-You are the animator. You have:
-- A `concept.md` with a beat list, slide types, narration seeds, and visual direction.
-- A `script.md` with finalized narration and `TIMINGS`.
-- A template (`template.html`) with 36 presets and 6 scene transitions.
-
-Your job is to **choreograph** every beat — pick which elements animate, in which order, with which preset, at what time relative to the cue, in service of the narration. Not just "make things appear." Make the picture tell the story.
-
-If a beat feels flat after you've finished it, you haven't done your job. Add a secondary motion, change a transition, hit a word, pull focus. Push until each beat has either a clear focal entrance, an atmospheric layer, OR a sync hit with the narration — ideally all three.
+> The junior asks "what preset goes here?" The senior asks "where is the viewer's eye, what does this beat make them feel, and what is the least motion that earns it?" Tools are listed in `animations.md`. This file is judgment.
 
 ---
 
-## The 12 principles, applied to this engine
+## The five marks of a senior animator
 
-| Principle | What it means here | Presets that express it |
-|---|---|---|
-| **Squash & stretch** | Things deform under force — they're not rigid. | `squash`, `anticipate` (the pull-back is squash) |
-| **Anticipation** | A small backward motion before the main action — telegraphs intent. | `anticipate`, `wobble` (as warm-up) |
-| **Staging** | Compose the frame so the eye knows where to look. | Use one big `scaleIn` / `spring` per beat; let everything else be smaller. Atmosphere (`particles`, `parallax`) lives in the back. |
-| **Straight-ahead vs pose-to-pose** | The engine is pose-to-pose: keyframes (start/end) + easing curves. Use the right ease for the feel. | `easeOutCubic` = clean settle, `easeOutBack` = overshoot, `easeOutElastic` = bouncy, `easeOutBounce` = playful. |
-| **Follow-through & overlap** | Different parts settle at different times. | Stagger element `data-t-rel` 0.15–0.30s apart. Use `overshoot` on the main subject, `fadeUp` on secondary. |
-| **Slow in / slow out** | Acceleration matters more than position. Linear motion looks mechanical. | All presets default to eased curves. Override with `data-ease` only if you need linear (rare — e.g. a `counter` for a stopwatch). |
-| **Arcs** | Natural motion follows curves, not straight lines. | `motionPath` along an SVG arc; `kenburns` with non-zero `dx` and `dy`; avoid pure vertical/horizontal where an arc fits. |
-| **Secondary action** | A small motion that supports the main one without competing. | `parallax` background; `particles`; `glow` on a CTA; a `wobble` on a character while the camera pans. |
-| **Timing** | Length of motion = weight of moment. | Big = 1.4–2.0s. Medium = 0.8–1.2s. Accent = 0.3–0.5s. **Match duration to the narration phrase length.** |
-| **Exaggeration** | Push a little past natural for clarity. | `bounce` and `spring` already exaggerate. `overshoot` lets you exaggerate any entrance. Don't be timid. |
-| **Solid drawing** | Things should feel weighted, not floaty. | Pair every reveal with motion (`fadeUp` not `fadeIn`). Things drop or arrive; they rarely just appear. |
-| **Appeal** | Make individual moments delightful. | One signature motion per project — pick a preset (e.g. `spring`) and a color (e.g. accent-hot) and reuse it for emphasis throughout. Coherence reads as quality. |
+A reviewer can tell senior work from junior work in ten seconds. Here is what they're seeing:
+
+1. **Hierarchy** — at every instant, one thing is clearly the most important. The eye is *led*, never lost. Junior work animates everything equally, so nothing reads.
+2. **Continuity** — motion flows *across* cuts. Energy, direction, and a recurring motif carry through. Junior work resets to zero every slide.
+3. **Restraint** — most of the frame is calm so the one moving thing lands. Junior work moves constantly and exhausts the viewer.
+4. **Timing as music** — motion sits *on* the narration's rhythm; pauses are used, not feared. Junior work is metronomic and ignores the voice.
+5. **Weight** — things have mass: they anticipate, overshoot, settle, and follow through. Junior work uses linear fades that feel like PowerPoint.
+
+Everything below serves these five.
 
 ---
 
-## Decision matrix — what to use when
+## 1. Composition & staging — direct the eye
 
-Read your concept's beat list. For each beat, find the closest row.
+Before motion, **compose the still frame.** If a paused frame is unbalanced, no animation will save it.
 
-| Beat purpose | First-choice presets | Notes |
-|---|---|---|
-| **Open / hook** | `gradientSweep` on title + `typewriter` eyebrow + `fadeUp` subtitle | The reader is colder than you think. Give them ~0.5s of stillness before motion starts. |
-| **State a problem** | `kenburns` photo + `vignette` overlay + `wordReveal` on the punchline + `flicker` accent if dark/urgent | Photography sells weight. Vignette focuses the eye. |
-| **Reveal a single fact** | `scaleIn` headline + `counter` for any number + `pulse` on the unit | Hold the number on screen for ≥1.5s after it settles. |
-| **Walk through a list** | `slideInLeft` on each item, staggered 0.7–0.9s | Don't cascade all at once — the rhythm of arrival is the point. |
-| **Show a process / sequence** | `pathdraw` to lay the path + `motionPath` for a marker traveling it + `scaleIn` on each waypoint | Build the diagram in narration order. |
-| **Comparison / contrast** | Two `revealUp` from opposite sides + `crossfade` between background images | Symmetry signals "two things, equal weight." |
-| **Pivot point (problem → solution)** | Scene transition `whipPan` or `dissolve` + big `spring` entrance on the new headline | This is the moment that earns its own transition. Don't waste it. |
-| **Build atmosphere / emotion** | `particles` + `parallax` background + `glow` on a focal element + slow `kenburns` (dur 14+) | Quiet, layered. Foreground stays still; depth moves. |
-| **Aha / surprise / data spike** | `bounce` or `confetti` or `rays` on the focal element + `flash` transition | Cheap, but earned. Use once per video, max. |
-| **CTA / close** | `spring` title + `wordReveal` body + `glow` (looping) CTA pill + `pulse` on hit | The glow loop reads as "alive" while the user reads the body. |
-| **Quote / pull-quote** | `splitReveal` or `irisIn` on the quote + `fadeIn` attribution after a beat of silence | Silence is itself an animation choice. |
+### Focal hierarchy (the one rule)
+Every beat has exactly **one** primary element, optionally one secondary, and everything else is context. Encode the hierarchy three ways at once:
+- **Size**: the focal element is decisively bigger. No timid 1.2× — go 2–3× the secondary.
+- **Contrast**: focal is brightest/most-saturated against a calm field. Dim or desaturate context (`defocus`, lower opacity, `cinematicGrade` to sink the edges).
+- **Motion**: the focal element gets the richest entrance + the only loop. Context arrives quietly (`fadeIn`) or is already present.
 
----
+If two things compete for attention, you have failed staging — pick one, demote the other.
 
-## Choreography recipes — proven multi-element sequences
+### Lead the eye between beats
+The viewer's eye has a position when a slide ends. **Start the next beat's focal element near where their eye just was**, then move it where you want them looking. `data-shared-id` (shared-element morph) is the literal tool; even without it, place the new hero where the old one died and let it travel.
 
-Each recipe is "one beat" — a coherent pattern for ~5–12 seconds of screen time. Copy the structure, swap content.
+### Depth — stage in planes (the multiplane camera)
+Flat decks read as flat. Real scenes have foreground, midground, background. Use `data-plane` layers inside a `.camera`: background (`data-plane="0.3"`) drifts slowly, foreground (`data-plane="1.8"`) races — during any camera push/pan this manufactures genuine 3D depth (the Disney multiplane camera). Put atmosphere on the back plane, the subject on the neutral plane (≈1.0), a few accent particles on the front plane. The parallax does the rest.
 
-### Recipe: **Spotlight focus**
-A single subject arrives center-stage while everything else stays out of focus.
-
-```
-t-rel  preset          element
-0.0    focusBlur       background image (full bleed)
-0.3    fadeIn          subtle vignette overlay
-0.8    scaleIn         subject headline (large)
-1.6    wordReveal      supporting line (small)
-```
-
-Use when: the beat is about *one specific thing* and the rest is context.
-
-### Recipe: **Cascading reveal**
-Items arrive in narration order, each landing on a beat.
-
-```
-t-rel  preset          element
-0.2    fadeUp          section title
-1.3    slideInLeft     item 1
-2.2    slideInLeft     item 2
-3.1    slideInLeft     item 3
-4.0    slideInLeft     item 4
-```
-
-The 0.9s stagger matches a deliberate narration pace. Tighten to 0.6s for an upbeat read.
-
-### Recipe: **Parallax pull**
-Depth that suggests a camera moving through space.
-
-```
-t-rel  preset          element
-0.0    parallax        back layer (dur 10, range 80)
-0.2    fadeUp          mid layer (image card)
-0.6    parallax        foreground particles (dur 10, range -40)
-1.4    scaleIn         text on top
-```
-
-Front and back drift opposite directions — that's the depth cue.
-
-### Recipe: **Wipe-and-stamp**
-A scene transition cuts to a hard-edged result.
-
-```
-transition-in="wipe"
-t-rel  preset          element
-0.0    fadeIn          background (already there post-transition)
-0.4    bounce          big number or headline
-1.0    fadeUp          caption
-1.8    pulse           sub-element accent
-```
-
-The wipe + bounce combo is decisive. Good for stats that punch.
-
-### Recipe: **Beat-sync emphasis**
-Sync visual hits to specific words in the narration (see *Word-sync* below).
-
-```
-0.0    wordReveal      whole sentence
-@word1 shake           the noun
-@word2 highlight       the adjective
-@word3 pulse           the verb
-```
-
-Use when narration has a rhythmic structure or list of single-word emphases.
-
-### Recipe: **The breath**
-Hold. The most under-used animation in explainer videos is *nothing happening*.
-
-```
-t-rel  preset          element
-0.0    kenburns        background (dur whole beat)
-1.0    fadeIn          a single line of text
-(no other motion until next beat)
-```
-
-Use after a heavy beat (problem statement, big reveal) to let the viewer absorb.
-
-### Recipe: **Diagram unfolds**
-Build a chart or diagram piece by piece as the narrator names each part.
-
-```
-t-rel  preset          element
-0.2    fadeUp          axis lines (revealUp)
-0.8    pathdraw        primary curve / arrow
-2.4    motionPath      marker traveling the curve
-3.2    scaleIn         labels (one at a time, staggered)
-```
-
-Always reveal containers before contents.
-
-### Recipe: **Celebration**
-For the very last slide, or a single mid-deck "yes!" moment.
-
-```
-t-rel  preset          element
-0.0    confetti        burst layer (SVG with .c children)
-0.0    flash           transition-in (already played)
-0.3    spring          headline
-1.0    glow            CTA (loop on)
-```
-
-Don't use this more than once per video.
+### Negative space & the rule of thirds
+Crowding kills impact. A single line of text in a sea of black out-performs a busy grid every time. Push the focal element off dead-center onto a thirds line when the composition allows; reserve true center for the most monumental, symmetrical moments (the final CTA, the one big number).
 
 ---
 
-## Scene transitions — when to use which
+## 2. Micro-choreography — give motion weight
 
-The default is `cut` (no transition). Override per slide with `data-transition-in="..."`.
+This is the craft that separates animation from transitions. Inside a single entrance:
 
-| Transition | Feel | Use when |
-|---|---|---|
-| `cut` | Instant | Most slides. The default. Same energy as previous beat. |
-| `dissolve` | Soft, smooth | Mood / tonal shift. Moving from one quiet scene to another. |
-| `whipPan` | Fast, kinetic | Energy spike. The narration just turned a corner. |
-| `wipe` | Decisive | A list item / chapter break. "Now: thing two." |
-| `flash` | Punchy | Surprise. Revelation. The data finally landing. |
-| `blocks` | Editorial | Chapter title / section card. Reads as "new section." |
+### Anticipation → action → follow-through
+Real motion winds up before it strikes and settles after it lands. The engine's `anticipate`, `overshoot`, `spring`, and `bounce` bake this in — *use them on the elements that matter* instead of `fadeUp` on everything. Tune the spring: premium/calm = `data-spring="120,18"` (gentle), playful = `data-spring="260,10"` (springy), urgent = stiff and fast.
 
-Rule of thumb: **at most 3 non-cut transitions per video.** Otherwise they stop meaning anything. Save them for the pivots that earn them.
+### Overlapping action & follow-through (the anti-robot rule)
+Parts of a thing do **not** move in lockstep. When a card flies in, its shadow, its label, and its icon should settle at *slightly* different times. Author this with `data-stagger` on groups (0.06–0.10s = energetic, 0.12–0.18s = deliberate) and with `data-then` chains so a secondary detail lands *after* the primary. Never reveal a container and its contents on the same frame.
 
----
+### Moving holds — never let a frame die
+A senior animator's secret: **nothing is ever perfectly still.** After an element settles, it keeps breathing imperceptibly. Add `data-hold="breathe"` (or `float`/`sway`) to hero elements — a 2–4px / 2–3% idle that the viewer never consciously notices but feels. A held frame with zero motion reads as "the video froze." Apply moving holds to every hero that stays on screen >4s.
 
-## Word-sync workflow (the secret weapon)
+### Secondary action
+The main action gets support from a smaller, non-competing motion: a glow pulse under a CTA, particles drifting behind a title, a back-plane parallax. Secondary action enriches; it must never out-shout the primary.
 
-The user already has per-word timestamps from ElevenLabs in their srotyboard project (`Script with time stamps.json`). If a similar file exists for the current project, use it.
-
-The format from ElevenLabs:
-
-```json
-{
-  "alignment": {
-    "characters": ["D", "i", "s", ...],
-    "character_start_times_seconds": [0.0, 0.05, ...],
-    "character_end_times_seconds": [...]
-  }
-}
-```
-
-Or word-level:
-
-```json
-{
-  "words": [
-    { "text": "Discrimination", "start": 0.0, "end": 0.72 },
-    { "text": "happens",        "start": 0.78, "end": 1.10 },
-    ...
-  ]
-}
-```
-
-### How to use it
-
-1. **For `wordReveal` text** — set `data-t-rel` to the first word's start time minus the slide cue. The preset's stagger naturally lands later words near their spoken times.
-
-2. **For specific word hits** — pick narration words that *deserve* a visual punch (verbs, surprising nouns, the number in a stat). Add them to the `WORD_HITS` array:
-
-   ```js
-   const WORD_HITS = [
-     { time: 12.34, sel: '#bigNoun',       hit: 'shake' },
-     { time: 18.71, sel: '.stat-number',   hit: 'pulse' },
-     { time: 24.50, sel: '.cta-pill',      hit: 'highlight' }
-   ];
-   ```
-
-   The engine flashes the matching preset for 0.6s at that exact audio time. Don't overdo it — 3–5 hits per minute, max.
-
-3. **For lip-sync-style emphasis** — wrap every word in a span at build time and toggle a class per word. This is heavier; only worth it for a character-anchored beat or a comedic accent.
+### Slow in / slow out, always
+Linear motion is the mark of the amateur. Every preset eases by default; when you override with `data-ease`, reach for `outQuint`/`outBack`/`spring`, almost never `linear` (linear is only for a mechanical readout like a stopwatch).
 
 ---
 
-## Signature motion — the coherence trick
+## 3. Timing as music — sit on the voice
 
-Pick *one* of each at the start of the project. Reuse them. Don't introduce new ones unless a beat genuinely needs it.
+The narration is the rhythm track. Motion that ignores it feels pasted on; motion locked to it feels *scored*.
 
-- **One signature ease**: pick a single curve and use it for 80% of your animations. The other 20% can be `bounce` / `spring` / `elastic` for emphasis.
-- **One signature transition**: e.g., `wipe` for every section break.
-- **One accent color** for highlights, glows, and confetti.
-- **One signature preset for "emphasis"**: e.g., always `spring` on the big-deal headline, never `bounce`. The viewer will start to anticipate it — that's the signal.
-- **One signature timing rhythm**: e.g., always 0.8s between cascading list items. The brain locks in.
+- **Land the hit on the word.** When the VO stresses the key word, the visual accent fires on that exact syllable — pull the time from the word-timestamps and put a `highlight`, `circleScribble`, or `shake` there. This lockstep is the single biggest "this is professional" tell.
+- **Phrase the entrances.** `wordReveal` and `wordSwap` should reveal at the narrator's actual pace, not a generic stagger. Three phrases said over 3 seconds = a 3-second `wordSwap`.
+- **Use the rest.** Silence is a frame. After a heavy beat (a problem stated, a number landed), give one beat with almost no motion — a `breathe`-held title and nothing else. The pause makes the next hit land. A reel with no rests is a reel with no peaks.
+- **Match duration to weight.** Big moment = slow (1.4–2.0s). Connective = medium (0.8–1.2s). Accent = fast (0.3–0.5s). A 2.5s counter on a throwaway number is as wrong as a 0.4s reveal on the hero line.
 
-Coherence reads as taste. Variety reads as chaos.
-
----
-
-## Anti-patterns — things that look bad
-
-- **All elements `fadeUp` with stagger** — feels like a default-Powerpoint deck. Vary the preset.
-- **Every slide has a transition** — transitions stop meaning anything. Most slides should `cut`.
-- **No atmospheric layer on a long beat** — 10+ seconds with no background motion looks frozen. Always add `kenburns` or `parallax` or `particles` to beats > 8 seconds.
-- **Counter animation longer than 2.5s** — past that it feels like a load bar. Cap at 2s.
-- **Three exclamation animations in a row** (`bounce`, then `shake`, then `confetti`) — diminishing returns. Pick one per beat.
-- **The last anim finishes after the slide changes** — the viewer never sees the payoff. Audit: `cue_next - cue_current - max(t_rel + dur)` should be ≥ 0.5s.
-- **Typewriter on long text** — character-by-character past ~60 chars is slow and annoying. Use `wordReveal` for sentences.
-- **Glow + pulse + shake on the same element** — pick one.
+### The energy arc
+The concept's `emotional_arc` (energy 1–5 per beat) is your spend plan. **Peaks** (5): signature emphasis + a non-cut transition in + maybe beat-sync + the loud text FX. **Valleys** (1–2): the breath — one quiet entrance, no transition, no loud loop. If every beat is a 4–5 it flattens to noise; the valleys are what *make* the peaks. Audit your build: no value ≤2 means no breath; all 4–5 means nothing peaks.
 
 ---
 
-## How Claude should reason about a single beat
+## 4. Continuity & through-lines — make it one film
 
-Pseudo-process for authoring each beat (do this in your head, fast):
+Junior decks are 15 unrelated slides. Senior decks are one continuous piece.
 
-1. **What is this beat doing in the arc?** (Hook / problem / fact / list / pivot / atmosphere / close — pick one from the decision matrix.)
-2. **What's the focal element?** (Headline, number, image, list?)
-3. **What's the secondary layer?** (Atmosphere — bg motion, particles, vignette.)
-4. **What gets the entrance preset?** (Match the matrix recommendation. Pick from the 1–2 candidates, prefer signature motion.)
-5. **What stays still?** (Most things. The eye needs a rest point.)
-6. **Is there a word in the narration that should be hit?** (If yes, add to `WORD_HITS`. If no, move on.)
-7. **What transition into this beat?** (Default `cut`. Upgrade only if the beat is a pivot, chapter, or surprise.)
-8. **Do the math.** Last anim's `t_rel + dur` must finish ≥ 0.5s before the next cue. Adjust.
-
-If the beat takes more than 60 seconds to choreograph, you're overdoing it. Most beats are 3–5 anims total.
+- **Signature motion.** Pick ONE emphasis preset (e.g. `spring`) and reuse it on your 3 biggest moments. The viewer's brain learns "this motion = this matters." Introducing a new flashy preset every slide reads as a sampler, not a style.
+- **Signature ease.** Drive ~80% of motion with one curve. Coherence of *timing* is as important as coherence of color.
+- **One transition family.** Most slides `cut`/`crossDissolve`; reserve the showy transitions for the 2–3 pivots that earn them (problem→solution, the reveal, the CTA). Pick the pair your style prescribes (see `styles.md`) and stay in it.
+- **A recurring visual motif.** A shape, a color accent, a particle, a piece of the brand that appears across beats and pays off at the end. The breathing circle that opens and closes the Help Me Breathe deck; the gradient word that returns on the CTA.
+- **Motion hand-off.** Exit a beat in the direction the next enters. If slide N's element `slideOutLeft`s, slide N+1's hero comes from the right — the eye tracks the momentum across the cut. Use `data-exit` + the matching transition direction.
 
 ---
 
-## When you have an existing HTML (adopt mode)
+## 5. The grade — make it look like film, not a webpage
 
-If the user passed an existing HTML deck to wrap, your job is different — you don't author from scratch, you *enhance*. The detection layer finds the slides; the overlay adds the audio + controls + animation engine. You then:
-
-1. **Walk every slide once.** For each, decide which existing element gets `class="anim"` plus a preset. Add `data-anim="..."` and `data-t-rel="..."` inline.
-2. **Don't add new elements** unless the slide is genuinely thin (a single headline). Then add atmospheric SVG layers as siblings.
-3. **Pick `data-transition-in` per slide** based on the slide's role in the arc.
-4. **Respect the existing visual language.** If the deck uses one accent color, your `glow`/`highlight`/`rays` should match it (not the template's default `#3CA8E8`).
+A senior never ships an ungraded frame. Two cheap, universal lifts:
+- **`cinematicGrade`** — a full-bleed overlay (vignette + corner falloff + multiply) that sinks the edges and focuses the center. Drop it on top of any bright or photographic slide and it instantly looks color-graded instead of web-flat.
+- **`filmGrain`** — a whisper of animated grain (opacity 0.05–0.10) over the whole deck unifies disparate slides into one texture and kills the "clean vector" sterility. Add once, low.
+- **Depth of field** — `rackFocus` to pull focus onto an arriving subject; `defocus` to push context back a plane. Sharpness *is* hierarchy: the sharp thing is the important thing.
 
 ---
 
-## The acid test
+## How to direct a single beat (senior workflow)
 
-Before declaring a build done, ask yourself:
+For each beat, decide in this order — composition first, motion last:
 
-- If I muted the audio and watched, would I know what each beat is about?
-- If I deleted the visuals and only listened, would the narration still hit?
-- Are there at least three beats where the visual is doing *more* than what the narration says?
-- Did I use my signature motion at least three times?
-- Did I leave at least one beat with no entrance animations at all (the breath)?
+1. **Intent.** One sentence: what does this beat make the viewer understand or feel? If you can't say it, the beat has no reason to move.
+2. **Focal element.** What is the one thing? Stage it: biggest, brightest, off-thirds or centered by weight.
+3. **Depth.** What's on the back plane (atmosphere), the subject plane, the front plane (accents)? Is there a camera move to motivate parallax?
+4. **Entrance choreography.** Focal gets anticipation→settle (signature emphasis if it's a peak). Context arrives quiet and earlier. Stagger groups; chain secondary details.
+5. **The hit.** Is there a word in the VO this beat should land on? Put the accent there.
+6. **The hold.** Add a moving hold to anything staying >4s. Decide the breath if this is a valley.
+7. **The exit & hand-off.** How does this beat leave, and does it set up the next one's entrance direction?
+8. **The grade.** Vignette/grain/DOF as needed so the frame reads as film.
+9. **Math check.** Last entrance finishes ≥0.4s before the next cue. Nothing dead, nothing clipped.
 
-If "no" to any: keep going.
-
----
-
-# Composable motion — recipes (v0.3)
-
-The v0.3 engine lets you *compose* instead of picking one preset per element. Reach for these patterns. (Full attribute reference in `animations.md § Composable motion`.)
-
-## Stagger a group with one instruction
-
-Stop hand-numbering list items. Use a `.anim-group`:
-
-```html
-<ul class="anim-group" data-anim="slideInLeft" data-stagger="0.12" data-t-rel="1.0">
-  <li>..</li><li>..</li><li>..</li>
-</ul>
-```
-
-Stagger interval encodes rhythm: 0.06–0.10s = brisk/energetic, 0.12–0.18s = deliberate, 0.25s+ = ceremonial. Match it to the narration cadence.
-
-## Enter, then live (chain + loop)
-
-A static element after entrance reads as frozen on long beats. Chain a settle-beat and a loop:
-
-```html
-<h2 class="anim" data-anim="scaleIn" data-then="pulse@1.6" data-loop="breathe" data-loop-amp="3" data-loop-period="3.5">
-```
-
-Rule: any element on screen >6s should either loop subtly OR have an atmospheric layer behind it. The `breathe` loop at amp 2–3 is invisible-but-alive — use it on heroes and CTAs constantly.
-
-## Tune the feel with spring/ease
-
-Don't accept the default curve on your signature moment. A premium product wants `data-spring="120,18"` (gentle settle); a playful brand wants `data-spring="260,10"` (bouncy). Pick the curve that matches the style's personality and reuse it.
-
-## 3D card decks
-
-A flipping card grid is a high-value "here are the N things" beat:
-
-```html
-<div class="cards anim-group" data-anim="flipInY" data-stagger="0.18" data-t-rel="0.4">
-  <div class="card3d">..</div> ... x3
-</div>
-```
-
-`tiltIn` is the subtler cousin — use it when full flips feel too much.
+If a beat takes more than a minute to direct, you're overworking it — most beats are 3–6 authored elements.
 
 ---
 
-# Data-viz choreography
+## Anti-patterns (the junior tells)
 
-Numbers are the most under-animated thing in explainers. When the narration cites a figure, the figure should *build* as it's spoken.
-
-- **Bars**: stagger a row 0.2–0.3s apart with `barGrow` + `data-ease="outBack"`, pair each with a `counter` that lands as the bar tops out. Hold ≥1.5s after the last bar.
-- **Single big stat**: `donutSweep` to `data-pct` + a `counter` to the same number, side by side. The ring and the number finish together.
-- **Trend over time**: `lineDraw` the line as the narrator walks the years; `scaleIn` a marker dot at the end point.
-- **Comparison**: two `comparisonBar`s growing to relative widths — the visual gap IS the argument. Don't animate them simultaneously; grow "us" after "them" so the contrast lands.
-
-Anti-pattern: never just fade a finished chart in. The *growth* is the narrative. A chart that's already drawn when the slide arrives wastes the beat.
-
----
-
-# Cinematic recipes
-
-## Shared-element morph (the "wow" cut)
-
-The single most impressive transition. A card/object on slide N becomes a differently-placed object on slide N+1 via `data-shared-id`. Use it once or twice per video on a genuine continuation (a product that moves from hero to context, a number that travels from headline to a chart). Don't overuse — it means "this is the same thing, now reframed."
-
-## Camera push for emphasis
-
-Wrap a detailed scene in a `.camera` and push in on the part the narrator is describing:
-
-```html
-<div class="camera" data-camera="0=>scale:1; 2.5=>scale:1.7,x:-200,y:-100; 5=>scale:1">
-```
-
-The pull-back at the end returns context. Use on maps, diagrams, dashboards, anything where "look here specifically" matters.
-
-## Beat-sync for energy peaks
-
-If there's a music bed, `data-loop="beat"` on a logo or pulse-ring at the climax makes the visual breathe with the track. Reserve for the single highest-energy beat.
+- **Everything `fadeUp`, staggered.** The default-deck smell. Vary by intent.
+- **No focal hierarchy** — three things the same size animating at once. Pick one.
+- **Constant motion, no rests.** Exhausting. Build valleys.
+- **A new flashy preset every slide.** Sampler, not style. Commit to a signature.
+- **Frozen held frames.** Add moving holds.
+- **Flat, ungraded, centered-everything.** Add depth planes, a grade, and use the thirds.
+- **Motion that ignores the voice.** Land hits on words; use the pauses.
+- **Linear easing.** Never, except mechanical readouts.
+- **Animations finishing after the cut.** The payoff is never seen. Do the math.
 
 ---
 
-# Using the emotional arc
+## The senior self-review (run this before declaring done)
 
-The concept's `emotional_arc` array (energy 1–5 per beat) tells you where to spend intensity:
+Watch it back (or scrub the frames) and ask:
+1. At every instant, is it obvious where to look? (hierarchy)
+2. Does it feel like one film or 15 slides? (continuity — signature motion, motif, hand-offs)
+3. Is there at least one true breath? (restraint)
+4. Do the accents land on the narrated words? (timing)
+5. Does anything sit dead-still on screen? (moving holds)
+6. Does any frame look like an un-graded webpage? (the grade)
+7. Could I remove 20% of the motion and make it *better*? (almost always yes — do it)
 
-- **Energy 5 (peaks)**: signature emphasis preset + a non-cut transition INTO the beat + maybe beat-sync. This is where you splurge.
-- **Energy 3–4**: standard choreography — entrance + secondary layer.
-- **Energy 1–2 (valleys)**: the breath. One quiet `fadeIn` or `wordReveal`, no transition, no loop. The stillness recharges the viewer for the next peak.
-
-A common mistake is animating every beat at energy 5 — it flattens to noise. The valleys are what make the peaks land. Audit your build: if `emotional_arc` has no value ≤2, you have no breath; if it's all 4–5, nothing peaks.
-
----
-
-# Pick a style first
-
-Before choosing presets per beat, pick ONE signature style from `styles.md` (kurzgesagt / apple-keynote / documentary / bold-editorial / data-journalism / neon-tech, or a derived one). The style hands you a palette, a motion vocabulary, a signature emphasis preset, and a transition pair. Author within it. Coherence across all beats reads as craft; a different look per beat reads as a template someone filled in.
-
----
-
-# Raw-motion craft (v0.5) — use these to lift quality
-
-These are the moves that separate "slides with animation" from "motion design."
-
-## Kinetic typography on heroes
-A plain `fadeUp` title is fine; a `lineReveal` (lines rising behind a mask) or `wordSwap` (phrases hitting center in rhythm) is *cinematic*. Use one on the hook and the CTA. Sync `wordSwap` so each phrase lands exactly as the narrator says it — that lockstep of word-and-motion is the single biggest "premium" tell. Reserve for 1–2 hero moments; don't kinetic-type every title.
-
-## Annotate what the narrator emphasizes
-When the VO stresses a word ("these are *real* attributes," "no *fakes*"), draw a hand annotation on it at that exact moment: `circleScribble`, `underlineDraw`, `boxDraw`, `strikethrough`. It mimics a person pointing at the screen — instantly more credible and human. Pull the hit time from the word timestamps. 2–4 annotations across a video; more reads as clutter.
-
-## Declutter with exits
-The old engine made everything accumulate. Now: on a talky beat with several points, give each a `data-exit` so it leaves before the next arrives (`slideOutLeft` at the next point's cue). One idea on screen at a time reads as confident; five stacked reads as a wall. Use exits on list/explanation beats, never on a final summary where you *want* everything visible.
-
-## Fill long beats with a living background
-Any beat over ~8s with a static background looks frozen. Drop an `aurora` (soft gradient drift) or `constellation` (connected-dot network) behind the content. They're cheap, deterministic, and add the "alive" quality. Match colors to the style (`data-c1/c2/c3` for aurora, `data-color` for constellation). One ambient layer per slide, behind everything.
-
-## The quality ladder (apply in order of payoff)
-1. Right transition per beat (v0.4) — no more scroll.
-2. A living background on every long beat — kills "frozen."
-3. Kinetic type on the 2 hero beats — premium tell.
-4. Annotations on the 2–4 emphasized words — human + credible.
-5. Exits on talky beats — confident, uncluttered.
-6. Signature motion + emotional arc (earlier sections) — coherence.
-
-If a draft feels "templated," it's almost always missing 2, 3, or 4.
-
-
----
-
-# v0.6 craft notes — charts, flows, demos, code
-
-- **Build data, don't show it.** A chart that's already drawn wastes the beat. Use `chartArea`/`pieSlice`/`gauge`/`barGrow` so the figure *grows as the narrator cites it*, and pair every number with a `counter`. For "it changed" moments use `barTo` (value morph) rather than a fresh bar.
-- **Flows reveal in narration order.** Draw node → connector → node, each on its own beat, with `connectorDraw data-arrow="end"`. Never show the whole diagram at once; the build *is* the explanation.
-- **UI demos beat screen recordings** for clarity: `cursorTour` lets you stage the exact happy path, type real example input, and click the one button that matters — no cursor hunting, no UI chrome you don't want. Sync the stop times to the VO ("type the rule name… and deploy").
-- **Reserve the loud text FX.** `rgbGlitch`/`assemble`/`neonOn` are hero-moment tools (title card, the one big word). `codeType` is for dev/technical content — let it finish typing before the narrator moves on. `textMask` is a premium title treatment; one per video.
-- **Quality ladder, extended:** transitions (v0.4) → living backgrounds (v0.5) → kinetic type + annotations (v0.5) → **data that builds / flows that draw / demos that click (v0.6)** → signature motion + emotional arc. Match the new tools to content type: data-journalism leans on charts, explainers on flows, SaaS on UI demos, dev on codeType.
+If any answer is "no," it's not done. Senior work is iterated, not one-shot.
