@@ -1,11 +1,12 @@
-# Demos — the engine, two ways
+# Demos — the engine, three ways
 
-This folder ships two silent demo decks (capability reels, not narrated explainers):
+This folder ships three silent demo decks (capability reels, not narrated explainers):
 
 | File | What it is |
 |---|---|
 | **`showcase.html`** / `showcase.mp4` | The **flagship reel** — a tight, 14-beat neon-tech story that sells the whole stack in ~90s. |
-| **`capabilities.html`** / `capabilities.mp4` | The **capability gallery** — a ~28-slide kitchen-sink catalog that demos *every* family the engine has, one section at a time, each arriving on a different transition. |
+| **`capabilities.html`** / `capabilities.mp4` | The **capability gallery** — a ~29-slide kitchen-sink catalog that demos *every* family the engine has, one section at a time, each arriving on a different transition. |
+| **`cast-and-sets.html`** / `cast-and-sets.mp4` | The **cast & sets** demo — the actor layer in action: procedural characters that wave, point, talk (lip-sync) and react, staged on device mockups + props, across living environments (night/day/dusk skies, snow, embers). |
 
 Open either in a browser (the synthetic clock plays the timeline with no audio — a PREVIEW badge shows on screen, hidden in renders), or watch the rendered MP4.
 

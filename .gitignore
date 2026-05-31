@@ -55,3 +55,4 @@ examples/**/trans_*.png
 # Keep the demo videos (hero reel + capability gallery) despite any *.mp4 ignore
 !examples/showcase/showcase.mp4
 !examples/showcase/capabilities.mp4
+!examples/showcase/cast-and-sets.mp4

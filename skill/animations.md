@@ -836,3 +836,45 @@ python skill/lottie_fetch.py fetch <url> --out ./my-video --id mascot-wave
 The fetcher validates the JSON is a real Lottie, saves it to `<project>/assets/lottie/<id>.json` (so renders stay offline-safe), and records the source + date in `assets/lottie/CREDITS.md`. **Always verify the source license before shipping.** Play it with the existing `data-anim="lottie" data-src="assets/lottie/<id>.json"`.
 
 Rule: **reach for the owned preset first** (46 of the 108 concepts have one — render-safe, brand-colored, never 404). Only fetch a Lottie when you need a specific illustrated look the engine can't draw.
+
+---
+
+# Cast & sets — actors, props, environments
+
+Beyond motion/data/dazzle: things with personality and places for them to live. All owned, render-safe, brand-colored. Demo: `examples/showcase/cast-and-sets.html`.
+
+## Character (the actor layer) — `character`
+An owned procedural mascot/guide that lives the whole beat (auto-blink, breathe, idle sway) and acts on a slide-relative timeline.
+
+```html
+<div class="anim" data-anim="character" data-char="blob" data-talk="1" data-color="var(--accent)"
+     data-acts="0.6:wave; 2:look=#kpi; 2.8:point=#kpi; 3.5:happy; 4.5:say=Up 84%!"></div>
+```
+
+| Attr | Meaning |
+|---|---|
+| `data-char` | `blob` (full body + arms) or `orb` (minimal head — good for serious decks) |
+| `data-mood` | initial expression (default `idle`) |
+| `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
+| `data-look` | selector the eyes track from the start |
+| `data-color` | body color (default `--accent`) |
+| `data-acts` | `"<t>:<cmd>; ..."` — times are **relative to this slide's cue** |
+
+**Act vocabulary** — moods (sticky): `idle` `happy` `sad` `surprised` `think` `wink`; gestures (one-shot): `wave` `nod` `jump` `bounce` `shrug` `spin`; gaze: `look=#sel`, `point=#sel` (raises an arm + gaze), `rest`; speech: `say=Text…` (typed bubble), `talk`/`quiet` (toggle lip-sync). Gaze + point use on-screen geometry, so they aim correctly regardless of deck scaling.
+
+## Props & device mockups
+| Preset | Use | Attrs |
+|---|---|---|
+| `device` | Wrap screen content in a frame | `data-device="browser\|phone\|laptop\|tablet"`, `data-url` (browser). Put the screen UI (mock or `<img>`) inside; nodes are preserved. |
+| `speechBubble` | Standalone callout that types in | `data-text` (or inner text), `data-tail="down\|up\|left\|right"` |
+| `stickyNote` | Pops in with a slight tilt | `data-rot="-3"`; inner text |
+| `pinDrop` | Map/location pin drops + bounces | `data-color` |
+
+## Environments + particles (full-bleed `.bleed` layers)
+| Preset | Use | Attrs |
+|---|---|---|
+| `emitter` | Particle field, loops forever | `data-fx="snow\|rain\|embers\|bubbles\|dust"`, `data-count` |
+| `sky` | Gradient sky + sun/moon + drifting clouds / twinkling stars | `data-sky="day\|dusk\|night"` |
+| `scenery` | Layered silhouette hill bands (parallax-ready under a `.camera`) | `data-color` |
+
+Compose them: `sky` (back) → `scenery` → `emitter` → content → `character` (front). For depth, put `scenery`/`sky` on `data-plane` layers inside a `.camera` so they parallax during camera moves.

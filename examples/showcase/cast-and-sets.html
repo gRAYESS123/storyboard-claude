@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Storyboard — Cast & Sets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:'Space Grotesk',system-ui,sans-serif}
+.stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
+:root{--bg:#05060a;--ink:#F4F6FF;--ink-soft:#9aa3c0;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:96px;contain:layout paint}
+.anim{opacity:0;will-change:transform,opacity,filter}
+.gradient-fill{background:linear-gradient(110deg,var(--accent),var(--accent2),var(--accent3));background-size:240% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,255,.06) 1px,transparent 1px);background-size:64px 64px;z-index:0}
+.bleed{position:absolute;inset:0;z-index:0}
+.center{position:relative;z-index:3;text-align:center;max-width:1500px}
+.mega{font-size:168px;line-height:.94;font-weight:700;letter-spacing:-.04em}
+.big{font-size:120px;line-height:1.0;font-weight:700;letter-spacing:-.03em}
+.h2{font-size:80px;line-height:1.05;font-weight:700;letter-spacing:-.02em}
+.sub{font-size:34px;line-height:1.4;color:var(--ink-soft);margin-top:30px;max-width:900px;margin-left:auto;margin-right:auto}
+.cta-pill{display:inline-block;margin-top:50px;padding:30px 60px;border-radius:18px;font-size:40px;font-weight:700;color:#06070c;background:var(--accent2)}
+.char{position:absolute;z-index:4}
+.mockui{height:100%;width:100%;background:linear-gradient(180deg,#11142a,#0b0e1a);color:#fff;font-family:inherit}
+.transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
+.transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#05060a 50%,transparent);transform:translateX(-100%)}
+.transition-overlay.dissolve{background:#05060a}
+</style>
+</head>
+<body>
+<div class="stage"><div class="deck" id="deck">
+
+  <!-- 1 night intro: sky + snow + scenery + character waves -->
+  <section class="slide" data-slide="1" data-transition-in="cut">
+    <div class="bleed anim" data-anim="sky" data-sky="night" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="scenery" data-t-rel="0" data-dur="9999" data-color="#28306a"></div>
+    <div class="bleed anim" data-anim="emitter" data-fx="snow" data-t-rel="0" data-dur="9999"></div>
+    <div class="center">
+      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.6">Meet the cast.</h1>
+      <p class="sub anim" data-anim="fadeUp" data-t-rel="2.4" data-dur="0.9">Characters that point, react, and talk on the beat — on sets, with props.</p>
+    </div>
+    <div class="char anim" data-anim="character" data-char="blob" style="left:130px;bottom:70px;width:250px;height:350px"
+         data-acts="0.6:wave; 2.6:say=Meet the cast!; 5:happy"></div>
+  </section>
+
+  <!-- 2 device mockup: phone + orb points -->
+  <section class="slide" data-slide="2" data-transition-in="pushLeft">
+    <div class="grid-bg"></div>
+    <div style="position:absolute;left:150px;top:50%;transform:translateY(-50%);text-align:left;max-width:640px;z-index:3">
+      <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">Stage it on a real device.</h2>
+      <p class="sub anim" data-anim="wordReveal" data-t-rel="1.2" data-dur="1.6" style="margin-left:0;max-width:600px">Drop a screen into a phone, laptop, tablet, or browser frame.</p>
+    </div>
+    <div id="cs-phone" class="anim" data-anim="device" data-device="phone" data-t-rel="0.6" data-dur="1.1" style="position:absolute;right:330px;top:130px;width:300px;height:580px;z-index:3">
+      <div class="mockui">
+        <div style="height:128px;background:linear-gradient(120deg,var(--accent),var(--accent3));display:flex;align-items:flex-end;padding:22px;font-size:32px;font-weight:700">Radar</div>
+        <div style="padding:22px;display:flex;flex-direction:column;gap:16px">
+          <div style="height:70px;background:#171b2e;border-radius:14px"></div>
+          <div style="height:70px;background:#171b2e;border-radius:14px"></div>
+          <div style="height:70px;background:#1d2440;border-radius:14px;border:1px solid var(--accent2)"></div>
+          <div style="height:70px;background:#171b2e;border-radius:14px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="char anim" data-anim="character" data-char="orb" data-color="var(--accent2)" style="right:120px;bottom:130px;width:200px;height:240px"
+         data-acts="1.2:look=#cs-phone; 1.9:point=#cs-phone; 2.5:say=On a phone!"></div>
+  </section>
+
+  <!-- 3 browser + sticky + speech bubble + character reacts -->
+  <section class="slide" data-slide="3" data-transition-in="crossDissolve">
+    <div class="grid-bg"></div>
+    <div id="cs-browser" class="anim" data-anim="device" data-device="browser" data-url="app.storyboard.dev" data-t-rel="0.4" data-dur="1.0" style="position:absolute;left:150px;top:190px;width:1020px;height:580px;z-index:2">
+      <div style="height:100%;background:#0d1020;padding:34px;color:#fff;display:flex;flex-direction:column;gap:22px">
+        <div style="font-size:32px;font-weight:700">Dashboard</div>
+        <div style="display:flex;gap:20px">
+          <div style="flex:1;height:120px;background:#11142a;border-radius:14px;padding:20px"><div style="font-size:22px;color:var(--ink-soft)">Approved</div><div style="font-size:46px;font-weight:800;color:var(--accent2)">84%</div></div>
+          <div style="flex:1;height:120px;background:#11142a;border-radius:14px;padding:20px"><div style="font-size:22px;color:var(--ink-soft)">Flagged</div><div style="font-size:46px;font-weight:800;color:var(--accent3)">11%</div></div>
+          <div style="flex:1;height:120px;background:#11142a;border-radius:14px;padding:20px"><div style="font-size:22px;color:var(--ink-soft)">Review</div><div style="font-size:46px;font-weight:800;color:var(--gold)">5%</div></div>
+        </div>
+        <div style="flex:1;background:#11142a;border-radius:14px;display:flex;align-items:flex-end;gap:22px;padding:28px">
+          <div style="flex:1;height:40%;background:linear-gradient(180deg,var(--accent),var(--accent3));border-radius:8px 8px 0 0"></div>
+          <div style="flex:1;height:62%;background:linear-gradient(180deg,var(--accent2),var(--accent));border-radius:8px 8px 0 0"></div>
+          <div style="flex:1;height:80%;background:linear-gradient(180deg,var(--accent),var(--accent3));border-radius:8px 8px 0 0"></div>
+          <div style="flex:1;height:100%;background:linear-gradient(180deg,var(--accent2),var(--accent));border-radius:8px 8px 0 0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="anim" data-anim="stickyNote" data-rot="5" data-t-rel="1.7" data-dur="0.9" style="position:absolute;left:1040px;top:150px;font-size:30px;z-index:4">ship it Friday</div>
+    <div class="anim" data-anim="speechBubble" data-tail="down" data-t-rel="2.3" data-dur="1.4" style="position:absolute;left:1080px;top:430px;font-size:32px;z-index:4">Annotate anything.</div>
+    <div class="char anim" data-anim="character" data-char="blob" style="right:120px;bottom:80px;width:240px;height:340px"
+         data-acts="2.4:happy; 3.1:nod; 4.4:say=Nice."></div>
+  </section>
+
+  <!-- 4 day sky + pins + character -->
+  <section class="slide" data-slide="4" data-transition-in="zoomIn">
+    <div class="bleed anim" data-anim="sky" data-sky="day" data-t-rel="0" data-dur="9999"></div>
+    <div class="center" style="position:absolute;top:120px;left:0;right:0">
+      <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8" style="color:#10131f">Pins, props &amp; particles.</h2>
+    </div>
+    <div class="anim" data-anim="pinDrop" data-t-rel="0.8" data-dur="1.0" data-color="var(--accent3)" style="position:absolute;left:560px;top:420px;width:64px;height:86px;z-index:3"></div>
+    <div class="anim" data-anim="pinDrop" data-t-rel="1.1" data-dur="1.0" data-color="var(--accent)" style="position:absolute;left:980px;top:340px;width:64px;height:86px;z-index:3"></div>
+    <div class="anim" data-anim="pinDrop" data-t-rel="1.4" data-dur="1.0" data-color="var(--accent2)" style="position:absolute;left:1320px;top:470px;width:64px;height:86px;z-index:3"></div>
+    <div class="char anim" data-anim="character" data-char="blob" data-color="var(--accent3)" style="left:150px;bottom:90px;width:240px;height:340px"
+         data-acts="1.6:say=Drop pins anywhere.; 3.4:wave"></div>
+  </section>
+
+  <!-- 5 finale: dusk + embers + confetti + character jumps -->
+  <section class="slide" data-slide="5" data-transition-in="whipPan">
+    <div class="bleed anim" data-anim="sky" data-sky="dusk" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="emitter" data-fx="embers" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed anim" data-anim="confettiBurst" data-t-rel="1.4" data-dur="2.2" style="z-index:3"></div>
+    <div class="center">
+      <h1 class="big gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.5">Now with a cast.</h1>
+      <p class="sub anim" data-anim="fadeUp" data-t-rel="2.0" data-dur="0.8">github.com/gRAYESS123/storyboard-claude</p>
+      <span class="cta-pill anim" data-anim="spring" data-t-rel="2.6" data-dur="1.0" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
+    </div>
+    <div class="char anim" data-anim="character" data-char="blob" style="left:50%;margin-left:-130px;bottom:60px;width:260px;height:360px"
+         data-acts="0.6:happy; 1.3:jump; 2.6:say=Let's go!; 3.6:jump"></div>
+  </section>
+
+</div></div>
+
+<div class="transition-overlay" id="transitionOverlay"></div>
+<audio id="voAudio" preload="metadata"></audio>
+<script src="storyboard-engine.js"></script>
+<script>
+const TIMINGS = [
+  { time: 0.0, slide: 1 }, { time: 6.5, slide: 2 }, { time: 13.0, slide: 3 },
+  { time: 20.0, slide: 4 }, { time: 26.0, slide: 5 }
+];
+const SLIDE_LABELS = ['Meet the cast','Device mockup','Browser + props','Pins + day','Finale'];
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 33 });
+</script>
+</body>
+</html>
