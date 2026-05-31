@@ -671,7 +671,9 @@
       el.querySelectorAll('.dl-d').forEach((d,i)=>{ d.style.transform='translateY('+(Math.sin(t*5-i*0.6)*-16)+'px)'; });
     }},
     heartBeat: { dur: 1.2, apply: (el,p,c) => {
-      if(!el.dataset.hb){ el.dataset.hb='1'; el.textContent=el.dataset.emoji||'❤️'; el.style.display='inline-block'; }
+      if(!el.dataset.hb){ el.dataset.hb='1'; el.style.display='inline-block';
+        if(el.dataset.emoji) el.textContent=el.dataset.emoji;
+        else el.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%;overflow:visible"><path d="M12 20.3C5 15.5 2.5 11.8 2.5 8.4 2.5 5.7 4.6 3.7 7.2 3.7 9 3.7 10.7 4.8 12 6.6 13.3 4.8 15 3.7 16.8 3.7 19.4 3.7 21.5 5.7 21.5 8.4 21.5 11.8 19 15.5 12 20.3Z" fill="var(--accent3,#FF5C8A)"/></svg>'; }
       el.style.opacity=Math.min(1,p*3);
       const t=p*2*Math.PI*1.5, thump=1+0.18*Math.abs(Math.sin(t))*Math.max(0,1-p*0.5);
       el.style.transform='scale('+(p<0.3?E.outBack(p/0.3):thump)+')';
@@ -681,9 +683,11 @@
       el.style.opacity=Math.min(1,p*3); const e=E.outElastic(p); el.style.transform='scale('+(0.2+0.8*e)+') rotate('+((1-e)*180)+'deg)';
     }},
     rocketLaunch: { dur: 1.6, apply: (el,p,c) => {
-      if(!el.dataset.rl){ el.dataset.rl='1'; el.textContent=el.dataset.emoji||'🚀'; el.style.display='inline-block'; }
-      el.style.opacity=1; const e=E.inCubic ? E.inCubic(p) : p*p;
-      el.style.transform='translateY('+(-e*700)+'px) translateX('+(Math.sin(p*12)*6)+'px) rotate(-45deg) scale('+(1-p*0.3)+')';
+      if(!el.dataset.rl){ el.dataset.rl='1'; el.style.display='inline-block';
+        if(el.dataset.emoji) el.textContent=el.dataset.emoji;
+        else el.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%;overflow:visible"><path d="M12 1.5C15.8 4.6 17 9.4 16 14.5H8C7 9.4 8.2 4.6 12 1.5Z" fill="#EAF0FF"/><circle cx="12" cy="8.5" r="2.1" fill="var(--accent,#7C5CFF)"/><path d="M8 13L4.8 18 8 16.7ZM16 13L19.2 18 16 16.7Z" fill="var(--accent3,#FF5C8A)"/><path d="M9.6 15.5C10.4 20 12 22 12 22 12 22 13.6 20 14.4 15.5 13.2 16.4 10.8 16.4 9.6 15.5Z" fill="var(--gold,#FFD166)"/></svg>'; }
+      el.style.opacity=1; const e=p*p;
+      el.style.transform='translateY('+(-e*680)+'px) translateX('+(Math.sin(p*14)*5)+'px) scale('+(1-p*0.25)+')';
     }},
     coinFlip: { dur: 1.2, apply: (el,p,c) => {
       if(!el.dataset.cf){ el.dataset.cf='1'; el.style.display='inline-flex'; el.style.alignItems='center'; el.style.justifyContent='center';
@@ -693,8 +697,9 @@
       el.style.opacity=Math.min(1,p*3); el.style.transform='perspective(600px) rotateY('+((1-E.outCubic(p))*1080)+'deg)';
     }},
     trophyShine: { dur: 1.4, apply: (el,p,c) => {
-      if(!el.dataset.tr){ el.dataset.tr='1'; if(getComputedStyle(el).position==='static') el.style.position='relative'; el.style.overflow='hidden';
-        el.textContent=el.dataset.emoji||'🏆'; el.style.display='inline-block'; }
+      if(!el.dataset.tr){ el.dataset.tr='1'; el.style.display='inline-block';
+        if(el.dataset.emoji) el.textContent=el.dataset.emoji;
+        else el.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%"><path d="M6 3H18V8A6 6 0 0 1 6 8Z" fill="var(--gold,#FFD166)"/><path d="M6 4.5H3.5V6A3 3 0 0 0 6.4 9M18 4.5H20.5V6A3 3 0 0 1 17.6 9" fill="none" stroke="var(--gold,#FFD166)" stroke-width="1.4"/><path d="M10.5 13H13.5V16H16V19H8V16H10.5Z" fill="var(--gold,#FFD166)"/></svg>'; }
       el.style.opacity=Math.min(1,p*3); el.style.transform='scale('+(0.6+0.4*E.outBack(Math.min(1,p*1.5)))+')';
     }},
     badgeUnlock: { dur: 1.5, apply: (el,p,c) => {
@@ -722,7 +727,10 @@
     }},
     partyPopper: { dur: 1.6, apply: (el,p,c) => {
       if(!el.dataset.pp){ el.dataset.pp='1'; if(getComputedStyle(el).position==='static') el.style.position='relative';
-        const em=document.createElement('span'); em.textContent=el.dataset.emoji||'🎉'; em.style.cssText='display:inline-block'; el.appendChild(em);
+        const em=document.createElement('span'); em.style.cssText='display:inline-block;width:64px;height:64px';
+        if(el.dataset.emoji) em.textContent=el.dataset.emoji;
+        else em.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%;overflow:visible"><path d="M3 21L9 8 16 15Z" fill="var(--accent,#7C5CFF)"/><path d="M3 21L9 8 11.5 10.5Z" fill="var(--accent2,#19E3B1)"/></svg>';
+        el.appendChild(em);
         let h=''; for(let i=0;i<30;i++) h+='<span class="pp-s" style="position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:'+((i%2)?'50%':'2px')+';background:'+FUN[i%4]+'"></span>';
         const wrap=document.createElement('span'); wrap.innerHTML=h; el.appendChild(wrap); el._ppEm=em; }
       el.style.opacity=1; if(el._ppEm) el._ppEm.style.transform='scale('+(0.5+0.5*E.outBack(Math.min(1,p*2)))+') rotate('+(-20+p*10)+'deg)';
@@ -738,12 +746,16 @@
       el.style.opacity=Math.min(1,p*4); const e=E.outElastic(p); el.style.transform='scale('+(0.2+0.8*e)+') translateY('+((1-E.outCubic(p))*30)+'px)';
     }},
     thumbsUp: { dur: 0.9, apply: (el,p,c) => {
-      if(!el.dataset.tu){ el.dataset.tu='1'; el.textContent=el.dataset.emoji||'👍'; el.style.display='inline-block'; }
+      if(!el.dataset.tu){ el.dataset.tu='1'; el.style.display='inline-block';
+        if(el.dataset.emoji) el.textContent=el.dataset.emoji;
+        else el.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%"><path d="M3 10H6.5V21H4A1 1 0 0 1 3 20Z" fill="var(--accent,#7C5CFF)"/><path d="M7 9.5L11.5 2.4C12.7 2.4 13.6 3.5 13.3 4.7L12.4 9H18.6C19.9 9 20.9 10.2 20.6 11.5L19.2 18.6C19 19.6 18.1 20.3 17.1 20.3H7Z" fill="var(--accent2,#19E3B1)"/></svg>'; }
       el.style.opacity=Math.min(1,p*4); const e=E.outBack(Math.min(1,p*1.4)); const wob=Math.sin(p*Math.PI*4)*(1-p)*12;
       el.style.transform='scale('+e+') rotate('+wob+'deg)';
     }},
     lightbulb: { dur: 1.2, apply: (el,p,c) => {
-      if(!el.dataset.lb){ el.dataset.lb='1'; el.textContent=el.dataset.emoji||'💡'; el.style.display='inline-block'; }
+      if(!el.dataset.lb){ el.dataset.lb='1'; el.style.display='inline-block';
+        if(el.dataset.emoji) el.textContent=el.dataset.emoji;
+        else el.innerHTML='<svg viewBox="0 0 24 24" style="width:100%;height:100%;overflow:visible"><path d="M9 18.5H15V20A1.5 1.5 0 0 1 13.5 21.5H10.5A1.5 1.5 0 0 1 9 20Z" fill="#9aa3c0"/><path d="M12 2.5A7 7 0 0 1 16.5 14.8C15.6 15.7 15.2 16.6 15.1 17.5H8.9C8.8 16.6 8.4 15.7 7.5 14.8A7 7 0 0 1 12 2.5Z" fill="var(--gold,#FFD166)"/></svg>'; }
       if(p<0.5){ const ph=(p*10)%1; el.style.opacity=(ph>0.3&&ph<0.6)?0.25:1; el.style.filter='none'; }
       else { el.style.opacity=1; const g=0.5+0.5*Math.sin(p*Math.PI*4); el.style.filter='drop-shadow(0 0 '+(10+g*26)+'px var(--gold,#FFD166))'; }
       el.style.transform='scale('+(0.7+0.3*E.outBack(Math.min(1,p*2)))+')';
@@ -775,6 +787,55 @@
 
 
 
+
+  /* ===== LOTTIE (real) + vector float ===== */
+  Object.assign(PRESETS, {
+    // Play a Lottie via lottie-web, clock-synced. Source: data-src="x.json"
+    // (served/HTTP decks) OR data-key="confetti" (inline window.SB_LOTTIE map,
+    // works on file:// too). Scrubs by progress by default; data-lottie-loop="1"
+    // free-runs from the clock. Needs lottie_svg.min.js loaded on the page.
+    lottie: { dur: 3.0, apply: (el,p,c) => {
+      if(!el._ltTried){
+        if(typeof window==='undefined' || !window.lottie){
+          if(!window._sbLottieWarned){ window._sbLottieWarned=1; console.warn('[storyboard] lottie-web not loaded yet (include lottie_svg.min.js)'); }
+          return; // retry next tick once the lib is present
+        }
+        el._ltTried=true;
+        const key=el.dataset.key, src=el.dataset.src||el.dataset.lottie;
+        const opts={ container: el, renderer:'svg', loop:false, autoplay:false, rendererSettings:{preserveAspectRatio:'xMidYMid meet'} };
+        if(key && window.SB_LOTTIE && window.SB_LOTTIE[key]) opts.animationData=window.SB_LOTTIE[key];
+        else if(src) opts.path=src;
+        else { console.warn('[storyboard] lottie: needs data-key or data-src'); return; }
+        try{
+          el._lt=window.lottie.loadAnimation(opts);
+          el._lt.addEventListener('DOMLoaded', ()=>{ el._ltReady=true; el._ltFrames=el._lt.getDuration(true)||60; el._ltFps=el._lt.frameRate||30; });
+        }catch(e){ console.warn('[storyboard] lottie load failed', e); }
+      }
+      el.style.opacity=1;
+      if(el._ltReady && el._lt){
+        const frames=el._ltFrames||60;
+        if(el.dataset.lottieLoop==='1'){ el._lt.goToAndStop((((c.time||0)*(el._ltFps||30))%frames), true); }
+        else { const e=(c.ease||E.linear)(p); el._lt.goToAndStop(Math.min(frames-1, e*(frames-1)), true); }
+      }
+    }},
+    // Owned vector confetti/hearts/stars drifting up (no OS emoji). data-shapes="heart,star,confetti,dot"
+    floatShapes: { dur: 9999, apply: (el,p,c) => {
+      if(!el.dataset.fs){ el.dataset.fs='1'; el.style.position='absolute'; el.style.inset='0'; el.style.overflow='hidden'; el.style.pointerEvents='none';
+        const kinds=(el.dataset.shapes||'heart,star,confetti,dot').split(',');
+        const mk=(k,col)=>{
+          if(k==='heart') return '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M12 20.3C5 15.5 2.5 11.8 2.5 8.4 2.5 5.7 4.6 3.7 7.2 3.7 9 3.7 10.7 4.8 12 6.6 13.3 4.8 15 3.7 16.8 3.7 19.4 3.7 21.5 5.7 21.5 8.4 21.5 11.8 19 15.5 12 20.3Z" fill="'+col+'"/></svg>';
+          if(k==='star') return '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M12 1L15 9 23 9 17 14 19 22 12 17 5 22 7 14 1 9 9 9Z" fill="'+col+'"/></svg>';
+          if(k==='confetti') return '<div style="width:100%;height:62%;background:'+col+';border-radius:2px"></div>';
+          return '<div style="width:70%;height:70%;border-radius:50%;background:'+col+';margin:15%"></div>';
+        };
+        let h=''; for(let i=0;i<18;i++){ const x=_seed(i)*100, sz=20+_seed(i+2)*34, col=FUN[i%4], k=kinds[i%kinds.length];
+          h+='<span class="fs-e" style="position:absolute;left:'+x+'%;bottom:-12%;width:'+sz+'px;height:'+sz+'px">'+mk(k,col)+'</span>'; }
+        el.innerHTML=h; }
+      el.style.opacity=1; const t=c.time||0;
+      el.querySelectorAll('.fs-e').forEach((sp,i)=>{ const sp1=0.25+_seed(i)*0.4, prog=((t*sp1+_seed(i))%1.25), y=prog*125, sway=Math.sin(t*1.5+i)*30;
+        sp.style.transform='translate('+sway+'px,-'+y+'vh) rotate('+(t*50+i*40)+'deg)'; sp.style.opacity=String(Math.max(0,1-prog)); });
+    }},
+  });
 
   const LOOPS = {
     float:   (t,amp,per) => `translateY(${Math.sin(t/per*Math.PI*2)*amp}px)`,

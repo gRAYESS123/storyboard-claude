@@ -24,7 +24,7 @@ The "playable document" pattern is the unlock. Animations sync to your voice-ove
 - **`/storyboard adopt <html-or-url>`** — wrap your existing HTML for narration without touching its styles
 - **`/storyboard generate`** — opt-in ElevenLabs call that renders the MP3 + word timestamps and writes exact `TIMINGS` (no AAF needed)
 - **`/storyboard render`** — opt-in headless-Chromium + ffmpeg render to a finished 1920×1080 MP4. No manual screen capture needed.
-- **~95 animation presets** driven by the audio clock: spring, anticipate, overshoot, bounce, ken-burns, typewriter, wordReveal/wordSwap, letterSpring, scramble, counter, charts (barGrow/gauge/pieSlice/chartArea), connectorDraw diagrams, syntax-highlighted codeType, hand-drawn annotations (circleScribble/underlineDraw/strikethrough), a synthetic-cursor UI demo (cursorTour/typeInto/clickRipple), a fun pack (confettiBurst, fireworks, badgeUnlock, ratingStars, floatEmojis, trophyShine…), cinematic grade (rackFocus/vignette/filmGrain/multiplane), Lottie support, and more
+- **~95 animation presets** driven by the audio clock: spring, anticipate, overshoot, bounce, ken-burns, typewriter, wordReveal/wordSwap, letterSpring, scramble, counter, charts (barGrow/gauge/pieSlice/chartArea), connectorDraw diagrams, syntax-highlighted codeType, hand-drawn annotations (circleScribble/underlineDraw/strikethrough), a synthetic-cursor UI demo (cursorTour/typeInto/clickRipple), a fun pack of **owned vector** dazzle (confettiBurst, fireworks, badgeUnlock, ratingStars, a beating heart, trophy, rocket, thumbs-up — crisp SVG, not OS emoji), cinematic grade (rackFocus/vignette/filmGrain/multiplane), and **real baked-in Lottie** (clock-synced lottie-web with a bundled owned animation set), and more
 - **17 cinematic scene transitions** (no scroll): cut, crossDissolve, pushLeft/Right/Up/Down, coverLeft, revealRight, zoomIn/Out, flip3D, spinZoom, whipPan, blurThrough, irisOpen, barWipe, glitch, flash, blocks
 - **Composable motion**: `data-stagger` cascades, `data-then` chains, named `data-ease`, physical `data-spring`, ambient `data-loop`, and `data-exit` — choreograph rich sequences from a handful of attributes
 - **Calibration tool baked into every deck** — press `T` to enter calibration, tap `M` at each slide change, `A` to apply, `E` to export. Hash-aware auto-save means your tuning persists across reloads but invalidates when you re-extract from a new audio source.
@@ -206,7 +206,7 @@ The animator's brain (`animator.md`) is the heart of the project — improvement
 
 Built by [Georges Rayess](https://georgesrayess.com). Inspired by the documentary explainer-video lineage of Kurzgesagt, Vox, and old-school *Mythbusters* talking-to-camera. Animator-mode design borrows from the 12 principles of animation (Disney, 1981).
 
-Powered by [Claude Code](https://claude.com/claude-code) and [ElevenLabs](https://elevenlabs.io). Lottie support via [airbnb/lottie-web](https://github.com/airbnb/lottie-web).
+Powered by [Claude Code](https://claude.com/claude-code) and [ElevenLabs](https://elevenlabs.io). Real Lottie playback via [airbnb/lottie-web](https://github.com/airbnb/lottie-web) (MIT), with a bundled set of owned, generated animations.
 
 ## License
 
