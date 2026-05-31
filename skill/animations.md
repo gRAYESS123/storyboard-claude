@@ -853,7 +853,8 @@ An owned procedural mascot/guide that lives the whole beat (auto-blink, breathe,
 
 | Attr | Meaning |
 |---|---|
-| `data-char` | `blob` (full body + arms) or `orb` (minimal head — good for serious decks) |
+| `data-char` | `blob` · `orb` (minimal head, good for serious decks) · `bot` (antenna robot) · `cat` (ears + whiskers) · `ghost` (floaty, wavy hem) · `star` · `bean` (tall capsule) — all share the same face/acting |
+| `data-accessory` | optional `glasses` · `hat` · `bowtie` |
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
 | `data-look` | selector the eyes track from the start |

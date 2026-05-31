@@ -45,8 +45,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:
          data-acts="0.6:wave; 2.6:say=Meet the cast!; 5:happy"></div>
   </section>
 
-  <!-- 2 device mockup: phone + orb points -->
-  <section class="slide" data-slide="2" data-transition-in="pushLeft">
+  <!-- 2 the whole cast lineup -->
+  <section class="slide" data-slide="2" data-transition-in="pushUp">
+    <div class="grid-bg"></div>
+    <div class="center" style="position:absolute;top:90px;left:0;right:0">
+      <h2 class="h2">A whole cast.</h2>
+      <p class="sub" style="margin-top:14px">Seven owned styles — all share the same expressions, gestures &amp; lip-sync.</p>
+    </div>
+    <div style="position:absolute;bottom:64px;left:0;right:0;display:flex;justify-content:center;align-items:flex-end;gap:24px;z-index:3">
+      <div class="anim" data-anim="character" data-char="blob"  data-color="var(--accent)"  style="width:178px;height:262px" data-acts="0.4:wave"></div>
+      <div class="anim" data-anim="character" data-char="orb"   data-color="var(--accent2)" style="width:168px;height:208px" data-acts="0.7:happy; 2.4:bounce"></div>
+      <div class="anim" data-anim="character" data-char="bot"   data-color="var(--accent)"  style="width:178px;height:262px" data-acts="1.0:nod"></div>
+      <div class="anim" data-anim="character" data-char="cat"   data-color="var(--accent3)" style="width:178px;height:262px" data-acts="1.3:happy"></div>
+      <div class="anim" data-anim="character" data-char="ghost" data-color="#cdd6f5"        style="width:172px;height:252px" data-acts="1.6:surprised; 3.4:happy"></div>
+      <div class="anim" data-anim="character" data-char="star"  data-color="var(--gold)"    style="width:184px;height:198px" data-acts="1.9:happy; 2.9:spin"></div>
+      <div class="anim" data-anim="character" data-char="bean"  data-color="var(--accent2)" style="width:150px;height:262px" data-acts="2.2:wave"></div>
+    </div>
+  </section>
+
+  <!-- 3 device mockup: phone + orb points -->
+  <section class="slide" data-slide="3" data-transition-in="pushLeft">
     <div class="grid-bg"></div>
     <div style="position:absolute;left:150px;top:50%;transform:translateY(-50%);text-align:left;max-width:640px;z-index:3">
       <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">Stage it on a real device.</h2>
@@ -68,7 +86,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:
   </section>
 
   <!-- 3 browser + sticky + speech bubble + character reacts -->
-  <section class="slide" data-slide="3" data-transition-in="crossDissolve">
+  <section class="slide" data-slide="4" data-transition-in="crossDissolve">
     <div class="grid-bg"></div>
     <div id="cs-browser" class="anim" data-anim="device" data-device="browser" data-url="app.storyboard.dev" data-t-rel="0.4" data-dur="1.0" style="position:absolute;left:150px;top:190px;width:1020px;height:580px;z-index:2">
       <div style="height:100%;background:#0d1020;padding:34px;color:#fff;display:flex;flex-direction:column;gap:22px">
@@ -93,7 +111,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:
   </section>
 
   <!-- 4 day sky + pins + character -->
-  <section class="slide" data-slide="4" data-transition-in="zoomIn">
+  <section class="slide" data-slide="5" data-transition-in="zoomIn">
     <div class="bleed anim" data-anim="sky" data-sky="day" data-t-rel="0" data-dur="9999"></div>
     <div class="center" style="position:absolute;top:120px;left:0;right:0">
       <h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8" style="color:#10131f">Pins, props &amp; particles.</h2>
@@ -106,7 +124,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:
   </section>
 
   <!-- 5 finale: dusk + embers + confetti + character jumps -->
-  <section class="slide" data-slide="5" data-transition-in="whipPan">
+  <section class="slide" data-slide="6" data-transition-in="whipPan">
     <div class="bleed anim" data-anim="sky" data-sky="dusk" data-t-rel="0" data-dur="9999"></div>
     <div class="bleed anim" data-anim="emitter" data-fx="embers" data-t-rel="0" data-dur="9999"></div>
     <div class="bleed anim" data-anim="confettiBurst" data-t-rel="1.4" data-dur="2.2" style="z-index:3"></div>
@@ -126,11 +144,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060a;font-family:
 <script src="storyboard-engine.js"></script>
 <script>
 const TIMINGS = [
-  { time: 0.0, slide: 1 }, { time: 6.5, slide: 2 }, { time: 13.0, slide: 3 },
-  { time: 20.0, slide: 4 }, { time: 26.0, slide: 5 }
+  { time: 0.0, slide: 1 }, { time: 6.5, slide: 2 }, { time: 14.0, slide: 3 },
+  { time: 21.0, slide: 4 }, { time: 28.0, slide: 5 }, { time: 34.0, slide: 6 }
 ];
-const SLIDE_LABELS = ['Meet the cast','Device mockup','Browser + props','Pins + day','Finale'];
-Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 33 });
+const SLIDE_LABELS = ['Meet the cast','Whole cast','Device mockup','Browser + props','Pins + day','Finale'];
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 41 });
 </script>
 </body>
 </html>

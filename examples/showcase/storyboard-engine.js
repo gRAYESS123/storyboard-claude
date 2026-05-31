@@ -839,7 +839,7 @@
 
   /* =====================================================================
      CHARACTER RIG (actor layer) — owned procedural mascot / guide.
-       <div class="anim" data-anim="character" data-char="blob|orb"
+       <div class="anim" data-anim="character" data-char="blob|orb|bot|cat|ghost|star|bean" data-accessory="glasses|hat|bowtie"
             data-mood="idle" data-talk="1" data-color="var(--accent)"
             data-look="#kpi"
             data-acts="1:wave; 2.4:look=#kpi; 3.2:point=#kpi; 4:happy; 5:say=Look!">
@@ -848,69 +848,83 @@
      analyser; sine-flap fallback when silent), and speech bubbles.
   ===================================================================== */
   let _charSeq=0;
+  const _CHAR_INK='#10131f';
+  function _charBrow(x,y){ return 'M'+(x-16)+','+y+' q16,-8 32,0'; }
+  function _charSmile(kind,f){ var mx=f.mx,my=f.my,w=f.mw;
+    if(kind==='happy') return 'M'+Math.round(mx-w*1.05)+','+(my-2)+' Q'+mx+','+Math.round(my+w*0.95)+' '+Math.round(mx+w*1.05)+','+(my-2);
+    if(kind==='sad') return 'M'+Math.round(mx-w)+','+Math.round(my+w*0.4)+' Q'+mx+','+Math.round(my-w*0.4)+' '+Math.round(mx+w)+','+Math.round(my+w*0.4);
+    if(kind==='think') return 'M'+Math.round(mx-w*0.5)+','+my+' Q'+mx+','+(my-2)+' '+Math.round(mx+w*0.6)+','+(my+3);
+    return 'M'+Math.round(mx-w)+','+my+' Q'+mx+','+Math.round(my+w*0.62)+' '+Math.round(mx+w)+','+my;
+  }
+  function _charFaceSVG(f){ var ink=_CHAR_INK;
+    return '<path class="sbc-brL" d="'+_charBrow(f.eyeLx,f.browY)+'" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
+      +'<path class="sbc-brR" d="'+_charBrow(f.eyeRx,f.browY)+'" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
+      +'<g class="sbc-eyeL"><ellipse class="sbc-eyew" cx="'+f.eyeLx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"/><circle class="sbc-pupil" cx="'+f.eyeLx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
+      +'<g class="sbc-eyeR"><ellipse class="sbc-eyew" cx="'+f.eyeRx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"/><circle class="sbc-pupil" cx="'+f.eyeRx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
+      +'<ellipse class="sbc-cheekL" cx="'+f.cheekLx+'" cy="'+f.cheekY+'" rx="12" ry="8" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
+      +'<ellipse class="sbc-cheekR" cx="'+f.cheekRx+'" cy="'+f.cheekY+'" rx="12" ry="8" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
+      +'<path class="sbc-smile" d="'+_charSmile('idle',f)+'" fill="none" stroke="'+ink+'" stroke-width="6" stroke-linecap="round"/>'
+      +'<ellipse class="sbc-open" cx="'+f.mx+'" cy="'+(f.my+4)+'" rx="14" ry="4" fill="'+ink+'" opacity="0"/>';
+  }
+  function _charAccessory(name,f){ var ink=_CHAR_INK;
+    if(name==='glasses'){ var r=f.erx+5; return '<g fill="none" stroke="'+ink+'" stroke-width="4" opacity="0.92"><circle cx="'+f.eyeLx+'" cy="'+f.eyeY+'" r="'+r+'"/><circle cx="'+f.eyeRx+'" cy="'+f.eyeY+'" r="'+r+'"/><line x1="'+(f.eyeLx+r)+'" y1="'+f.eyeY+'" x2="'+(f.eyeRx-r)+'" y2="'+f.eyeY+'"/></g>'; }
+    if(name==='hat'){ var hy=f.browY-12, w=f.eyeRx-f.eyeLx; return '<g fill="'+ink+'"><rect x="'+(f.eyeLx-6)+'" y="'+(hy-34)+'" width="'+(w+12)+'" height="36" rx="6"/><rect x="'+(f.eyeLx-24)+'" y="'+hy+'" width="'+(w+48)+'" height="9" rx="4"/></g>'; }
+    if(name==='bowtie'){ var by=f.my+30, cx=f.mx; return '<g fill="var(--accent3,#FF5C8A)"><path d="M'+cx+','+by+' L'+(cx-22)+','+(by-13)+' L'+(cx-22)+','+(by+13)+' Z"/><path d="M'+cx+','+by+' L'+(cx+22)+','+(by-13)+' L'+(cx+22)+','+(by+13)+' Z"/><circle cx="'+cx+'" cy="'+by+'" r="6"/></g>'; }
+    return '';
+  }
+  const _CHAR_STYLES = {
+    blob: { vb:[240,300], shadow:[120,288,66,12], originY:250, armPivot:{Lx:34,Ly:152,Rx:206,Ry:152},
+      face:{eyeLx:92,eyeRx:148,eyeY:136,erx:25,ery:29,pupil:11,mx:120,my:180,mw:19,browY:104,cheekLx:72,cheekRx:168,cheekY:178},
+      body:function(c){return '<rect class="sbc-armL" x="18" y="150" width="32" height="88" rx="16" fill="'+c+'"/><rect class="sbc-armR" x="190" y="150" width="32" height="88" rx="16" fill="'+c+'"/><rect class="sbc-body" x="44" y="58" width="152" height="192" rx="74" fill="'+c+'"/>';} },
+    orb: { vb:[240,240], shadow:[120,226,58,10], originY:210,
+      face:{eyeLx:96,eyeRx:144,eyeY:110,erx:22,ery:26,pupil:10,mx:120,my:148,mw:19,browY:82,cheekLx:80,cheekRx:160,cheekY:148},
+      body:function(c){return '<circle class="sbc-body" cx="120" cy="118" r="92" fill="'+c+'"/>';} },
+    bot: { vb:[240,300], shadow:[120,288,64,12], originY:250, armPivot:{Lx:29,Ly:152,Rx:211,Ry:152},
+      face:{eyeLx:92,eyeRx:148,eyeY:140,erx:23,ery:27,pupil:11,mx:120,my:186,mw:18,browY:110,cheekLx:72,cheekRx:168,cheekY:184},
+      body:function(c){return '<rect class="sbc-armL" x="14" y="152" width="30" height="84" rx="15" fill="'+c+'"/><rect class="sbc-armR" x="196" y="152" width="30" height="84" rx="15" fill="'+c+'"/><line x1="120" y1="64" x2="120" y2="34" stroke="'+c+'" stroke-width="7" stroke-linecap="round"/><circle cx="120" cy="28" r="9" fill="'+c+'"/><rect class="sbc-body" x="46" y="62" width="148" height="180" rx="34" fill="'+c+'"/><rect x="96" y="214" width="48" height="12" rx="6" fill="rgba(255,255,255,.28)"/>';} },
+    cat: { vb:[240,300], shadow:[120,288,64,12], originY:250, armPivot:{Lx:33,Ly:152,Rx:207,Ry:152},
+      face:{eyeLx:92,eyeRx:148,eyeY:138,erx:24,ery:28,pupil:11,mx:120,my:182,mw:17,browY:110,cheekLx:74,cheekRx:166,cheekY:180},
+      body:function(c){return '<rect class="sbc-armL" x="18" y="152" width="30" height="82" rx="15" fill="'+c+'"/><rect class="sbc-armR" x="192" y="152" width="30" height="82" rx="15" fill="'+c+'"/><path d="M72,82 L60,30 L106,68 Z" fill="'+c+'"/><path d="M168,82 L180,30 L134,68 Z" fill="'+c+'"/><rect class="sbc-body" x="46" y="62" width="148" height="188" rx="72" fill="'+c+'"/><g stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"><line x1="60" y1="178" x2="14" y2="170"/><line x1="60" y1="186" x2="14" y2="190"/><line x1="180" y1="178" x2="226" y2="170"/><line x1="180" y1="186" x2="226" y2="190"/></g>';} },
+    ghost: { vb:[240,300], shadow:[120,278,54,10], originY:230,
+      face:{eyeLx:96,eyeRx:144,eyeY:130,erx:21,ery:25,pupil:10,mx:120,my:168,mw:16,browY:104,cheekLx:80,cheekRx:160,cheekY:166},
+      body:function(c){return '<path class="sbc-body" d="M40,160 C40,84 200,84 200,160 L200,248 q-20,20 -40,0 q-20,-20 -40,0 q-20,20 -40,0 q-20,-20 -40,0 Z" fill="'+c+'" opacity="0.93"/>';} },
+    star: { vb:[240,240], shadow:[120,232,52,9], originY:200,
+      face:{eyeLx:104,eyeRx:136,eyeY:118,erx:16,ery:19,pupil:8,mx:120,my:150,mw:13,browY:98,cheekLx:88,cheekRx:152,cheekY:148},
+      body:function(c){return '<path class="sbc-body" d="M120,18 L150,94 L232,96 L168,146 L190,224 L120,178 L50,224 L72,146 L8,96 L90,94 Z" fill="'+c+'"/>';} },
+    bean: { vb:[240,300], shadow:[120,288,52,11], originY:252, armPivot:{Lx:40,Ly:152,Rx:200,Ry:152},
+      face:{eyeLx:100,eyeRx:140,eyeY:120,erx:20,ery:24,pupil:10,mx:120,my:162,mw:16,browY:92,cheekLx:84,cheekRx:156,cheekY:160},
+      body:function(c){return '<rect class="sbc-armL" x="26" y="150" width="28" height="80" rx="14" fill="'+c+'"/><rect class="sbc-armR" x="186" y="150" width="28" height="80" rx="14" fill="'+c+'"/><rect class="sbc-body" x="64" y="40" width="112" height="220" rx="56" fill="'+c+'"/>';} },
+  };
   function _charBuild(el){
-    const style=el.dataset.char||'blob';
-    const col=el.dataset.color||'var(--accent,#7C5CFF)';
-    const ink='#10131f';
-    let svg;
-    if(style==='orb'){
-      svg='<svg class="sbc-svg" viewBox="0 0 240 240" style="width:100%;height:100%;overflow:visible">'
-        +'<ellipse class="sbc-shadow" cx="120" cy="226" rx="58" ry="10" fill="rgba(0,0,0,.22)"/>'
-        +'<g class="sbc-bodyG">'
-        +'<circle class="sbc-body" cx="120" cy="118" r="92" fill="'+col+'"/>'
-        +'<path class="sbc-brL" d="M78,82 q14,-7 28,0" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-        +'<path class="sbc-brR" d="M134,82 q14,-7 28,0" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-        +'<g class="sbc-eyeL"><ellipse class="sbc-eyew" cx="96" cy="110" rx="22" ry="26" fill="#fff"/><circle class="sbc-pupil" cx="96" cy="112" r="10" fill="'+ink+'"/></g>'
-        +'<g class="sbc-eyeR"><ellipse class="sbc-eyew" cx="144" cy="110" rx="22" ry="26" fill="#fff"/><circle class="sbc-pupil" cx="144" cy="112" r="10" fill="'+ink+'"/></g>'
-        +'<ellipse class="sbc-cheekL" cx="80" cy="148" rx="11" ry="7" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
-        +'<ellipse class="sbc-cheekR" cx="160" cy="148" rx="11" ry="7" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
-        +'<path class="sbc-smile" d="M101,148 Q120,160 139,148" fill="none" stroke="'+ink+'" stroke-width="6" stroke-linecap="round"/>'
-        +'<ellipse class="sbc-open" cx="120" cy="154" rx="13" ry="4" fill="'+ink+'" opacity="0"/>'
-        +'</g></svg>';
-    } else {
-      svg='<svg class="sbc-svg" viewBox="0 0 240 300" style="width:100%;height:100%;overflow:visible">'
-        +'<ellipse class="sbc-shadow" cx="120" cy="288" rx="66" ry="12" fill="rgba(0,0,0,.22)"/>'
-        +'<g class="sbc-bodyG">'
-        +'<rect class="sbc-armL" x="18" y="150" width="32" height="88" rx="16" fill="'+col+'"/>'
-        +'<rect class="sbc-armR" x="190" y="150" width="32" height="88" rx="16" fill="'+col+'"/>'
-        +'<rect class="sbc-body" x="44" y="58" width="152" height="192" rx="74" fill="'+col+'"/>'
-        +'<path class="sbc-brL" d="M74,103 q16,-8 32,0" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-        +'<path class="sbc-brR" d="M134,103 q16,-8 32,0" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-        +'<g class="sbc-eyeL"><ellipse class="sbc-eyew" cx="92" cy="136" rx="25" ry="29" fill="#fff"/><circle class="sbc-pupil" cx="92" cy="138" r="11" fill="'+ink+'"/></g>'
-        +'<g class="sbc-eyeR"><ellipse class="sbc-eyew" cx="148" cy="136" rx="25" ry="29" fill="#fff"/><circle class="sbc-pupil" cx="148" cy="138" r="11" fill="'+ink+'"/></g>'
-        +'<ellipse class="sbc-cheekL" cx="72" cy="178" rx="13" ry="9" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
-        +'<ellipse class="sbc-cheekR" cx="168" cy="178" rx="13" ry="9" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
-        +'<path class="sbc-smile" d="M101,180 Q120,194 139,180" fill="none" stroke="'+ink+'" stroke-width="6" stroke-linecap="round"/>'
-        +'<ellipse class="sbc-open" cx="120" cy="186" rx="15" ry="4" fill="'+ink+'" opacity="0"/>'
-        +'</g></svg>';
-    }
-    el.innerHTML=svg;
-    const q=s=>el.querySelector(s);
-    const cx={L: style==='orb'?96:92, R: style==='orb'?144:148}, cy=style==='orb'?110:136;
-    const p={ bodyG:q('.sbc-bodyG'), eyeL:q('.sbc-eyeL'), eyeR:q('.sbc-eyeR'),
+    var style=el.dataset.char||'blob'; var S=_CHAR_STYLES[style]||_CHAR_STYLES.blob;
+    var col=el.dataset.color||'var(--accent,#7C5CFF)'; var f=S.face; var vb=S.vb, sh=S.shadow;
+    var acc=el.dataset.accessory?_charAccessory(el.dataset.accessory,f):'';
+    el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+vb[0]+' '+vb[1]+'" style="width:100%;height:100%;overflow:visible">'
+      +'<ellipse class="sbc-shadow" cx="'+sh[0]+'" cy="'+sh[1]+'" rx="'+sh[2]+'" ry="'+sh[3]+'" fill="rgba(0,0,0,.22)"/>'
+      +'<g class="sbc-bodyG">'+S.body(col)+_charFaceSVG(f)+acc+'</g></svg>';
+    var q=function(s){return el.querySelector(s);};
+    var p={ bodyG:q('.sbc-bodyG'), eyeL:q('.sbc-eyeL'), eyeR:q('.sbc-eyeR'),
       pupilL:q('.sbc-eyeL .sbc-pupil'), pupilR:q('.sbc-eyeR .sbc-pupil'),
       smile:q('.sbc-smile'), open:q('.sbc-open'), cheekL:q('.sbc-cheekL'), cheekR:q('.sbc-cheekR'),
-      brL:q('.sbc-brL'), brR:q('.sbc-brR'), armL:q('.sbc-armL'), armR:q('.sbc-armR'), style };
-    el._chParts=p;
-    p.eyeL.style.transformOrigin=cx.L+'px '+cy+'px'; p.eyeR.style.transformOrigin=cx.R+'px '+cy+'px';
-    if(p.armL){ p.armL.style.transformOrigin='34px 152px'; p.armR.style.transformOrigin='206px 152px'; }
-    p.brL.style.transformOrigin=(cx.L)+'px '+(cy-32)+'px'; p.brR.style.transformOrigin=(cx.R)+'px '+(cy-32)+'px';
-    p.bodyG.style.transformOrigin='120px '+(style==='orb'?'210px':'250px');
+      brL:q('.sbc-brL'), brR:q('.sbc-brR'), armL:q('.sbc-armL'), armR:q('.sbc-armR'), style:style };
+    el._chParts=p; el._chFace=f;
+    p.eyeL.style.transformOrigin=f.eyeLx+'px '+f.eyeY+'px'; p.eyeR.style.transformOrigin=f.eyeRx+'px '+f.eyeY+'px';
+    if(p.armL && S.armPivot){ p.armL.style.transformOrigin=S.armPivot.Lx+'px '+S.armPivot.Ly+'px'; p.armR.style.transformOrigin=S.armPivot.Rx+'px '+S.armPivot.Ry+'px'; }
+    p.brL.style.transformOrigin=f.eyeLx+'px '+f.browY+'px'; p.brR.style.transformOrigin=f.eyeRx+'px '+f.browY+'px';
+    p.bodyG.style.transformOrigin=(vb[0]/2)+'px '+S.originY+'px';
   }
   function _charApplyMood(el, mood){
-    const p=el._chParts, ch=el._ch; if(!p) return; ch.mood=mood;
+    var p=el._chParts, ch=el._ch, f=el._chFace; if(!p) return; ch.mood=mood;
     p.cheekL.style.opacity='0'; p.cheekR.style.opacity='0';
     p.brL.style.opacity='0'; p.brR.style.opacity='0'; p.brL.style.transform=''; p.brR.style.transform='';
-    ch.eyeRy=1; ch.winkR=0; ch.moodLook=[0,0];
-    const orb=p.style==='orb';
-    let smile= orb?'M101,148 Q120,160 139,148':'M101,180 Q120,194 139,180';
-    if(mood==='happy'||mood==='wink'){ smile= orb?'M99,146 Q120,164 141,146':'M93,176 Q120,206 147,176'; p.cheekL.style.opacity='.9'; p.cheekR.style.opacity='.9'; ch.eyeRy=0.78; }
+    ch.eyeRy=1; ch.winkR=0; ch.moodLook=[0,0]; ch.moodSurprise=0;
+    var kind='idle';
+    if(mood==='happy'||mood==='wink'){ kind='happy'; p.cheekL.style.opacity='.9'; p.cheekR.style.opacity='.9'; ch.eyeRy=0.78; }
     if(mood==='wink') ch.winkR=1;
-    if(mood==='sad'){ smile= orb?'M101,158 Q120,146 139,158':'M101,192 Q120,178 139,192'; p.brL.style.opacity='.9'; p.brR.style.opacity='.9'; p.brL.style.transform='rotate(14deg)'; p.brR.style.transform='rotate(-14deg)'; ch.moodLook=[0,5]; }
+    if(mood==='sad'){ kind='sad'; p.brL.style.opacity='.9'; p.brR.style.opacity='.9'; p.brL.style.transform='rotate(14deg)'; p.brR.style.transform='rotate(-14deg)'; ch.moodLook=[0,5]; }
     if(mood==='surprised'){ p.brL.style.opacity='.9'; p.brR.style.opacity='.9'; p.brL.style.transform='translateY(-7px)'; p.brR.style.transform='translateY(-7px)'; ch.eyeRy=1.2; ch.moodSurprise=1; }
-    else ch.moodSurprise=0;
-    if(mood==='think'){ smile= orb?'M108,154 Q122,150 132,156':'M110,186 Q123,183 133,189'; p.brR.style.opacity='.9'; p.brR.style.transform='translateY(-6px)'; ch.moodLook=[-5,-6]; }
-    p.smile.setAttribute('d', smile); ch.smileD=smile;
+    if(mood==='think'){ kind='think'; p.brR.style.opacity='.9'; p.brR.style.transform='translateY(-6px)'; ch.moodLook=[-5,-6]; }
+    p.smile.setAttribute('d', _charSmile(kind, f)); ch.smileD=kind;
   }
   function _charParseActs(spec){
     if(!spec) return [];
