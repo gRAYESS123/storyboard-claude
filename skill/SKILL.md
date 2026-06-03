@@ -792,6 +792,6 @@ For maximal/playful videos, use the `playful-pop` style (styles.md) and lean on 
 ## Cast & sets: actors, props, environments
 
 Give a deck personality and a place to live (all owned, render-safe — full reference in animations.md; demo in `examples/showcase/cast-and-sets.html`):
-- **Characters** — `data-anim="character"` with 7 owned styles (`blob`/`orb`/`bot`/`cat`/`ghost`/`star`/`bean`, optional `data-accessory="glasses|hat|bowtie"`), a slide-relative `data-acts` timeline (`wave`, `look=#x`, `point=#x`, moods, `say=…`) and `data-talk="1"` lip-sync that rides the audio analyser. Use a character as a guide/presenter that points at the thing the VO is describing.
+- **Characters** — `data-anim="character"` with 8 owned styles: a human `person` (set `data-skin`/`data-hair`/`data-haircolor`/`data-color`) plus mascots `blob`/`orb`/`bot`/`cat`/`ghost`/`star`/`bean` (optional `data-accessory="glasses|hat|bowtie"`), a slide-relative `data-acts` timeline (`wave`, `look=#x`, `point=#x`, moods, `say=…`) and `data-talk="1"` lip-sync that rides the audio analyser. Use a character as a guide/presenter that points at the thing the VO is describing.
 - **Props & devices** — `device` (phone/laptop/browser/tablet frames for product shots), `speechBubble`, `stickyNote`, `pinDrop`.
 - **Environments** — `emitter` (snow/rain/embers/bubbles/dust), `sky` (day/dusk/night), `scenery` (parallax hills). Layer back→front: sky → scenery → emitter → content → character.
