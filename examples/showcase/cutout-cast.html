@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Storyboard — Cutout Cast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#dedacd;font-family:'Space Grotesk',system-ui,sans-serif}
+.stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
+:root{--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166;--ink:#222}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:#dedacd;color:#26241e;display:flex;align-items:center;justify-content:center;padding:90px;contain:layout paint}
+.anim{opacity:0;will-change:transform,opacity,filter}
+.paper{position:absolute;inset:0;background:#dedacd;z-index:0}
+.mega{font-size:150px;line-height:.96;font-weight:700;letter-spacing:-.03em;color:#26241e}
+.h2{font-size:88px;line-height:1.04;font-weight:700;letter-spacing:-.02em;color:#26241e}
+.sub{font-size:34px;line-height:1.4;color:#5c584d;margin-top:24px}
+.mono{font-family:'JetBrains Mono',monospace}
+.center{position:relative;z-index:3;text-align:center;max-width:1500px}
+.cta-pill{display:inline-block;margin-top:46px;padding:28px 58px;border-radius:16px;font-size:38px;font-weight:700;color:#fff;background:#26241e}
+.row{position:absolute;left:0;right:0;bottom:60px;display:flex;align-items:flex-end;justify-content:center;gap:18px;z-index:3}
+.char{z-index:3}
+.transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
+.transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#dedacd 50%,transparent);transform:translateX(-100%)}
+.transition-overlay.dissolve{background:#dedacd}
+</style>
+</head>
+<body>
+<div class="stage"><div class="deck" id="deck">
+
+  <!-- 1 lineup -->
+  <section class="slide" data-slide="1" data-transition-in="cut">
+    <div class="paper"></div>
+    <div class="center" style="position:absolute;top:80px;left:0;right:0">
+      <h1 class="mega anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.9">A cutout cast.</h1>
+      <p class="sub anim" data-anim="fadeUp" data-t-rel="1.0" data-dur="0.8">Construction-paper characters — <span class="mono">data-char="cutout"</span></p>
+    </div>
+    <div class="row">
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="light"  data-hair="buzz"  data-haircolor="#c9a96a" data-color="#8fd17a" style="width:210px;height:274px" data-acts="0.5:wave"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="deep"   data-hair="afro"  data-haircolor="#15151a" data-color="#2b2b30" style="width:210px;height:274px" data-acts="0.8:happy"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="light"  data-hair="hood"  data-haircolor="#c0392b" data-color="#c0392b" style="width:210px;height:274px" data-acts="1.1:nod"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="medium" data-hair="long"  data-haircolor="#8a7a9a" data-color="#3f6b5e" style="width:210px;height:274px" data-acts="1.4:wave"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="tan"    data-hair="curly" data-haircolor="#3a2a1e" data-color="#9b8579" data-accessory="glasses" style="width:210px;height:274px" data-acts="1.7:happy"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="light"  data-hair="bald"  data-color="#6fa8c7" style="width:210px;height:274px" data-acts="2.0:surprised"></div>
+    </div>
+  </section>
+
+  <!-- 2 acting: talk + react -->
+  <section class="slide" data-slide="2" data-transition-in="crossDissolve">
+    <div class="paper"></div>
+    <div class="center" style="position:absolute;top:70px;left:0;right:0"><h2 class="h2 anim" data-anim="fadeUp" data-t-rel="0.2" data-dur="0.7">They act, too.</h2></div>
+    <div style="position:absolute;left:0;right:0;bottom:40px;display:flex;align-items:flex-end;justify-content:center;gap:90px;z-index:3">
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="medium" data-hair="short" data-haircolor="#5a3a26" data-color="var(--accent)" style="width:300px;height:392px"
+           data-acts="0.6:say=Welcome to the cast!; 4:happy"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="deep" data-hair="afro" data-haircolor="#15151a" data-color="#2b2b30" style="width:300px;height:392px"
+           data-acts="1.2:surprised; 3.4:happy"></div>
+      <div class="char anim" data-anim="character" data-char="cutout" data-skin="light" data-hair="hood" data-haircolor="#e08a2b" data-color="#e08a2b" style="width:300px;height:392px"
+           data-acts="1.8:wave; 3:happy"></div>
+    </div>
+  </section>
+
+  <!-- 3 CTA -->
+  <section class="slide" data-slide="3" data-transition-in="whipPan">
+    <div class="paper"></div>
+    <div class="center">
+      <h1 class="mega anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.9">Your cast,<br>your style.</h1>
+      <p class="sub anim" data-anim="fadeUp" data-t-rel="1.4" data-dur="0.7">github.com/gRAYESS123/storyboard-claude</p>
+      <span class="cta-pill anim" data-anim="spring" data-t-rel="2.0" data-dur="0.9" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
+    </div>
+    <div class="char anim" data-anim="character" data-char="cutout" data-skin="medium" data-hair="curly" data-haircolor="#2b2b30" data-color="var(--accent2)" style="position:absolute;right:230px;bottom:60px;width:280px;height:366px"
+         data-acts="0.8:wave; 2.4:happy"></div>
+  </section>
+
+</div></div>
+<div class="transition-overlay" id="transitionOverlay"></div>
+<audio id="voAudio" preload="metadata"></audio>
+<script src="storyboard-engine.js"></script>
+<script>
+const TIMINGS = [ { time: 0.0, slide: 1 }, { time: 7.0, slide: 2 }, { time: 14.0, slide: 3 } ];
+const SLIDE_LABELS = ['Cutout lineup','Acting','CTA'];
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 21 });
+</script>
+</body>
+</html>

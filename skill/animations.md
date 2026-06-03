@@ -853,8 +853,8 @@ An owned procedural mascot/guide that lives the whole beat (auto-blink, breathe,
 
 | Attr | Meaning |
 |---|---|
-| `data-char` | `blob` · `orb` · `bot` (antenna robot) · `cat` (ears + whiskers) · `ghost` (wavy hem) · `star` · `bean` (tall capsule) · `person` (human — head, hair, clothed shoulders) — all share the same face/acting |
-| `data-skin` / `data-hair` / `data-haircolor` | **`person` only:** skin (`light`/`medium`/`tan`/`brown`/`deep` or hex), hair (`short`/`long`/`bun`/`curly`/`buzz`/`cap`/`bald`), hair color (`dark`/`brown`/`blonde`/`auburn`/`red`/`gray`/`white` or hex). `data-color` = clothing. |
+| `data-char` | `blob` · `orb` · `bot` (antenna robot) · `cat` (ears + whiskers) · `ghost` (wavy hem) · `star` · `bean` (tall capsule) · `person` (modern-flat human) · `cutout` (construction-paper / South-Park look — big outlined eyes, stubby body, mitten hands) — all share the same face/acting |
+| `data-skin` / `data-hair` / `data-haircolor` | **`person` & `cutout`:** skin (`light`/`medium`/`tan`/`brown`/`deep` or hex), hair (`short`/`long`/`bun`/`curly`/`buzz`/`cap`/`bald`; `cutout` also `afro`/`hood`), hair color (`dark`/`brown`/`blonde`/`auburn`/`red`/`gray`/`white` or hex). `data-color` = clothing (`cutout` also `data-pants`). |
 | `data-accessory` | optional `glasses` · `hat` · `bowtie` |
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |

@@ -839,7 +839,7 @@
 
   /* =====================================================================
      CHARACTER RIG (actor layer) — owned procedural mascot / guide.
-       <div class="anim" data-anim="character" data-char="blob|orb|bot|cat|ghost|star|bean|person" data-accessory="glasses|hat|bowtie"
+       <div class="anim" data-anim="character" data-char="blob|orb|bot|cat|ghost|star|bean|person|cutout" data-accessory="glasses|hat|bowtie"
             data-skin="medium" data-hair="short" data-haircolor="dark"   (person only)
             data-mood="idle" data-talk="1" data-color="var(--accent)"
             data-look="#kpi"
@@ -858,13 +858,15 @@
     return 'M'+Math.round(mx-w)+','+my+' Q'+mx+','+Math.round(my+w*0.62)+' '+Math.round(mx+w)+','+my;
   }
   function _charFaceSVG(f){ var ink=_CHAR_INK;
-    return '<path class="sbc-brL" d="'+_charBrow(f.eyeLx,f.browY)+'" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-      +'<path class="sbc-brR" d="'+_charBrow(f.eyeRx,f.browY)+'" fill="none" stroke="'+ink+'" stroke-width="5" stroke-linecap="round" opacity="0"/>'
-      +'<g class="sbc-eyeL"><ellipse class="sbc-eyew" cx="'+f.eyeLx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"/><circle class="sbc-pupil" cx="'+f.eyeLx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
-      +'<g class="sbc-eyeR"><ellipse class="sbc-eyew" cx="'+f.eyeRx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"/><circle class="sbc-pupil" cx="'+f.eyeRx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
+    var es = f.outline?(' stroke="'+f.outline+'" stroke-width="'+(f.outlineW||3)+'"'):'';
+    var bd = f.browDef||0, bw = f.browW||5, bc = f.browColor||ink;
+    return '<path class="sbc-brL" d="'+_charBrow(f.eyeLx,f.browY)+'" fill="none" stroke="'+bc+'" stroke-width="'+bw+'" stroke-linecap="round" opacity="'+bd+'"/>'
+      +'<path class="sbc-brR" d="'+_charBrow(f.eyeRx,f.browY)+'" fill="none" stroke="'+bc+'" stroke-width="'+bw+'" stroke-linecap="round" opacity="'+bd+'"/>'
+      +'<g class="sbc-eyeL"><ellipse class="sbc-eyew" cx="'+f.eyeLx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"'+es+'/><circle class="sbc-pupil" cx="'+f.eyeLx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
+      +'<g class="sbc-eyeR"><ellipse class="sbc-eyew" cx="'+f.eyeRx+'" cy="'+f.eyeY+'" rx="'+f.erx+'" ry="'+f.ery+'" fill="#fff"'+es+'/><circle class="sbc-pupil" cx="'+f.eyeRx+'" cy="'+(f.eyeY+2)+'" r="'+f.pupil+'" fill="'+ink+'"/></g>'
       +'<ellipse class="sbc-cheekL" cx="'+f.cheekLx+'" cy="'+f.cheekY+'" rx="12" ry="8" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
       +'<ellipse class="sbc-cheekR" cx="'+f.cheekRx+'" cy="'+f.cheekY+'" rx="12" ry="8" fill="var(--accent3,#FF5C8A)" opacity="0"/>'
-      +'<path class="sbc-smile" d="'+_charSmile('idle',f)+'" fill="none" stroke="'+ink+'" stroke-width="6" stroke-linecap="round"/>'
+      +'<path class="sbc-smile" d="'+_charSmile('idle',f)+'" fill="none" stroke="'+ink+'" stroke-width="'+(f.smileW||6)+'" stroke-linecap="round"/>'
       +'<ellipse class="sbc-open" cx="'+f.mx+'" cy="'+(f.my+4)+'" rx="14" ry="4" fill="'+ink+'" opacity="0"/>';
   }
   function _charAccessory(name,f){ var ink=_CHAR_INK;
@@ -886,7 +888,30 @@
     if(style==='cap') return '<path d="M50,96 Q120,26 190,96 Z" fill="'+c+'"/><rect x="46" y="90" width="148" height="14" rx="7" fill="'+c+'"/>';
     return '<path d="M50,106 Q46,28 120,24 Q194,28 190,106 Q178,64 120,58 Q62,64 50,106 Z" fill="'+c+'"/>';
   }
+  function _charHairCut(style,c,O){
+    if(style==='bald') return '';
+    var sw=' stroke="'+O+'" stroke-width="3"';
+    if(style==='buzz') return '<path d="M52,58 L58,40 L66,56 L74,38 L82,56 L90,38 L98,56 L106,38 L114,56 L122,38 L130,56 L138,38 L146,56 L154,38 L162,56 L170,40 L176,58 Q120,46 52,58 Z" fill="'+c+'"'+sw+'/>';
+    if(style==='afro') return '<g fill="'+c+'"><circle cx="120" cy="34" r="52"/><circle cx="64" cy="66" r="40"/><circle cx="176" cy="66" r="40"/><circle cx="46" cy="100" r="27"/><circle cx="194" cy="100" r="27"/></g>';
+    if(style==='long') return '<path d="M40,182 Q32,40 120,28 Q208,40 200,182 Q204,92 178,64 Q178,54 120,50 Q62,54 62,64 Q36,92 40,182 Z" fill="'+c+'"'+sw+'/>';
+    if(style==='hood') return '<path d="M28,182 Q22,38 120,28 Q218,38 212,182 Q212,118 170,94 Q170,68 120,64 Q70,68 70,94 Q28,118 28,182 Z" fill="'+c+'"'+sw+'/>';
+    if(style==='bun') return '<circle cx="120" cy="26" r="18" fill="'+c+'"'+sw+'/><path d="M50,104 Q46,34 120,30 Q194,34 190,104 Q176,62 120,56 Q64,62 50,104 Z" fill="'+c+'"'+sw+'/>';
+    if(style==='curly') return '<g fill="'+c+'"><circle cx="64" cy="56" r="24"/><circle cx="96" cy="38" r="26"/><circle cx="144" cy="38" r="26"/><circle cx="176" cy="56" r="24"/><circle cx="48" cy="86" r="19"/><circle cx="192" cy="86" r="19"/></g>';
+    return '<path d="M44,108 Q40,30 120,26 Q200,30 196,108 Q182,60 120,52 Q58,60 44,108 Z" fill="'+c+'"'+sw+'/>';
+  }
   const _CHAR_STYLES = {
+    cutout: { vb:[240,300], shadow:[120,295,74,11], originY:286, armPivot:{Lx:61,Ly:200,Rx:179,Ry:200},
+      face:{eyeLx:101,eyeRx:139,eyeY:100,erx:27,ery:33,pupil:7,mx:120,my:150,mw:11,browY:60,cheekLx:80,cheekRx:160,cheekY:138,outline:'#1c1c22',outlineW:3,browDef:1,browW:7,smileW:5},
+      body:function(c,el){ var d=(el&&el.dataset)||{}; var sk=_charSkin(d.skin), hc=_charHairColor(d.haircolor), hs=d.hair||'short', pants=d.pants||'#3a4a63', O='#1c1c22';
+        return '<rect x="86" y="244" width="26" height="42" rx="9" fill="'+pants+'" stroke="'+O+'" stroke-width="3"/><rect x="128" y="244" width="26" height="42" rx="9" fill="'+pants+'" stroke="'+O+'" stroke-width="3"/>'
+          +'<ellipse cx="92" cy="290" rx="22" ry="10" fill="#2b2b33" stroke="'+O+'" stroke-width="3"/><ellipse cx="148" cy="290" rx="22" ry="10" fill="#2b2b33" stroke="'+O+'" stroke-width="3"/>'
+          +'<g class="sbc-armL"><rect x="48" y="198" width="26" height="44" rx="12" fill="'+c+'" stroke="'+O+'" stroke-width="3"/><circle cx="61" cy="246" r="15" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/></g>'
+          +'<g class="sbc-armR"><rect x="166" y="198" width="26" height="44" rx="12" fill="'+c+'" stroke="'+O+'" stroke-width="3"/><circle cx="179" cy="246" r="15" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/></g>'
+          +'<path d="M66,252 L66,208 Q66,178 120,176 Q174,178 174,208 L174,252 Z" fill="'+c+'" stroke="'+O+'" stroke-width="3"/>'
+          +'<rect x="108" y="158" width="24" height="26" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/>'
+          +'<ellipse cx="43" cy="104" rx="10" ry="15" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/><ellipse cx="197" cy="104" rx="10" ry="15" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/>'
+          +'<ellipse class="sbc-body" cx="120" cy="104" rx="80" ry="76" fill="'+sk+'" stroke="'+O+'" stroke-width="3"/>'
+          +_charHairCut(hs,hc,O); } },
     person: { vb:[240,320], shadow:[120,313,72,12], originY:300, armPivot:{Lx:41,Ly:236,Rx:199,Ry:236},
       face:{eyeLx:98,eyeRx:142,eyeY:92,erx:14,ery:17,pupil:7,mx:120,my:128,mw:14,browY:70,cheekLx:84,cheekRx:156,cheekY:120},
       body:function(c,el){ var d=(el&&el.dataset)||{}; var sk=_charSkin(d.skin), hc=_charHairColor(d.haircolor), hs=d.hair||'short';
@@ -939,7 +964,8 @@
   function _charApplyMood(el, mood){
     var p=el._chParts, ch=el._ch, f=el._chFace; if(!p) return; ch.mood=mood;
     p.cheekL.style.opacity='0'; p.cheekR.style.opacity='0';
-    p.brL.style.opacity='0'; p.brR.style.opacity='0'; p.brL.style.transform=''; p.brR.style.transform='';
+    var _bd=String((f&&f.browDef)||0);
+    p.brL.style.opacity=_bd; p.brR.style.opacity=_bd; p.brL.style.transform=''; p.brR.style.transform='';
     ch.eyeRy=1; ch.winkR=0; ch.moodLook=[0,0]; ch.moodSurprise=0;
     var kind='idle';
     if(mood==='happy'||mood==='wink'){ kind='happy'; p.cheekL.style.opacity='.9'; p.cheekR.style.opacity='.9'; ch.eyeRy=0.78; }
