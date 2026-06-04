@@ -21,6 +21,13 @@ Usage:
   python render_video.py storyboard.html --out final.mp4
   python render_video.py storyboard.html --audio "VO English.mp3" --quality high
   python render_video.py storyboard.html --quality fast    # crf 23, faster encode
+  python render_video.py storyboard.html --no-audio --frames   # OFFLINE GPU frame render (best for 3D/WebGL)
+
+Two render paths:
+  * default        real-time: Playwright records the page as it plays, then ffmpeg muxes audio.
+  * --frames       offline: steps the engine clock frame-by-frame (Storyboard.renderAt), screenshots
+                   each frame, assembles a PNG sequence. Runs on the real GPU (ANGLE), supersamples
+                   the WebGL buffer, and is perfectly smooth (no dropped frames). Use for scene3d decks.
 """
 import argparse
 import asyncio
@@ -74,6 +81,21 @@ except ImportError:
         )
 
 
+def _gpu_flags():
+    """Force headless Chromium onto the real GPU via ANGLE instead of falling back to
+    SwiftShader (software). On a discrete GPU this is the difference between a soft, choppy
+    software render and a sharp, smooth one — essential for WebGL (data-anim="scene3d") decks.
+    Degrades gracefully to the platform's software path when no GPU is present."""
+    base = ['--ignore-gpu-blocklist', '--enable-gpu-rasterization', '--enable-zero-copy', '--disable-gpu-vsync']
+    if sys.platform.startswith('win'):
+        base.insert(0, '--use-angle=d3d11')
+    elif sys.platform == 'darwin':
+        base.insert(0, '--use-angle=metal')
+    else:
+        base.insert(0, '--use-angle=gl')
+    return base
+
+
 async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'high', no_audio: bool = False, duration_override=None) -> None:
     # Per-output temp dir so concurrent renders into the same folder don't collide
     # (a fixed '.render-tmp' lets two renders clobber each other's WebM frames).
@@ -125,6 +147,7 @@ async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'hig
                 '--disable-blink-features=AutomationControlled',
                 '--enable-features=NetworkService',
                 '--allow-file-access-from-files',  # allows file:// pages to load local audio
+                *_gpu_flags(),                  # use the real GPU (not SwiftShader) for WebGL/3D
             ]
         )
         context = await browser.new_context(
@@ -232,6 +255,118 @@ async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'hig
     print(f"\n[OK] Wrote {out_mp4.name} ({size_mb:.1f} MB)")
 
 
+async def render_frames(html_path: Path, audio_path, out_mp4: Path, fps: int = 30,
+                        quality: str = 'high', no_audio: bool = False,
+                        duration_override=None, supersample: float = 1.5) -> None:
+    """Deterministic OFFLINE render: step the engine clock frame-by-frame, screenshot each
+    frame, then assemble a PNG sequence into the MP4. Decouples quality from real-time
+    performance — every frame renders on the GPU with no fps pressure, so scenes can be heavy
+    and motion is perfectly smooth (exact t per frame). The WebGL buffer is supersampled
+    (window.SB_SS) for crisp antialiasing. Best path for data-anim="scene3d" decks."""
+    tmp_dir = out_mp4.parent / ('.frames-tmp-' + out_mp4.stem)
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
+    frames_dir = tmp_dir / 'frames'
+    frames_dir.mkdir(parents=True)
+
+    srv_port, srv = _start_server(html_path.parent)
+    page_url = f"http://127.0.0.1:{srv_port}/{html_path.name}"
+    print(f"[ok] Local HTTP server on port {srv_port}")
+    print(f"[ in] HTML  : {html_path}")
+    print(f"[out] MP4   : {out_mp4}")
+    print(f"[ok] Offline frame render @ {fps}fps, supersample {supersample}x")
+    print()
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=True,
+            args=['--autoplay-policy=no-user-gesture-required', '--no-sandbox', '--mute-audio', *_gpu_flags()],
+        )
+        context = await browser.new_context(viewport={'width': 1920, 'height': 1080}, device_scale_factor=1)
+        page = await context.new_page()
+        # Mark offline + set supersample BEFORE any deck/engine script runs.
+        await page.add_init_script(f"window.SB_OFFLINE=1; window.SB_SS={supersample};")
+        await page.goto(page_url)
+
+        # Read real deck size, resize viewport to match (handles vertical templates).
+        try:
+            await page.wait_for_selector('.deck', timeout=8000)
+            dd = await page.evaluate("(()=>{const d=document.querySelector('.deck');return d?[d.offsetWidth,d.offsetHeight]:[1920,1080];})()")
+        except Exception:
+            dd = [1920, 1080]
+        deck_w, deck_h = int(dd[0]), int(dd[1])
+        if (deck_w, deck_h) != (1920, 1080):
+            await page.set_viewport_size({'width': deck_w, 'height': deck_h})
+        print(f"[ok] Deck size: {deck_w}x{deck_h}")
+
+        await page.add_style_tag(content=".play-controls,#sb-preview-badge,.jump-menu,.play-progress{display:none!important}")
+        try:
+            await page.wait_for_function("window.Storyboard && window.THREE", timeout=20000)
+        except Exception:
+            try:
+                await page.wait_for_function("window.Storyboard", timeout=8000)
+            except Exception:
+                sys.exit("Engine failed to initialize within 20s.")
+        await asyncio.sleep(1.6)  # let the synthetic clock + lazy inits settle
+
+        if duration_override:
+            duration = float(duration_override)
+        elif no_audio:
+            last = await page.evaluate("(()=>{const c=window.Storyboard&&window.Storyboard.cues;return c&&c.length?c[c.length-1].time:0;})()")
+            duration = float(last) + 8.0
+        else:
+            d = await page.evaluate("(()=>{const a=document.getElementById('voAudio');return a&&isFinite(a.duration)?a.duration:0;})()")
+            if d and d > 0:
+                duration = float(d)
+            else:
+                last = await page.evaluate("(()=>{const c=window.Storyboard&&window.Storyboard.cues;return c&&c.length?c[c.length-1].time:0;})()")
+                duration = float(last) + 8.0
+        total = int(round(duration * fps))
+        print(f"[ok] Duration {duration:.2f}s -> {total} frames")
+
+        # Warm up: first renderAt builds the WebGL context(s) for each scene3d element.
+        await page.evaluate("Storyboard.reset && Storyboard.reset()")
+        await page.evaluate("Storyboard.renderAt && Storyboard.renderAt(0)")
+        await asyncio.sleep(0.5)
+
+        clip = {'x': 0, 'y': 0, 'width': deck_w, 'height': deck_h}
+        t0 = time.perf_counter()
+        for i in range(total):
+            t = i / float(fps)
+            await page.evaluate("(t)=>window.Storyboard.renderAt(t)", t)
+            # Let the compositor pick up the freshly rendered WebGL buffer before capture.
+            await page.evaluate("()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))")
+            await page.screenshot(path=str(frames_dir / f"f{i:05d}.png"), clip=clip, animations='disabled')
+            if i and i % 30 == 0:
+                rate = i / (time.perf_counter() - t0)
+                print(f"  [{i}/{total}] {rate:.1f} fps render", flush=True)
+
+        await context.close()
+        await browser.close()
+
+    print("[..] Encoding MP4 from frame sequence...")
+    crf = '18' if quality == 'high' else '22'
+    cmd = [FFMPEG, '-y', '-framerate', str(fps), '-i', str(frames_dir / 'f%05d.png')]
+    if not no_audio and audio_path:
+        cmd += ['-i', str(audio_path)]
+    cmd += ['-c:v', 'libx264', '-preset', 'slow', '-crf', crf, '-pix_fmt', 'yuv420p']
+    if not no_audio and audio_path:
+        cmd += ['-c:a', 'aac', '-b:a', '192k', '-shortest']
+    else:
+        cmd += ['-an']
+    cmd += ['-movflags', '+faststart', str(out_mp4)]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        print("\n[ERROR] ffmpeg failed:\n")
+        print(proc.stderr[-2000:])
+        sys.exit(1)
+
+    shutil.rmtree(tmp_dir)
+    srv.shutdown()
+    size_mb = out_mp4.stat().st_size / 1_048_576
+    print(f"\n[OK] Wrote {out_mp4.name} ({size_mb:.1f} MB)")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('html', help='Path to storyboard.html')
@@ -243,6 +378,12 @@ def main():
                     help='Silent render: drive the synthetic clock, encode video-only (no VO/MP3 needed)')
     ap.add_argument('--duration', type=float, default=None,
                     help='Override timeline length in seconds (no-audio mode; default = last cue + 8s)')
+    ap.add_argument('--frames', action='store_true',
+                    help='OFFLINE deterministic render: step the clock frame-by-frame, screenshot each, '
+                         'assemble a PNG sequence. Perfectly smooth + supersampled — best for 3D/WebGL decks.')
+    ap.add_argument('--fps', type=int, default=30, help='Frame rate for --frames mode (default 30)')
+    ap.add_argument('--supersample', type=float, default=1.5,
+                    help='--frames mode: internal WebGL supersample factor for antialiasing (default 1.5)')
     args = ap.parse_args()
 
     html = Path(args.html).resolve()
@@ -263,7 +404,12 @@ def main():
 
     out = Path(args.out).resolve() if args.out else html.parent / (html.stem + '.mp4')
 
-    asyncio.run(render(html, audio, out, quality=args.quality, no_audio=args.no_audio, duration_override=args.duration))
+    if args.frames:
+        asyncio.run(render_frames(html, audio, out, fps=args.fps, quality=args.quality,
+                                  no_audio=args.no_audio, duration_override=args.duration,
+                                  supersample=args.supersample))
+    else:
+        asyncio.run(render(html, audio, out, quality=args.quality, no_audio=args.no_audio, duration_override=args.duration))
 
 
 if __name__ == '__main__':

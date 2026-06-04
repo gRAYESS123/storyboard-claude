@@ -10,7 +10,7 @@ This folder ships seven silent demo decks (capability reels, not narrated explai
 | **`cutout-cast.html`** / `cutout-cast.mp4` | The **cutout cast** — a construction-paper / South-Park-style character set (big outlined eyes, stubby bodies, mitten hands) that talks, reacts and waves; one `cutout` style, many looks via skin/hair/clothing. |
 | **`byo-characters.html`** / `byo-characters.mp4` | **Bring your own character** — built-in styles, a JSON-defined character, and a rig-your-own-SVG character side by side, all sharing the acting. Format docs in [`../characters/`](../characters/). |
 | **`scene-3d.html`** / `scene-3d.mp4` | **Real 3D (WebGL)** — clock-synced three.js: a lit torus knot, an orbiting scene with a moving camera, a multi-material cube, and a faceted gem. Keep scenes modest (headless renders use software GL). |
-| **`scene-3d-beauty.html`** / `scene-3d-beauty.mp4` | **Beautiful 3D** — full-bleed *cinematic* WebGL: a 16,000-star spiral galaxy, a synthwave highway with streaming car lights, a ringed planet with atmosphere, and a warp-speed CTA. ACES tone mapping + selective bloom (`data-bloom`) + soft round particles; `data-res` keeps it smooth at full screen. |
+| **`scene-3d-beauty.html`** / `scene-3d-beauty.mp4` | **Cinematic 3D** — full-bleed WebGL rendered on the GPU, frame-by-frame: a 40,000-star spiral galaxy, a **flythrough of a neon night city** (emissive lit-window towers, wet-road reflections, streaming light-trails), an **alien world** with oceans, clouds, a ring, and glowing night-side city lights, and a hyperspace warp CTA. ACES tone mapping + selective bloom + supersampled antialiasing. |
 
 Open either in a browser (the synthetic clock plays the timeline with no audio — a PREVIEW badge shows on screen, hidden in renders), or watch the rendered MP4.
 
@@ -81,6 +81,9 @@ open showcase.html        # or: capabilities.html
 # Re-render the silent MP4 (no VO needed) — the --no-audio path drives the synthetic clock
 python ../../skill/render_video.py showcase.html      --no-audio --out showcase.mp4
 python ../../skill/render_video.py capabilities.html  --no-audio --out capabilities.mp4
+
+# 3D/WebGL decks: render OFFLINE on the GPU, frame-by-frame (perfectly smooth + supersampled)
+python ../../skill/render_video.py scene-3d-beauty.html --no-audio --frames
 ```
 
 ## Note on `storyboard-engine.js` here

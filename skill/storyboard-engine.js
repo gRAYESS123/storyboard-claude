@@ -1324,10 +1324,15 @@
       if(el._s3===undefined){
         if(typeof window==='undefined' || !window.THREE){ if(!window._sb3warn){ window._sb3warn=1; console.warn('[storyboard] three.js not loaded — include three.min.js for data-anim="scene3d"'); } return; }
         var w=el.clientWidth||el.offsetWidth||720, h=el.clientHeight||el.offsetHeight||540;
-        var _res=parseFloat(el.dataset.res)||1;   // internal render scale (<1 = softer but faster; good for full-bleed)
+        // Offline (frame-by-frame export): render the internal buffer at full size * supersample for crisp,
+        // antialiased output (the GPU has no real-time budget), and preserve the drawing buffer so each
+        // page.screenshot() reliably reads the rendered frame. Live preview keeps data-res for perf.
+        var _off=(typeof window!=='undefined' && window.SB_OFFLINE);
+        var _ss=_off ? (parseFloat(window.SB_SS)||1) : 1;
+        var _res=_off ? _ss : (parseFloat(el.dataset.res)||1);   // internal render scale
         try{
           var rw=Math.round(w*_res), rh=Math.round(h*_res);
-          var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+          var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:!!_off, powerPreference:'high-performance'});
           renderer.setPixelRatio(1); renderer.setSize(rw,rh,false);
           renderer.domElement.style.cssText='width:100%;height:100%;display:block';
           renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=parseFloat(el.dataset.exposure)||1.0;
@@ -1863,6 +1868,9 @@
     init, EASE, PRESETS, LOOPS,
     play, pause, reset,
     seek(t){ setTime(t); let target=TIMINGS[0].slide; for(const c of TIMINGS){ if(t>=c.time) target=c.slide; else break; } if(target!==currentSlide){ goToSlide(target,'cut',true); } applyAnimsAt(t); applyCameras(t); },
+    // Deterministic single-frame render for offline (frame-by-frame) video export.
+    // Sets the clock to t, shows the correct slide instantly, applies every layer + renders WebGL.
+    renderAt(t){ setTime(t); let target=TIMINGS[0].slide; for(const c of TIMINGS){ if(t>=c.time) target=c.slide; else break; } if(target!==currentSlide){ goToSlide(target,'cut',true); } applyAnimsAt(t); applyCameras(t); if(typeof applyWordHits==='function'){ try{ applyWordHits(t); }catch(e){} } },
     transitions:()=>Object.keys(TRANSITIONS),
     goToSlide,
     currentSlide:()=>currentSlide,

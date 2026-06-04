@@ -894,14 +894,26 @@ Your scene function builds the three.js scene and returns an `update(t,p)` that 
 <div class="anim" data-anim="scene3d" data-scene="galaxy"
      data-bloom="0.45,0.55,0.6"   <!-- strength, radius, threshold -->
      data-exposure="0.9"          <!-- tone-mapping exposure (default 1.0) -->
-     data-res="0.62"></div>        <!-- internal render scale (perf) -->
+     data-res="0.7"></div>         <!-- live-preview render scale; offline --frames renders full-res -->
 <script src="three.min.js"></script>
 <script src="three-bloom.js"></script>  <!-- skill/assets/vendor/three-bloom.js — required for data-bloom -->
 ```
 
 The look lives in **restraint**: keep the base scene fairly **dark**, then bloom only the **brightest** cores. A high `threshold` (~0.55–0.72) blooms just the hot spots; `threshold` near 0 blooms *everything* and blows the frame to white — the classic mistake. Pair it with `exposure` ≤ 1.0. For pretty particles, draw points/sprites with a **soft round texture** (radial-gradient canvas) and additive blending — never hard squares. A fresnel shell (`BackSide`, `abs(dot(n,view))`) gives a clean atmosphere rim; a key + `HemisphereLight` fill reads as a lit world (skip IBL — equirect gradients can wash the lower hemisphere).
 
-**Render note:** headless renders use software GL (SwiftShader), so keep scenes modest — keep the element under ~900px internal (`data-res` scales it down), simple lights — for smooth MP4s (the live browser preview uses your GPU). Inactive slides skip GL automatically. Bundle the vendored `three.min.js` (+ `three-bloom.js` if blooming) beside the deck. Demos: `examples/showcase/scene-3d.html` (API basics) and **`scene-3d-beauty.html`** (cinematic galaxy · synthwave highway · ringed planet · warp). (GLTF model loading is a follow-on: add `GLTFLoader` + a model file.)
+**Rendering 3D — use the offline frame path.** For any `scene3d` deck, render with **`--frames`**:
+
+```bash
+python render_video.py deck.html --no-audio --frames        # add --fps 60 / --supersample 2 for max quality
+```
+
+This (1) puts headless Chromium on the **real GPU** via ANGLE (`--use-angle=d3d11` / `metal` / `gl`; it falls back to software only if there's no GPU), (2) steps the engine clock **frame-by-frame** (`Storyboard.renderAt(t)`) and screenshots each — so motion is *perfectly* smooth with zero dropped frames, decoupled from real-time speed — and (3) **supersamples** the WebGL buffer (`window.SB_SS`, default 1.5×) for crisp antialiasing. Because nothing runs in real time, scenes can be **heavy**: tens of thousands of particles, an emissive-window city, real materials + bloom all render fine. The plain (real-time `record_video`) path still works and also gets the GPU flags, but `--frames` is the quality path for 3D.
+
+Two rules that make it work:
+- **`data-res` is a live-preview perf knob only.** The offline render ignores it and renders at full size × `SB_SS`. Use `data-res` (~0.6–0.75) so the deck stays smooth when *previewed* in a browser; the exported MP4 is always full-res.
+- **Make all motion a function of `t`** (the clock), never per-frame increments (`pos += v`) — otherwise changing fps changes the speed. Camera moves, particle positions, rotations: author them as `f(t)` (use `t - t0` for slide-local time).
+
+Inactive slides skip GL automatically. Bundle the vendored `three.min.js` (+ `three-bloom.js` if blooming) beside the deck. Demos: `examples/showcase/scene-3d.html` (API basics) and **`scene-3d-beauty.html`** (galaxy · neon-city flythrough · alien world with night-side city lights · hyperspace warp). (GLTF model loading is a follow-on: add `GLTFLoader` + a model file.)
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
 | `data-look` | selector the eyes track from the start |
