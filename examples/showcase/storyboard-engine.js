@@ -1326,21 +1326,31 @@
         var w=el.clientWidth||el.offsetWidth||720, h=el.clientHeight||el.offsetHeight||540;
         var _res=parseFloat(el.dataset.res)||1;   // internal render scale (<1 = softer but faster; good for full-bleed)
         try{
+          var rw=Math.round(w*_res), rh=Math.round(h*_res);
           var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
-          renderer.setPixelRatio(1); renderer.setSize(Math.round(w*_res),Math.round(h*_res),false);
+          renderer.setPixelRatio(1); renderer.setSize(rw,rh,false);
           renderer.domElement.style.cssText='width:100%;height:100%;display:block';
+          renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=parseFloat(el.dataset.exposure)||1.0;
+          if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding;
           el.appendChild(renderer.domElement);
           var scene=new THREE.Scene();
-          var camera=new THREE.PerspectiveCamera(parseFloat(el.dataset.fov)||50, w/h, 0.1, 200); camera.position.set(0,0,5);
+          var camera=new THREE.PerspectiveCamera(parseFloat(el.dataset.fov)||50, w/h, 0.1, 400); camera.position.set(0,0,5);
           var fn=(window.SB_SCENES && window.SB_SCENES[el.dataset.scene]) || _sb3Default;
           var upd=fn({THREE:THREE, scene:scene, camera:camera, renderer:renderer, el:el, w:w, h:h});
-          el._s3={renderer:renderer, scene:scene, camera:camera, update:(typeof upd==='function')?upd:null};
+          var composer=null;   // data-bloom="strength,radius,threshold" -> cinematic glow (needs three-bloom.js)
+          if(el.dataset.bloom && THREE.EffectComposer && THREE.UnrealBloomPass){
+            var bp=(el.dataset.bloom||'').split(',').map(parseFloat);
+            composer=new THREE.EffectComposer(renderer);
+            composer.addPass(new THREE.RenderPass(scene,camera));
+            composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(rw,rh), isFinite(bp[0])?bp[0]:0.7, isFinite(bp[1])?bp[1]:0.4, isFinite(bp[2])?bp[2]:0.85));
+          }
+          el._s3={renderer:renderer, scene:scene, camera:camera, update:(typeof upd==='function')?upd:null, composer:composer};
         }catch(e){ console.warn('[storyboard] scene3d init failed', e); el._s3=null; }
       }
       var s=el._s3; if(!s) return; el.style.opacity=1;
       var _sl=el.closest('.slide'); if(_sl){ var _cs=getComputedStyle(_sl); if(_cs.visibility==='hidden'||parseFloat(_cs.opacity||'1')<0.03) return; }  // don't burn GL on hidden slides
       if(s.update){ try{ s.update(c.time||0, p); }catch(e){} }
-      s.renderer.render(s.scene, s.camera);
+      if(s.composer) s.composer.render(); else s.renderer.render(s.scene, s.camera);
     }},
   });
 

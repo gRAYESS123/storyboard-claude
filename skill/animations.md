@@ -888,7 +888,20 @@ window.SB_SCENES = { myScene: function(api){            // api: {THREE, scene, c
 
 Your scene function builds the three.js scene and returns an `update(t,p)` that runs every frame with the audio clock — so the 3D **scrubs with the VO**. No `data-scene` → a rotating icosahedron default. `data-fov` sets the camera FOV.
 
-**Render note:** headless renders use software GL (SwiftShader), so keep scenes modest — a few meshes, simple lights, the element under ~900px — for smooth MP4s (the live browser preview uses your GPU). Inactive slides skip GL automatically. Bundle the vendored `three.min.js` beside the deck. Demo: `examples/showcase/scene-3d.html`. (GLTF model loading is a follow-on: add `GLTFLoader` + a model file.)
+**Cinematic look (bloom + tone mapping).** The renderer ships with **ACES Filmic tone mapping** + sRGB output, so colors roll off like film instead of clipping. Add a bloom pass for the glow that sells a "rendered" frame:
+
+```html
+<div class="anim" data-anim="scene3d" data-scene="galaxy"
+     data-bloom="0.45,0.55,0.6"   <!-- strength, radius, threshold -->
+     data-exposure="0.9"          <!-- tone-mapping exposure (default 1.0) -->
+     data-res="0.62"></div>        <!-- internal render scale (perf) -->
+<script src="three.min.js"></script>
+<script src="three-bloom.js"></script>  <!-- skill/assets/vendor/three-bloom.js — required for data-bloom -->
+```
+
+The look lives in **restraint**: keep the base scene fairly **dark**, then bloom only the **brightest** cores. A high `threshold` (~0.55–0.72) blooms just the hot spots; `threshold` near 0 blooms *everything* and blows the frame to white — the classic mistake. Pair it with `exposure` ≤ 1.0. For pretty particles, draw points/sprites with a **soft round texture** (radial-gradient canvas) and additive blending — never hard squares. A fresnel shell (`BackSide`, `abs(dot(n,view))`) gives a clean atmosphere rim; a key + `HemisphereLight` fill reads as a lit world (skip IBL — equirect gradients can wash the lower hemisphere).
+
+**Render note:** headless renders use software GL (SwiftShader), so keep scenes modest — keep the element under ~900px internal (`data-res` scales it down), simple lights — for smooth MP4s (the live browser preview uses your GPU). Inactive slides skip GL automatically. Bundle the vendored `three.min.js` (+ `three-bloom.js` if blooming) beside the deck. Demos: `examples/showcase/scene-3d.html` (API basics) and **`scene-3d-beauty.html`** (cinematic galaxy · synthwave highway · ringed planet · warp). (GLTF model loading is a follow-on: add `GLTFLoader` + a model file.)
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
 | `data-look` | selector the eyes track from the start |

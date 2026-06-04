@@ -10,17 +10,17 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#03040a;font-family:'Space Grotesk',system-ui,sans-serif}
 .stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
-:root{--ink:#F4F6FF;--ink-soft:#aeb6d6;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166}
+:root{--ink:#F4F6FF;--ink-soft:#c3c9e8;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166}
 .slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:#03040a;color:var(--ink);contain:layout paint}
 .anim{opacity:0;will-change:transform,opacity,filter}
 .bleed3d{position:absolute;inset:0;z-index:1}
-.gradient-fill{background:linear-gradient(110deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.gradient-fill{background:linear-gradient(110deg,#fff,#cdd6ff 45%,#9fb0ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .t-wrap{position:absolute;z-index:3}
 .eyebrow{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent2)}
-.mega{font-size:150px;line-height:.95;font-weight:700;letter-spacing:-.04em;text-shadow:0 6px 40px rgba(0,0,0,.6)}
-.big{font-size:120px;line-height:1.0;font-weight:700;letter-spacing:-.03em;text-shadow:0 6px 40px rgba(0,0,0,.6)}
-.sub{font-size:34px;line-height:1.4;color:var(--ink-soft);margin-top:22px;text-shadow:0 2px 18px rgba(0,0,0,.6)}
-.cta-pill{display:inline-block;margin-top:46px;padding:30px 60px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2)}
+.mega{font-size:154px;line-height:.95;font-weight:700;letter-spacing:-.04em;text-shadow:0 8px 50px rgba(0,0,0,.85)}
+.big{font-size:122px;line-height:1.0;font-weight:700;letter-spacing:-.03em;text-shadow:0 8px 50px rgba(0,0,0,.85)}
+.sub{font-size:34px;line-height:1.4;color:var(--ink-soft);margin-top:22px;text-shadow:0 2px 26px rgba(0,0,0,.9)}
+.cta-pill{display:inline-block;margin-top:46px;padding:30px 60px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2);box-shadow:0 0 50px rgba(25,227,177,.45)}
 .transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
 .transition-overlay.dissolve{background:#03040a}.transition-overlay.flash{background:#fff}
 .transition-overlay.whipPan{background:linear-gradient(90deg,transparent,#03040a 50%,transparent);transform:translateX(-100%)}
@@ -29,35 +29,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03040a;font-family:
 <body>
 <div class="stage"><div class="deck" id="deck">
 
-  <!-- 1 galaxy -->
   <section class="slide" data-slide="1" data-transition-in="cut">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="galaxy" data-res="0.62" data-t-rel="0" data-dur="9999"></div>
-    <div class="t-wrap" style="top:96px;left:0;right:0;text-align:center">
-      <p class="eyebrow anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">webgl · 14,000 stars</p>
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="galaxy" data-res="0.62" data-bloom="0.42,0.55,0.55" data-exposure="0.9" data-t-rel="0" data-dur="9999"></div>
+    <div class="t-wrap" style="top:92px;left:0;right:0;text-align:center">
+      <p class="eyebrow anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">webgl · bloom · 16k stars</p>
       <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="1.0" data-dur="1.6" style="margin-top:16px">A whole<br>universe.</h1>
     </div>
   </section>
 
-  <!-- 2 synthwave highway / cars -->
   <section class="slide" data-slide="2" data-transition-in="crossDissolve">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="highway" data-res="0.6" data-t-rel="0" data-dur="9999"></div>
-    <div class="t-wrap" style="top:90px;left:120px">
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="highway" data-res="0.6" data-bloom="0.45,0.55,0.6" data-exposure="0.95" data-t-rel="0" data-dur="9999"></div>
+    <div class="t-wrap" style="top:88px;left:120px">
       <h1 class="big anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.9">Neon nights.</h1>
-      <p class="sub anim" data-anim="wordReveal" data-t-rel="1.3" data-dur="1.6" style="max-width:680px">Streaming headlights, a scrolling grid, a sunset that never sets — all on the audio clock.</p>
+      <p class="sub anim" data-anim="wordReveal" data-t-rel="1.3" data-dur="1.6" style="max-width:680px">Glowing headlights, a sunset that never sets — all on the audio clock.</p>
     </div>
   </section>
 
-  <!-- 3 planet -->
   <section class="slide" data-slide="3" data-transition-in="crossDissolve">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="planet" data-res="0.64" data-t-rel="0" data-dur="9999"></div>
-    <div class="t-wrap" style="bottom:120px;left:0;right:0;text-align:center">
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="planet" data-res="0.64" data-bloom="0.34,0.5,0.72" data-exposure="0.92" data-t-rel="0" data-dur="9999"></div>
+    <div class="t-wrap" style="bottom:118px;left:0;right:0;text-align:center">
       <h1 class="big gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.5">Worlds away.</h1>
     </div>
   </section>
 
-  <!-- 4 warp CTA -->
   <section class="slide" data-slide="4" data-transition-in="flash">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="warp" data-res="0.62" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="warp" data-res="0.62" data-bloom="0.5,0.5,0.25" data-exposure="1.0" data-t-rel="0" data-dur="9999"></div>
     <div class="t-wrap" style="top:50%;left:0;right:0;text-align:center;transform:translateY(-50%)">
       <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.5">Storyboard,<br>in 3D.</h1>
       <p class="sub anim" data-anim="fadeUp" data-t-rel="2.0" data-dur="0.7" style="text-align:center">github.com/gRAYESS123/storyboard-claude</p>
@@ -70,69 +66,75 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03040a;font-family:
 <audio id="voAudio" preload="metadata"></audio>
 
 <script src="three.min.js"></script>
+<script src="three-bloom.js"></script>
 <script>
+function softTex(T){ var c=document.createElement('canvas'); c.width=c.height=64; var x=c.getContext('2d');
+  var g=x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.22,'rgba(255,255,255,.85)'); g.addColorStop(0.5,'rgba(255,255,255,.28)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,64,64); return new T.CanvasTexture(c); }
+function skyTex(T,stops){ var c=document.createElement('canvas'); c.width=8; c.height=160; var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,0,160); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); x.fillStyle=g; x.fillRect(0,0,8,160); return new T.CanvasTexture(c); }
+function gradEnv(T,r,top,bot){ var c=document.createElement('canvas'); c.width=8; c.height=128; var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,0,128); g.addColorStop(0,top); g.addColorStop(1,bot); x.fillStyle=g; x.fillRect(0,0,8,128);
+  var tex=new T.CanvasTexture(c); tex.mapping=T.EquirectangularReflectionMapping; var pm=new T.PMREMGenerator(r); var e=pm.fromEquirectangular(tex).texture; pm.dispose(); tex.dispose(); return e; }
+function sprite(T,tex,color,size){ var s=new T.Sprite(new T.SpriteMaterial({map:tex,color:color,transparent:true,depthWrite:false,blending:T.AdditiveBlending})); s.scale.set(size,size,1); return s; }
+function atmo(T,radius,color,strength){ var m=new T.ShaderMaterial({
+    uniforms:{ gc:{value:new T.Color(color)}, st:{value:strength} },
+    vertexShader:'varying float vI; void main(){ vec4 wp=modelMatrix*vec4(position,1.0); vec3 wn=normalize(mat3(modelMatrix)*normal); vec3 vd=normalize(cameraPosition-wp.xyz); vI=pow(1.0-abs(dot(wn,vd)),3.0); gl_Position=projectionMatrix*viewMatrix*wp; }',
+    fragmentShader:'varying float vI; uniform vec3 gc; uniform float st; void main(){ gl_FragColor=vec4(gc, vI*st); }',
+    transparent:true, blending:T.AdditiveBlending, side:T.BackSide, depthWrite:false });
+  return new T.Mesh(new T.SphereGeometry(radius,48,48), m); }
+function lerp3(T,a,b,c,t){ var ca=new T.Color(a),cb=new T.Color(b),cc=new T.Color(c); return t<0.5? ca.lerp(cb,t/0.5): cb.lerp(cc,(t-0.5)/0.5); }
+
 window.SB_SCENES = {
-  /* ---- spiral galaxy ---- */
-  galaxy: function(api){ var T=api.THREE, s=api.scene, cam=api.camera;
-    var COUNT=14000, ARMS=5, RAD=10, SPIN=0.85;
-    var pos=new Float32Array(COUNT*3), col=new Float32Array(COUNT*3);
-    var cIn=new T.Color(0xFFE9A8), cOut=new T.Color(0x7C5CFF);
-    for(var i=0;i<COUNT;i++){ var r=Math.pow(Math.random(),1.6)*RAD;
-      var branch=(i%ARMS)/ARMS*Math.PI*2, spin=r*SPIN;
-      var rx=Math.pow(Math.random(),3)*(Math.random()<.5?1:-1)*r*0.32;
-      var ry=Math.pow(Math.random(),3)*(Math.random()<.5?1:-1)*r*0.12;
-      var rz=Math.pow(Math.random(),3)*(Math.random()<.5?1:-1)*r*0.32;
-      pos[i*3]=Math.cos(branch+spin)*r+rx; pos[i*3+1]=ry; pos[i*3+2]=Math.sin(branch+spin)*r+rz;
-      var c=cIn.clone().lerp(cOut, Math.min(1,r/RAD)); col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b; }
+  galaxy: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x05061a);
+    var tex=softTex(T), N=16000, RAD=11, ARMS=5, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+    for(var i=0;i<N;i++){ var r=Math.pow(Math.random(),1.7)*RAD, br=(i%ARMS)/ARMS*6.2832, sp=r*0.9;
+      pos[i*3]=Math.cos(br+sp)*r+(Math.pow(Math.random(),3)*(Math.random()<.5?1:-1))*r*0.34;
+      pos[i*3+1]=(Math.pow(Math.random(),3)*(Math.random()<.5?1:-1))*r*0.10;
+      pos[i*3+2]=Math.sin(br+sp)*r+(Math.pow(Math.random(),3)*(Math.random()<.5?1:-1))*r*0.34;
+      var c=lerp3(T,0xFFE9B8,0xFF6FB4,0x5B4BFF, Math.min(1,r/RAD)); col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b; }
     var g=new T.BufferGeometry(); g.setAttribute('position',new T.BufferAttribute(pos,3)); g.setAttribute('color',new T.BufferAttribute(col,3));
-    var pts=new T.Points(g, new T.PointsMaterial({size:0.06,sizeAttenuation:true,depthWrite:false,blending:T.AdditiveBlending,vertexColors:true,transparent:true,opacity:0.9})); s.add(pts);
-    var core=new T.Mesh(new T.SphereGeometry(0.45,18,18), new T.MeshBasicMaterial({color:0xFFF6D8})); s.add(core);
-    var glow=new T.Mesh(new T.SphereGeometry(1.3,20,20), new T.MeshBasicMaterial({color:0xFFD166,transparent:true,opacity:0.18,blending:T.AdditiveBlending})); s.add(glow);
-    cam.position.set(0,5,11);
-    return function(t,p){ pts.rotation.y=t*0.07; var a=t*0.09; cam.position.set(Math.sin(a)*11, 4.5+Math.sin(t*0.13)*1.6, Math.cos(a)*11); cam.lookAt(0,0,0); };
+    s.add(new T.Points(g, new T.PointsMaterial({size:0.12,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true,opacity:0.5})));
+    var core=sprite(T,tex,0xFFE0A8,1.7); s.add(core); var halo=sprite(T,tex,0x3a206a,6); s.add(halo);
+    cam.position.set(0,5,12);
+    return function(t,p){ s.rotation.y=t*0.06; var a=t*0.08; cam.position.set(Math.sin(a)*12,4.5+Math.sin(t*0.12)*1.6,Math.cos(a)*12); cam.lookAt(0,0,0); };
   },
-  /* ---- synthwave highway with cars ---- */
   highway: function(api){ var T=api.THREE, s=api.scene, cam=api.camera;
-    s.background=new T.Color(0x190a2f); s.fog=new T.Fog(0x190a2f, 12, 64);
-    var sun=new T.Mesh(new T.CircleGeometry(8,48), new T.MeshBasicMaterial({color:0xFF7AC0})); sun.position.set(0,7,-52); s.add(sun);
-    var sun2=new T.Mesh(new T.CircleGeometry(8.6,48), new T.MeshBasicMaterial({color:0xFFB36B,transparent:true,opacity:0.35,blending:T.AdditiveBlending})); sun2.position.set(0,7,-53); s.add(sun2);
-    var grid=new T.GridHelper(180,90,0x19E3B1,0x6a39c9); grid.position.y=0.01; s.add(grid);
-    var cars=[]; var lanesR=[1.6,3.2,4.8], lanesL=[-1.6,-3.2,-4.8];
-    function mkCar(x,head){ var col=head?0xFFF3D0:0xFF3B6B; var m=new T.Mesh(new T.BoxGeometry(0.5,0.22,1.0), new T.MeshBasicMaterial({color:col}));
-      m.position.set(x,0.22,head?(10-Math.random()*70):(-60+Math.random()*70)); m.userData={head:head,sp:14+Math.random()*10}; s.add(m); cars.push(m); }
-    for(var i=0;i<10;i++){ mkCar(lanesL[i%3], true); }   // headlights coming toward
-    for(var j=0;j<12;j++){ mkCar(lanesR[j%3], false); }  // taillights heading away
-    for(var b=0;b<18;b++){ var hgt=4+Math.random()*9; var bx=new T.Mesh(new T.BoxGeometry(2.4+Math.random()*2, hgt, 2.4), new T.MeshBasicMaterial({color:0x0c0720}));
-      bx.position.set((Math.random()-0.5)*90, hgt/2, -34-Math.random()*16); s.add(bx); }
-    cam.position.set(0,2.6,11);
+    s.background=new T.Color(0x130824); s.fog=new T.Fog(0x25103a, 16, 80);
+    var sky=new T.Mesh(new T.PlaneGeometry(320,170), new T.MeshBasicMaterial({map:skyTex(T,[[0,'#090518'],[0.5,'#34113f'],[0.8,'#9c3556'],[1,'#cf7a54']]),depthWrite:false,fog:false})); sky.position.set(0,30,-80); s.add(sky);
+    var st=softTex(T); var sun=sprite(T,st,0xFF9A66,15); sun.position.set(0,14,-76); s.add(sun);
+    var sunDisk=new T.Mesh(new T.CircleGeometry(5,48), new T.MeshBasicMaterial({color:0xE85A7E,fog:false})); sunDisk.position.set(0,13.5,-74); s.add(sunDisk);
+    var grid=new T.GridHelper(200,100,0x2ad8c0,0x6a2cc0); grid.material.transparent=true; grid.material.opacity=0.7; grid.position.y=0.02; s.add(grid);
+    var cars=[]; var lanesL=[-1.8,-3.6,-5.4], lanesR=[1.8,3.6,5.4];
+    function car(x,head){ var sp=sprite(T,st,head?0x9fe9ff:0xFF3B6B,0.8); sp.position.set(x,0.5,head?(11-Math.random()*70):(-62+Math.random()*70)); sp.userData={head:head,v:14+Math.random()*9}; s.add(sp); cars.push(sp); }
+    for(var i=0;i<12;i++) car(lanesL[i%3],true); for(var j=0;j<12;j++) car(lanesR[j%3],false);
+    for(var b=0;b<20;b++){ var hg=4+Math.random()*10; var bx=new T.Mesh(new T.BoxGeometry(2.4+Math.random()*2.2,hg,2.4), new T.MeshBasicMaterial({color:0x0a0518})); bx.position.set((Math.random()-0.5)*96,hg/2,-36-Math.random()*18); s.add(bx); }
+    cam.position.set(0,2.7,11);
     return function(t,p){ grid.position.z=(t*9)%2;
-      cars.forEach(function(m){ var d=m.userData; m.position.z += (d.head?1:-1)*d.sp*0.016;
-        if(m.position.z>11){ m.position.z=-62; } if(m.position.z<-62){ m.position.z=11; } });
-      cam.position.x=Math.sin(t*0.16)*1.4; cam.lookAt(0,1.8,-30); };
+      cars.forEach(function(m){ var d=m.userData; m.position.z+=(d.head?1:-1)*d.v*0.016; if(m.position.z>11)m.position.z=-62; if(m.position.z<-62)m.position.z=11; });
+      cam.position.x=Math.sin(t*0.16)*1.3; cam.lookAt(0,1.9,-30); };
   },
-  /* ---- ringed planet in space ---- */
-  planet: function(api){ var T=api.THREE, s=api.scene, cam=api.camera;
-    var SC=2600, sp=new Float32Array(SC*3); for(var i=0;i<SC;i++){ var rr=26+Math.random()*44, th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1);
+  planet: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x04050d);
+    var tex=softTex(T), SC=2400, sp=new Float32Array(SC*3); for(var i=0;i<SC;i++){ var rr=30+Math.random()*50, th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1);
       sp[i*3]=rr*Math.sin(ph)*Math.cos(th); sp[i*3+1]=rr*Math.sin(ph)*Math.sin(th); sp[i*3+2]=rr*Math.cos(ph); }
     var sg=new T.BufferGeometry(); sg.setAttribute('position',new T.BufferAttribute(sp,3));
-    var stars=new T.Points(sg, new T.PointsMaterial({color:0xffffff,size:0.16,sizeAttenuation:true,transparent:true,opacity:0.9,depthWrite:false})); s.add(stars);
-    var sun=new T.DirectionalLight(0xfff0d4,1.5); sun.position.set(6,3,5); s.add(sun); s.add(new T.AmbientLight(0x223a66,0.45));
-    var planet=new T.Mesh(new T.SphereGeometry(2.5,48,48), new T.MeshStandardMaterial({color:0x2f6fb6,roughness:0.85,metalness:0.05})); s.add(planet);
-    var atmo=new T.Mesh(new T.SphereGeometry(2.78,32,32), new T.MeshBasicMaterial({color:0x5ab0ff,transparent:true,opacity:0.18,blending:T.AdditiveBlending,side:T.BackSide})); s.add(atmo);
-    var ring=new T.Mesh(new T.RingGeometry(3.3,4.8,72), new T.MeshBasicMaterial({color:0xFFD166,transparent:true,opacity:0.5,side:T.DoubleSide})); ring.rotation.x=Math.PI*0.46; s.add(ring);
-    cam.position.set(0,1.4,8.5);
-    return function(t,p){ planet.rotation.y=t*0.12; ring.rotation.z=t*0.04; stars.rotation.y=t*0.008;
-      var a=t*0.08; cam.position.set(Math.sin(a)*8.5, 1.4+Math.sin(t*0.12)*1.1, Math.cos(a)*8.5); cam.lookAt(0,0,0); };
+    s.add(new T.Points(sg, new T.PointsMaterial({color:0xffffff,size:0.28,map:tex,transparent:true,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true,opacity:0.65})));
+    var sun=new T.DirectionalLight(0xfff1e0,1.7); sun.position.set(7.5,2,1); s.add(sun); s.add(new T.HemisphereLight(0x2a4675,0x05060c,0.28));
+    var planet=new T.Mesh(new T.SphereGeometry(2.5,64,64), new T.MeshStandardMaterial({color:0x2861c4,roughness:0.72,metalness:0.0})); s.add(planet);
+    s.add(atmo(T,2.95,0x8fd4ff,0.8));
+    var ring=new T.Mesh(new T.RingGeometry(3.3,5.0,96), new T.MeshBasicMaterial({color:0xE9BE84,transparent:true,opacity:0.22,side:T.DoubleSide})); ring.rotation.x=Math.PI*0.46; ring.rotation.z=0.2; s.add(ring);
+    var sunSpr=sprite(T,tex,0xFFE3B0,5); sunSpr.position.set(13,5,-3); s.add(sunSpr);
+    cam.position.set(0,1.3,8.5);
+    return function(t,p){ planet.rotation.y=t*0.1; ring.rotation.z=0.2+t*0.03; var a=t*0.07; cam.position.set(Math.sin(a)*8.5,1.3+Math.sin(t*0.11)*1.1,Math.cos(a)*8.5); cam.lookAt(0,0,0); };
   },
-  /* ---- warp starfield ---- */
-  warp: function(api){ var T=api.THREE, s=api.scene, cam=api.camera;
-    var N=2600, sp=new Float32Array(N*3); for(var i=0;i<N;i++){ sp[i*3]=(Math.random()-0.5)*40; sp[i*3+1]=(Math.random()-0.5)*24; sp[i*3+2]=-Math.random()*70; }
-    var g=new T.BufferGeometry(); g.setAttribute('position',new T.BufferAttribute(sp,3));
-    var pts=new T.Points(g, new T.PointsMaterial({color:0xCfe0ff,size:0.13,sizeAttenuation:true,transparent:true,opacity:0.95,depthWrite:false,blending:T.AdditiveBlending})); s.add(pts);
+  warp: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x05060f);
+    var tex=softTex(T), N=2200, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+    for(var i=0;i<N;i++){ pos[i*3]=(Math.random()-0.5)*44; pos[i*3+1]=(Math.random()-0.5)*26; pos[i*3+2]=-Math.random()*80;
+      var c=new T.Color().setHSL(0.56+Math.random()*0.12,0.65,0.62); col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b; }
+    var g=new T.BufferGeometry(); g.setAttribute('position',new T.BufferAttribute(pos,3)); g.setAttribute('color',new T.BufferAttribute(col,3));
+    var pts=new T.Points(g,new T.PointsMaterial({size:0.3,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true,opacity:0.8})); s.add(pts);
     cam.position.set(0,0,6); cam.lookAt(0,0,-1);
-    return function(t,p){ var a=g.attributes.position.array;
-      for(var i=0;i<N;i++){ a[i*3+2]+=0.55; if(a[i*3+2]>7){ a[i*3+2]=-70; a[i*3]=(Math.random()-0.5)*40; a[i*3+1]=(Math.random()-0.5)*24; } }
-      g.attributes.position.needsUpdate=true; pts.rotation.z=t*0.05; };
+    return function(t,p){ var a=g.attributes.position.array; for(var i=0;i<N;i++){ a[i*3+2]+=0.6; if(a[i*3+2]>7){ a[i*3+2]=-80; a[i*3]=(Math.random()-0.5)*44; a[i*3+1]=(Math.random()-0.5)*26; } } g.attributes.position.needsUpdate=true; pts.rotation.z=t*0.04; };
   }
 };
 const TIMINGS = [ { time:0.0, slide:1 }, { time:7.0, slide:2 }, { time:14.0, slide:3 }, { time:20.0, slide:4 } ];
