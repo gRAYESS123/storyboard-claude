@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Storyboard â€” Character Rigger</title>
+<style>
+:root{--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166;--ink:#1c2030;--panel:#fff;--bg:#eef0f6}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 'Space Grotesk',system-ui,Segoe UI,sans-serif}
+h1{font-size:22px;font-weight:700}.mono{font-family:ui-monospace,'JetBrains Mono',monospace}
+header{display:flex;align-items:baseline;gap:14px;padding:16px 24px;background:#fff;border-bottom:1px solid #e2e5ee}
+header .sub{color:#7a8094;font-size:14px}
+.wrap{display:grid;grid-template-columns:1fr 380px;gap:20px;padding:20px 24px;max-width:1300px;margin:0 auto}
+.card{background:var(--panel);border:1px solid #e2e5ee;border-radius:14px;padding:18px}
+.stage{position:relative;height:560px;display:flex;align-items:center;justify-content:center;background:
+  linear-gradient(#f6f7fb,#eef0f6);border-radius:12px;overflow:hidden}
+#rig{position:absolute}
+.handle{position:absolute;width:26px;height:26px;border-radius:50%;border:2.5px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:grab;transform:translate(-50%,-50%);z-index:20;display:flex;
+  align-items:center;justify-content:center;font-size:13px;touch-action:none;user-select:none}
+.handle:active{cursor:grabbing}
+.handle.eye{background:var(--accent)}.handle.mouth{background:var(--accent3)}.handle.look{background:var(--gold);width:30px;height:30px}
+.handle .lbl{position:absolute;top:-20px;font-size:11px;font-weight:700;color:#555;white-space:nowrap}
+.row{display:flex;align-items:center;gap:10px;margin:10px 0}
+.row label{width:96px;font-size:13px;color:#5a6072}
+input[type=range]{flex:1}
+button{font:inherit;font-weight:600;border:1px solid #d4d8e4;background:#fff;color:var(--ink);
+  border-radius:9px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+textarea{width:100%;height:120px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid #d4d8e4;
+  border-radius:9px;padding:10px;resize:vertical}
+.out{width:100%;height:150px;font-family:ui-monospace,monospace;font-size:11px;border:1px solid #d4d8e4;
+  border-radius:9px;padding:10px;background:#0f1320;color:#cdd6f5;white-space:pre;overflow:auto;resize:vertical}
+.hint{font-size:12.5px;color:#7a8094;margin:6px 0}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#8a90a4;margin:18px 0 8px;font-weight:700}
+h3:first-child{margin-top:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Character Rigger</h1>
+  <span class="sub">Drop in your art Â· drag the eyes &amp; mouth Â· test Â· copy the code</span>
+</header>
+<div class="wrap">
+  <!-- LEFT: stage -->
+  <div class="card">
+    <div class="stage" id="stage">
+      <div id="rig" data-anim="character" data-char="custom" data-talk="1"></div>
+      <!-- handles injected by JS -->
+    </div>
+    <div class="btnrow" style="margin-top:14px">
+      <button data-mood="idle" class="on">Idle</button>
+      <button data-mood="happy">Happy</button>
+      <button data-mood="sad">Sad</button>
+      <button data-mood="surprised">Surprised</button>
+      <button data-mood="think">Think</button>
+      <button id="talkBtn" class="on">ðŸ—£ Talk</button>
+      <button id="lookBtn">ðŸ‘€ Look-at (drag the gold dot)</button>
+    </div>
+    <p class="hint">The engine draws its animated eyes &amp; mouth where you place the handles, on top of your art. Use <b>faceless</b> art (the engine supplies the face). Drag the gold dot to test gaze.</p>
+  </div>
+
+  <!-- RIGHT: controls -->
+  <div class="card">
+    <h3>Your art (SVG)</h3>
+    <textarea id="svgIn" spellcheck="false"></textarea>
+    <div class="row"><button id="loadBtn" style="flex:1">Load / re-render</button></div>
+
+    <h3>Eyes &amp; mouth</h3>
+    <div class="row"><label>Eye size</label><input type="range" id="erx" min="10" max="44" step="1"></div>
+    <div class="row"><label>Eye height</label><input type="range" id="ery" min="12" max="50" step="1"></div>
+    <div class="row"><label>Pupil</label><input type="range" id="pupil" min="4" max="18" step="1"></div>
+    <div class="row"><label>Mouth width</label><input type="range" id="mw" min="8" max="40" step="1"></div>
+
+    <h3>Export</h3>
+    <div class="btnrow" style="margin-bottom:10px">
+      <button id="copyHtml" style="flex:1">Copy inline HTML</button>
+      <button id="copyJson" style="flex:1">Copy JSON definition</button>
+    </div>
+    <textarea class="out" id="out" readonly spellcheck="false"></textarea>
+    <p class="hint">Paste the inline HTML straight into a deck, or save the JSON and load it with <span class="mono">data-char-src</span> / <span class="mono">SB_CHARACTERS</span>. Validate JSON with <span class="mono">skill/validate_character.py</span>.</p>
+  </div>
+</div>
+
+<div style="position:absolute;left:-9999px"><span id="lookTargetHost"></span></div>
+<script src="storyboard-engine.js"></script>
+<script>
+/* ---- sample faceless creature ---- */
+const SAMPLE = `<svg viewBox="0 0 240 280">
+  <ellipse cx="120" cy="274" rx="70" ry="12" fill="rgba(0,0,0,.16)"/>
+  <path d="M70,72 L58,26 L106,62 Z" fill="#7C5CFF"/>
+  <path d="M170,72 L182,26 L134,62 Z" fill="#7C5CFF"/>
+  <ellipse cx="120" cy="122" rx="92" ry="96" fill="#7C5CFF"/>
+  <rect x="74" y="210" width="92" height="60" rx="30" fill="#6a4ee0"/>
+</svg>`;
+
+const rig = document.getElementById('rig');
+const stage = document.getElementById('stage');
+const out = document.getElementById('out');
+const svgIn = document.getElementById('svgIn');
+
+let state = {
+  svg: SAMPLE, vb:[240,280],
+  desc:{ eyeL:[98,112], eyeR:[142,112], erx:22, ery:26, pupil:10, mouthX:120, mouthY:150, mouthW:18 },
+  look:[200,90], mood:'idle', talk:true, lookOn:false
+};
+const HANDLES = {}; // id -> el
+
+function parseSvg(markup){
+  const doc=new DOMParser().parseFromString(markup,'image/svg+xml');
+  const svg=doc.querySelector('svg'); if(!svg) return null;
+  const vb=(svg.getAttribute('viewBox')||'0 0 240 280').split(/[\s,]+/).map(Number);
+  return { svg, vb:[vb[2]||240, vb[3]||280] };
+}
+
+function descJSON(){
+  const d=state.desc;
+  return { eyes:{L:[r1(d.eyeL[0]),r1(d.eyeL[1])], R:[r1(d.eyeR[0]),r1(d.eyeR[1])], rx:d.erx, ry:d.ery, pupil:d.pupil},
+    mouth:{x:r1(d.mouthX), y:r1(d.mouthY), w:d.mouthW}, origin:[state.vb[0]/2, Math.round(state.vb[1]*0.86)] };
+}
+function r1(n){ return Math.round(n); }
+
+/* ---- (re)build the engine character ---- */
+function render(){
+  rig.setAttribute('data-face', JSON.stringify(descJSON()));
+  rig.setAttribute('data-viewbox', state.vb[0]+' '+state.vb[1]);
+  rig.setAttribute('data-mood', state.mood);
+  if(state.talk) rig.setAttribute('data-talk','1'); else rig.removeAttribute('data-talk');
+  if(state.lookOn) rig.setAttribute('data-look','#lookTargetHost'); else rig.removeAttribute('data-look');
+  rig.innerHTML = state.svg;
+  // size the rig box to the viewBox aspect
+  const dispW=420, dispH=Math.round(dispW*state.vb[1]/state.vb[0]);
+  rig.style.width=dispW+'px'; rig.style.height=dispH+'px';
+  rig.style.left='50%'; rig.style.top='50%'; rig.style.transform='translate(-50%,-50%)';
+  // force the engine to (re)adopt
+  rig._chInit=0; rig._ch=undefined; rig._chParts=undefined;
+  requestAnimationFrame(()=>{ positionLookTarget(); placeHandles(); });
+  buildExports();
+}
+
+function scale(){ return rig.getBoundingClientRect().width / state.vb[0]; }
+function vbToStage(x,y){ const r=rig.getBoundingClientRect(), s=stage.getBoundingClientRect(), k=scale();
+  return [ r.left-s.left + x*k, r.top-s.top + y*k ]; }
+function stageToVb(px,py){ const r=rig.getBoundingClientRect(), s=stage.getBoundingClientRect(), k=scale();
+  return [ (px-(r.left-s.left))/k, (py-(r.top-s.top))/k ]; }
+
+function placeHandles(){
+  const d=state.desc;
+  setH('eyeL','eye','L', d.eyeL); setH('eyeR','eye','R', d.eyeR);
+  setH('mouth','mouth','â—¡', [d.mouthX,d.mouthY]);
+  if(state.lookOn) setH('look','look','â—‰', state.look); else removeH('look');
+}
+function setH(id,cls,txt,coord){
+  let h=HANDLES[id];
+  if(!h){ h=document.createElement('div'); h.className='handle '+cls; h.dataset.id=id;
+    h.innerHTML='<span class="lbl"></span>'+txt; stage.appendChild(h); HANDLES[id]=h; bindDrag(h); }
+  h.querySelector('.lbl').textContent={eyeL:'left eye',eyeR:'right eye',mouth:'mouth',look:'look-at'}[id]||'';
+  const p=vbToStage(coord[0],coord[1]); h.style.left=p[0]+'px'; h.style.top=p[1]+'px';
+}
+function removeH(id){ if(HANDLES[id]){ HANDLES[id].remove(); delete HANDLES[id]; } }
+
+function bindDrag(h){
+  h.addEventListener('pointerdown',e=>{ e.preventDefault(); h.setPointerCapture(e.pointerId);
+    const move=ev=>{ const s=stage.getBoundingClientRect(); const vb=stageToVb(ev.clientX-s.left, ev.clientY-s.top);
+      const id=h.dataset.id, d=state.desc;
+      if(id==='eyeL') d.eyeL=vb; else if(id==='eyeR') d.eyeR=vb; else if(id==='mouth'){ d.mouthX=vb[0]; d.mouthY=vb[1]; }
+      else if(id==='look'){ state.look=vb; positionLookTarget(); }
+      h.style.left=(ev.clientX-s.left)+'px'; h.style.top=(ev.clientY-s.top)+'px';
+      throttleRender();
+    };
+    const up=ev=>{ h.releasePointerCapture(e.pointerId); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); render(); };
+    window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
+  });
+}
+let _raf=0; function throttleRender(){ if(_raf) return; _raf=requestAnimationFrame(()=>{ _raf=0; softRender(); }); }
+function softRender(){ // update data-face + rebuild without re-sizing/handle churn
+  rig.setAttribute('data-face', JSON.stringify(descJSON()));
+  rig.innerHTML=state.svg; rig._chInit=0; rig._ch=undefined; rig._chParts=undefined; buildExports();
+}
+
+/* ---- look-at target: a real element positioned over the gold handle so gaze works ---- */
+const lookHost=document.getElementById('lookTargetHost');
+function positionLookTarget(){ if(!state.lookOn) return; const p=vbToStage(state.look[0],state.look[1]); const s=stage.getBoundingClientRect();
+  lookHost.style.position='fixed'; lookHost.style.left=(s.left+p[0])+'px'; lookHost.style.top=(s.top+p[1])+'px'; lookHost.style.width='4px'; lookHost.style.height='4px'; }
+
+/* ---- exports ---- */
+function buildExports(){ /* default to inline */ if(out.dataset.kind==='json') out.value=exportJSON(); else out.value=exportHTML(); }
+function exportHTML(){
+  const face=JSON.stringify(descJSON());
+  return '<div data-anim="character" data-char="custom"\n     data-talk="1" data-acts="0.6:happy; 2:say=Hi!"\n     data-face=\''+face+'\'>\n'
+    + state.svg.replace(/^/gm,'  ') + '\n</div>';
+}
+function exportJSON(){
+  const parsed=parseSvg(state.svg); const parts=parsed?svgToParts(parsed.svg):[];
+  const def={ name:'my-character', viewBox:state.vb, origin:[state.vb[0]/2, Math.round(state.vb[1]*0.86)],
+    face:descJSON(), parts:parts };
+  return JSON.stringify(def,null,2);
+}
+function svgToParts(svg){ const out=[]; const map={rect:'rect',circle:'circle',ellipse:'ellipse',line:'line',path:'path',polygon:'polygon'};
+  svg.querySelectorAll('rect,circle,ellipse,line,path,polygon').forEach(n=>{ const t=map[n.tagName.toLowerCase()]; if(!t) return;
+    const p={shape:t}; const g=a=>n.getAttribute(a);
+    if(t==='rect'){ asg(p,'x',g('x')); asg(p,'y',g('y')); asg(p,'w',g('width')); asg(p,'h',g('height')); const rr=g('rx')||g('ry'); if(rr) p.r=+rr; }
+    else if(t==='circle'){ asg(p,'cx',g('cx')); asg(p,'cy',g('cy')); asg(p,'r',g('r')); }
+    else if(t==='ellipse'){ asg(p,'cx',g('cx')); asg(p,'cy',g('cy')); asg(p,'rx',g('rx')); asg(p,'ry',g('ry')); }
+    else if(t==='line'){ asg(p,'x1',g('x1')); asg(p,'y1',g('y1')); asg(p,'x2',g('x2')); asg(p,'y2',g('y2')); }
+    else if(t==='path'){ if(g('d')) p.d=g('d'); }
+    else if(t==='polygon'){ if(g('points')) p.points=g('points'); }
+    const fill=g('fill'); if(fill&&fill!=='none') p.fill=fill; else if(fill==='none') p.fill='none';
+    const st=g('stroke'); if(st) p.stroke=st; const sw=g('stroke-width'); if(sw) p.sw=+sw;
+    out.push(p); });
+  return out;
+}
+function asg(o,k,v){ if(v!=null&&v!=='') o[k]=+v; }
+
+/* ---- wiring ---- */
+function copy(text,btn){ navigator.clipboard.writeText(text).then(()=>{ const o=btn.textContent; btn.textContent='Copied!'; btn.classList.add('on'); setTimeout(()=>{btn.textContent=o;btn.classList.remove('on');},1100); }); }
+document.getElementById('copyHtml').onclick=e=>{ out.dataset.kind='html'; out.value=exportHTML(); copy(out.value,e.target); };
+document.getElementById('copyJson').onclick=e=>{ out.dataset.kind='json'; out.value=exportJSON(); copy(out.value,e.target); };
+document.getElementById('loadBtn').onclick=()=>{ const p=parseSvg(svgIn.value); if(!p){ alert('Could not parse that SVG. Make sure it starts with <svg viewBox="...">'); return; } state.svg=svgIn.value.trim(); state.vb=p.vb; render(); };
+document.querySelectorAll('[data-mood]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-mood]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); state.mood=b.dataset.mood; render(); });
+document.getElementById('talkBtn').onclick=e=>{ state.talk=!state.talk; e.target.classList.toggle('on',state.talk); render(); };
+document.getElementById('lookBtn').onclick=e=>{ state.lookOn=!state.lookOn; e.target.classList.toggle('on',state.lookOn); render(); };
+['erx','ery','pupil','mw'].forEach(id=>{ const el=document.getElementById(id);
+  el.oninput=()=>{ const v=+el.value; if(id==='mw') state.desc.mouthW=v; else state.desc[id]=v; softRender(); placeHandles(); }; });
+
+function syncSliders(){ document.getElementById('erx').value=state.desc.erx; document.getElementById('ery').value=state.desc.ery;
+  document.getElementById('pupil').value=state.desc.pupil; document.getElementById('mw').value=state.desc.mouthW; }
+
+/* ---- boot ---- */
+svgIn.value=SAMPLE; syncSliders();
+render();
+// Drive the engine's character preset directly each frame â€” no deck needed.
+const CHAR = Storyboard.PRESETS.character;
+let _t=0,_last=0;
+function tick(ts){ if(!_last)_last=ts; _t+=Math.min(0.05,(ts-_last)/1000); _last=ts;
+  try{ CHAR.apply(rig, 1, {time:_t}); }catch(e){}
+  requestAnimationFrame(tick); }
+requestAnimationFrame(tick);
+window.addEventListener('resize',()=>{ placeHandles(); positionLookTarget(); });
+</script>
+</body>
+</html>

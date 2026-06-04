@@ -1022,31 +1022,24 @@
     if(p.bodyG) p.bodyG.style.transformOrigin=((vb?vb[0]:240)/2)+'px '+(originY||250)+'px';
   }
   function _charAdopt(el){
-    // Rig-your-own-SVG: the element should contain a real inner <svg> (so shapes are
-    // parsed in the SVG namespace). Tag parts with data-sbc="eyeL|eyeR|pupilL|pupilR|
-    // mouth|open|armL|armR|brL|brR|cheekL|cheekR|body" and put a face descriptor on
-    // data-face (and optionally data-viewbox). The engine drives the tagged parts.
+    // Rig-your-own-SVG. Provide a real inner <svg> (viewBox + your art). If you tag eyes
+    // with data-sbc="eyeL"/"eyeR" the engine drives YOUR drawn face; otherwise it draws
+    // its own animated face onto your art at the data-face descriptor. Other rig points:
+    // pupilL/pupilR, mouth, open, armL/armR, brL/brR, cheekL/cheekR, body.
     var fd=null; try{ fd=el.dataset.face?JSON.parse(el.dataset.face):null; }catch(e){ fd=null; }
-    var svg=el.querySelector('svg');
-    if(!svg){ // fallback: best-effort wrap of raw markup (prefer a real <svg> instead)
-      var v0=(el.dataset.viewbox||'240 300').split(/[\s,]+/).map(Number);
-      el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+(v0[0]||240)+' '+(v0[1]||300)+'" style="width:100%;height:100%;overflow:visible">'+_charSanitizeSVG(el.innerHTML)+'</svg>';
-      svg=el.querySelector('svg');
-    }
+    var svg=el.querySelector('svg'); var artInner='', vbA=[240,300];
     if(svg){
-      // sanitize in-DOM
       svg.querySelectorAll('script,foreignObject,a,image,use').forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
       svg.querySelectorAll('*').forEach(function(n){ for(var i=n.attributes.length-1;i>=0;i--){ var an=n.attributes[i].name; if(/^on/i.test(an)||/href/i.test(an)) n.removeAttribute(an); } });
-      svg.setAttribute('class',((svg.getAttribute('class')||'')+' sbc-svg').trim()); svg.style.width='100%'; svg.style.height='100%'; svg.style.overflow='visible';
-      // ensure a .sbc-bodyG group wraps the drawables (for breathe/gestures)
-      if(!svg.querySelector('.sbc-bodyG')){ var bg=document.createElementNS('http://www.w3.org/2000/svg','g'); bg.setAttribute('class','sbc-bodyG');
-        var kids=[]; for(var j=0;j<svg.childNodes.length;j++) kids.push(svg.childNodes[j]); kids.forEach(function(k){ bg.appendChild(k); }); svg.appendChild(bg); }
-    }
-    el.querySelectorAll('[data-sbc]').forEach(function(node){ var key=node.getAttribute('data-sbc'); if(_SBC_RIG[key]) node.classList.add(_SBC_RIG[key]); });
-    var vbA=[240,300]; var vbAttr=(svg&&svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);
-    if(vbAttr.length>=4 && isFinite(vbAttr[2]) && isFinite(vbAttr[3])) vbA=[vbAttr[2],vbAttr[3]];
+      artInner=svg.innerHTML;
+      var va=(svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number); if(va.length>=4&&isFinite(va[2])&&isFinite(va[3])) vbA=[va[2],va[3]];
+    } else { artInner=_charSanitizeSVG(el.innerHTML); }
     if(el.dataset.viewbox){ var dv=el.dataset.viewbox.split(/[\s,]+/).map(Number); if(dv[0]&&dv[1]) vbA=[dv[0],dv[1]]; }
     var f=(fd&&fd.eyes)?_compileFace(fd):_compileFace({eyes:{L:[vbA[0]*0.4,vbA[1]*0.42],R:[vbA[0]*0.6,vbA[1]*0.42]},mouth:{x:vbA[0]/2,y:vbA[1]*0.6,w:16}});
+    var ownEyes=/data-sbc\s*=\s*["']?\s*(eyeL|eyeR)/i.test(artInner);
+    var faceSVG=(!ownEyes && (!fd || fd.render!==false)) ? _charFaceSVG(f) : '';
+    el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+vbA[0]+' '+vbA[1]+'" style="width:100%;height:100%;overflow:visible"><g class="sbc-bodyG">'+artInner+faceSVG+'</g></svg>';
+    el.querySelectorAll('[data-sbc]').forEach(function(node){ var key=node.getAttribute('data-sbc'); if(_SBC_RIG[key]) node.classList.add(_SBC_RIG[key]); });
     var ap=(fd&&fd.arms&&fd.arms.L&&fd.arms.R)?{Lx:fd.arms.L[0],Ly:fd.arms.L[1],Rx:fd.arms.R[0],Ry:fd.arms.R[1]}:null;
     _charCacheParts(el,f,ap,vbA,(fd&&fd.origin&&fd.origin[1])||(vbA[1]-50));
   }

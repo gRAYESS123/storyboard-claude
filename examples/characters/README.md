@@ -4,6 +4,8 @@ The cast isn't limited to the built-in styles. There are **two** ways to add you
 
 > The quickest path: **describe your character (or paste a reference image) to `/storyboard`** and let it generate the JSON definition below. That's how the built-in `cutout` (South-Park) style was made.
 
+> **Prefer to do it visually?** Open **[`rigger.html`](rigger.html)** in a browser — drop in your SVG art, **drag the eyes & mouth** onto it, watch it blink / talk / emote live, then copy the generated code (inline HTML *or* a JSON definition). No coordinates by hand. (Also ships with the installed skill as `rigger.html`.)
+
 ---
 
 ## ① JSON Character Definition (recommended)
