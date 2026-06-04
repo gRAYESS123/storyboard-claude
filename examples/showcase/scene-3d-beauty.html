@@ -134,12 +134,12 @@ function concreteCanvas(){ var W=64,H=64; var c=document.createElement('canvas')
 /* ---------------- the shared neon city ---------------- */
 var NEON=[0xFF1E8E,0x14F0D0,0x9D5BFF,0x36C8FF,0xFFD23A,0xFF4D5E,0x6AFF7A];
 function buildCity(T,s,api,soft){
-  s.background=new T.Color(0x05030d); s.fog=new T.Fog(0x140a28, 28, 235);
-  var sky=new T.Mesh(new T.PlaneGeometry(900,360), new T.MeshBasicMaterial({map:vgrad(T,[[0,'#040310'],[0.55,'#120b2a'],[0.83,'#321443'],[1,'#5a2547']]),depthWrite:false,fog:false})); sky.position.set(0,56,-190); s.add(sky);
-  var moon=sprite(T,soft,0xCFE6FF,7); moon.position.set(-66,72,-186); s.add(moon);
-  starfield(T,s,soft,700,130,290,0xcdd8ff,0.5,0.7);
-  var key=new T.DirectionalLight(0xa9c4ff,0.5); key.position.set(-30,70,30); s.add(key);
-  s.add(new T.HemisphereLight(0x33477e,0x060810,0.42)); s.add(new T.AmbientLight(0x0d1430,0.32));
+  s.background=new T.Color(0x05030d); s.fog=new T.Fog(0x0e0820, 32, 245);
+  var sky=new T.Mesh(new T.PlaneGeometry(900,360), new T.MeshBasicMaterial({map:vgrad(T,[[0,'#040310'],[0.6,'#160c30'],[0.85,'#3a1748'],[1,'#5e2a4e']]),depthWrite:false,fog:false})); sky.position.set(0,58,-205); s.add(sky);
+  var moon=sprite(T,soft,0xCFE6FF,7); moon.position.set(-66,74,-200); s.add(moon);
+  starfield(T,s,soft,600,140,300,0xcdd8ff,0.5,0.6);
+  var key=new T.DirectionalLight(0xbcd0ff,0.35); key.position.set(-30,70,30); s.add(key);
+  s.add(new T.HemisphereLight(0x2a3a60,0x05060c,0.22));   // fill; the rich reflections/IBL come from the HDRI environment
   var ground=new T.Mesh(new T.PlaneGeometry(900,900), new T.MeshStandardMaterial({color:0x06060d,roughness:0.7,metalness:0.2})); ground.rotation.x=-Math.PI/2; ground.position.y=-0.05; s.add(ground);
   var cc=new T.CanvasTexture(concreteCanvas()); cc.wrapS=cc.wrapT=T.RepeatWrapping; cc.repeat.set(2,42);
   [-7,7].forEach(function(sx){ var sw=new T.Mesh(new T.BoxGeometry(3,0.5,440), new T.MeshStandardMaterial({map:cc,roughness:0.9,metalness:0.05})); sw.position.set(sx,0.25,-52); s.add(sw); });
@@ -153,7 +153,7 @@ function buildCity(T,s,api,soft){
     var cv=faces[(Math.random()*faces.length)|0]; var tx=new T.CanvasTexture(cv); tx.wrapS=tx.wrapT=T.RepeatWrapping;
     tx.repeat.set(Math.max(1,Math.round(w/4)), Math.max(2,Math.round(h/5))); tx.offset.set(Math.random(),Math.random()); tx.anisotropy=8;
     // dark reflective GLASS + emissive lit windows (reflects the baked neon env)
-    var mat=new T.MeshStandardMaterial({color:0x0a0e1c,emissive:0xffffff,emissiveMap:tx,emissiveIntensity:0.7+Math.random()*0.6,roughness:0.14+Math.random()*0.12,metalness:0.62,envMapIntensity:0.95});
+    var mat=new T.MeshStandardMaterial({color:0x070a14,emissive:0xffffff,emissiveMap:tx,emissiveIntensity:0.5+Math.random()*0.45,roughness:0.08+Math.random()*0.1,metalness:0.85,envMapIntensity:1.15});
     var m=new T.Mesh(new T.BoxGeometry(w,h,d), mat); m.position.set(x,h/2,z); s.add(m);
     // varied silhouettes: setback + spire (tall) or rooftop unit (short)
     if(h>46 && Math.random()<0.7){ var w2=w*(0.55+Math.random()*0.2), h2=h*(0.2+Math.random()*0.18); var m2=new T.Mesh(new T.BoxGeometry(w2,h2,d*0.6), mat); m2.position.set(x,h+h2/2,z); s.add(m2);
@@ -177,13 +177,15 @@ function buildCity(T,s,api,soft){
   for(var ci=0;ci<28;ci++) car(ci%2===0);
   function updateCars(lt){ cars.forEach(function(o){ var span=200; var z=34 - (((o.ph + lt*o.v*(o.head?1:-0.7))%span)+span)%span;
     o.mesh.position.set(o.lane,0.5,z); o.glow.position.set(o.lane,0.55,z+(o.head?-o.len/2:o.len/2)); }); }
-  // bake the lit/neon city into an environment cube so the glass towers reflect it
-  try{ var cubeRT=new T.WebGLCubeRenderTarget(256,{format:T.RGBAFormat,generateMipmaps:true,minFilter:T.LinearMipmapLinearFilter}); var cubeCam=new T.CubeCamera(1,1400,cubeRT); cubeCam.position.set(0,24,-46); cubeCam.update(api.renderer,s); s.environment=cubeRT.texture; }catch(e){}
+  // real Shanghai-night-skyline HDRI -> IBL + reflections on the glass + sky background (applied as soon as it loads)
+  var _envSet=false, _pmrem=null;
+  function ensureEnv(){ if(_envSet || !SB_HDR) return; try{ if(!_pmrem) _pmrem=new T.PMREMGenerator(api.renderer); s.environment=_pmrem.fromEquirectangular(SB_HDR).texture; _envSet=true; }catch(e){} }
+  ensureEnv();
   // REAL wet-road reflections: a planar mirror + a semi-transparent asphalt overlay (lane markings show on top)
   try{ var mirror=new T.Reflector(new T.PlaneGeometry(13,440), {textureWidth:1024,textureHeight:1024,color:0x0a0d12,clipBias:0.003}); mirror.rotation.x=-Math.PI/2; mirror.position.set(0,0.002,-52); s.add(mirror); }catch(e){}
   var aTex=new T.CanvasTexture(asphaltCanvas()); aTex.wrapS=aTex.wrapT=T.RepeatWrapping; aTex.repeat.set(1,30); aTex.anisotropy=8;
   var roadTop=new T.Mesh(new T.PlaneGeometry(13,440), new T.MeshBasicMaterial({map:aTex,transparent:true,opacity:0.58,depthWrite:false,fog:true})); roadTop.rotation.x=-Math.PI/2; roadTop.position.set(0,0.014,-52); s.add(roadTop);
-  return { updateCars:updateCars };
+  return { updateCars:updateCars, ensureEnv:ensureEnv };
 }
 
 /* real Earth night-lights: scatter warm dots over land pixels of the albedo (same-origin -> readable) */
@@ -195,6 +197,9 @@ function earthNightCanvas(img){ var W=1024,H=512; var c=document.createElement('
       var land=(r>=b-4||g>=b+6) && bright>60 && !(r>180&&g>180&&b>190);
       if(land && Math.random()<0.11){ x.fillStyle='rgba(255,'+(192+Math.random()*52|0)+','+(110+Math.random()*70|0)+','+(0.5+Math.random()*0.5)+')'; x.fillRect(px,py,1.5,1.5); } } }catch(e){}
   return c; }
+/* real night-skyline HDRI -> image-based lighting + reflections + sky background for the city */
+var SB_HDR=null;
+try{ new THREE.RGBELoader().load('shanghai_bund_2k.hdr', function(t){ t.mapping=THREE.EquirectangularReflectionMapping; SB_HDR=t; }); }catch(e){}
 window.SB_SCENES = {
   /* ===================== UNIVERSE (dive into the galaxy) ===================== */
   universe: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x04051a);
@@ -239,7 +244,7 @@ window.SB_SCENES = {
   city: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); var city=buildCity(T,s,api,soft);
     cam.position.set(0,44,44);
     var t0=null;
-    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt);
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt); city.ensureEnv();
       var k=eio(Math.min(1,lt/5.0)); var y=44-28*k; var z=44-lt*6.5;
       cam.position.set(Math.sin(lt*0.18)*4.0, y, z);
       cam.lookAt(Math.sin(lt*0.18)*2.0, y-18, z-34); cam.rotateZ(Math.sin(lt*0.5)*0.03); };
@@ -249,7 +254,7 @@ window.SB_SCENES = {
   cityCta: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); var city=buildCity(T,s,api,soft);
     cam.position.set(0,14,22);
     var t0=null;
-    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt);
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt); city.ensureEnv();
       cam.position.set(Math.sin(lt*0.14)*2.0, 14+Math.sin(lt*0.2)*0.6, 22-lt*0.7);
       cam.lookAt(0, -2, -30); };
   }
