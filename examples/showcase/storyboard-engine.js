@@ -943,37 +943,137 @@
       face:{eyeLx:100,eyeRx:140,eyeY:120,erx:20,ery:24,pupil:10,mx:120,my:162,mw:16,browY:92,cheekLx:84,cheekRx:156,cheekY:160},
       body:function(c){return '<rect class="sbc-armL" x="26" y="150" width="28" height="80" rx="14" fill="'+c+'"/><rect class="sbc-armR" x="186" y="150" width="28" height="80" rx="14" fill="'+c+'"/><rect class="sbc-body" x="64" y="40" width="112" height="220" rx="56" fill="'+c+'"/>';} },
   };
-  function _charBuild(el){
-    var style=el.dataset.char||'blob'; var S=_CHAR_STYLES[style]||_CHAR_STYLES.blob;
-    var col=el.dataset.color||'var(--accent,#7C5CFF)'; var f=S.face; var vb=S.vb, sh=S.shadow;
-    var acc=el.dataset.accessory?_charAccessory(el.dataset.accessory,f):'';
-    el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+vb[0]+' '+vb[1]+'" style="width:100%;height:100%;overflow:visible">'
-      +'<ellipse class="sbc-shadow" cx="'+sh[0]+'" cy="'+sh[1]+'" rx="'+sh[2]+'" ry="'+sh[3]+'" fill="rgba(0,0,0,.22)"/>'
-      +'<g class="sbc-bodyG">'+S.body(col,el)+_charFaceSVG(f)+acc+'</g></svg>';
+  /* ===== BRING-YOUR-OWN-CHARACTER ===============================================
+     (A) declarative JSON definition  -> Storyboard.defineCharacter(def)  /  data-char-src
+     (B) rig-your-own-SVG             -> data-char="custom" + [data-sbc] tags + data-face
+     Both inherit the full acting (blink/gaze/expressions/gestures/lip-sync).
+  ============================================================================= */
+  function _sbNum(v){ var n=Number(v); return isFinite(n)?n:null; }
+  function _sbColorOK(s){ return typeof s==='string' && !/[<>"']/.test(s) && s.length<=64; }
+  function _sbPathOK(s){ return typeof s==='string' && s.length<=4000 && /^[\sMLHVCSQTAZmlhvcsqtaz0-9eE,.\- ]+$/.test(s); }
+  function _sbResolve(v,tok){ if(typeof v==='string' && v.charAt(0)==='$'){ var k=v.slice(1); return (tok&&tok[k]!=null)?tok[k]:'#888'; } return v; }
+  function _sbAttr(name,v){ var n=_sbNum(v); return n==null?'':(' '+name+'="'+n+'"'); }
+  var _SBC_RIG={armL:'sbc-armL',armR:'sbc-armR',eyeL:'sbc-eyeL',eyeR:'sbc-eyeR',pupilL:'sbc-pupil',pupilR:'sbc-pupil',pupil:'sbc-pupil',smile:'sbc-smile',mouth:'sbc-smile',open:'sbc-open',mouthOpen:'sbc-open',brL:'sbc-brL',brR:'sbc-brR',cheekL:'sbc-cheekL',cheekR:'sbc-cheekR',body:'sbc-body'};
+  function _renderParts(parts, tok){
+    if(!Array.isArray(parts)) return ''; var out='';
+    for(var i=0;i<parts.length;i++){ var p=parts[i]; if(!p||typeof p!=='object') continue;
+      var rig=(p.rig&&_SBC_RIG[p.rig])?(' class="'+_SBC_RIG[p.rig]+'"'):'';
+      if(p.shape==='g'){ out+='<g'+rig+'>'+_renderParts(p.parts,tok)+'</g>'; continue; }
+      var tag={rect:'rect',circle:'circle',ellipse:'ellipse',line:'line',path:'path',polygon:'polygon'}[p.shape]; if(!tag) continue;
+      var a='';
+      if(tag==='rect'){ a+=_sbAttr('x',p.x)+_sbAttr('y',p.y)+_sbAttr('width',p.w)+_sbAttr('height',p.h); if(p.r!=null){a+=_sbAttr('rx',p.r)+_sbAttr('ry',p.r);} }
+      else if(tag==='circle'){ a+=_sbAttr('cx',p.cx)+_sbAttr('cy',p.cy)+_sbAttr('r',p.r); }
+      else if(tag==='ellipse'){ a+=_sbAttr('cx',p.cx)+_sbAttr('cy',p.cy)+_sbAttr('rx',p.rx)+_sbAttr('ry',p.ry); }
+      else if(tag==='line'){ a+=_sbAttr('x1',p.x1)+_sbAttr('y1',p.y1)+_sbAttr('x2',p.x2)+_sbAttr('y2',p.y2); }
+      else if(tag==='path'){ if(!_sbPathOK(p.d)) continue; a+=' d="'+p.d+'"'; }
+      else if(tag==='polygon'){ if(!_sbPathOK(p.points)) continue; a+=' points="'+p.points+'"'; }
+      var fl=_sbResolve(p.fill,tok); if(fl!=null) a+=' fill="'+(_sbColorOK(fl)?fl:'none')+'"';
+      var st=_sbResolve(p.stroke,tok); if(st!=null&&_sbColorOK(st)) a+=' stroke="'+st+'"';
+      if(p.sw!=null) a+=_sbAttr('stroke-width',p.sw);
+      if(p.opacity!=null) a+=_sbAttr('opacity',p.opacity);
+      if(p.lc==='round'||p.lc==='square') a+=' stroke-linecap="'+p.lc+'"';
+      if(p.lj==='round') a+=' stroke-linejoin="round"';
+      out+='<'+tag+a+rig+'/>';
+    }
+    return out;
+  }
+  function _charTokens(el,S){
+    var d=el.dataset||{};
+    var t={ color:d.color||'var(--accent,#7C5CFF)', skin:_charSkin(d.skin), hair:_charHairColor(d.haircolor),
+      accent:'var(--accent,#7C5CFF)', accent2:'var(--accent2,#19E3B1)', accent3:'var(--accent3,#FF5C8A)', gold:'var(--gold,#FFD166)',
+      clothing:d.color||'var(--accent,#7C5CFF)', pants:d.pants||'#3a4a63', ink:'#1c1c22', white:'#ffffff' };
+    var P=(S&&S.params)||{};
+    for(var k in P){ if(!Object.prototype.hasOwnProperty.call(P,k)) continue; var dv=P[k];
+      if(typeof dv==='string'&&dv.charAt(0)==='$'){ var rk=dv.slice(1); dv=(t[rk]!=null)?t[rk]:dv; }
+      t[k]=(d[k]!=null&&d[k]!=='')?d[k]:dv; }
+    return t;
+  }
+  function _compileFace(F){ if(!F) return null;
+    var e=F.eyes||{}, m=F.mouth||{}, b=F.brows||{}, c=F.cheeks||{};
+    return { eyeLx:e.L?e.L[0]:92, eyeY:e.L?e.L[1]:136, eyeRx:e.R?e.R[0]:148, erx:e.rx||25, ery:e.ry||29, pupil:e.pupil||11,
+      outline:e.outline||null, outlineW:e.outlineW||3, mx:m.x||120, my:m.y||180, mw:m.w||19, smileW:m.w?Math.max(5,Math.round(m.w*0.32)):6,
+      browY:b.y||104, browDef:b['default']||0, browW:b.w||5, browColor:b.color||null,
+      cheekLx:c.L?c.L[0]:72, cheekY:c.L?c.L[1]:178, cheekRx:c.R?c.R[0]:168, render:F.render!==false };
+  }
+  function defineCharacter(def){
+    if(!def||typeof def!=='object'||!def.name||typeof def.name!=='string'){ console.warn('[storyboard] defineCharacter needs {name,...}'); return false; }
+    var vb=(def.viewBox&&def.viewBox.length===2)?[_sbNum(def.viewBox[0])||240,_sbNum(def.viewBox[1])||300]:[240,300];
+    var f=_compileFace(def.face)||_compileFace({eyes:{L:[92,136],R:[148,136]}});
+    _CHAR_STYLES[def.name]={ vb:vb, shadow:def.shadow||[vb[0]/2,vb[1]-12,vb[0]*0.28,11], originY:(def.origin&&def.origin[1])||(vb[1]-50),
+      armPivot:(def.arms&&def.arms.L&&def.arms.R)?{Lx:def.arms.L[0],Ly:def.arms.L[1],Rx:def.arms.R[0],Ry:def.arms.R[1]}:null,
+      params:def.params||{}, parts:Array.isArray(def.parts)?def.parts:[], faceRender:(def.face?def.face.render!==false:true), face:f };
+    return true;
+  }
+  function _charRegisterBundle(){ if(typeof window!=='undefined' && window.SB_CHARACTERS && !window._sbCharsReg){ window._sbCharsReg=1;
+    for(var k in window.SB_CHARACTERS){ try{ var dd=window.SB_CHARACTERS[k]; if(dd&&!dd.name) dd.name=k; defineCharacter(dd); }catch(e){} } } }
+  function _charSanitizeSVG(s){ return String(s).replace(/<\s*script[\s\S]*?<\s*\/\s*script\s*>/gi,'').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,'').replace(/javascript:/gi,''); }
+  function _charCacheParts(el, f, armPivot, vb, originY){
     var q=function(s){return el.querySelector(s);};
     var p={ bodyG:q('.sbc-bodyG'), eyeL:q('.sbc-eyeL'), eyeR:q('.sbc-eyeR'),
-      pupilL:q('.sbc-eyeL .sbc-pupil'), pupilR:q('.sbc-eyeR .sbc-pupil'),
+      pupilL:q('.sbc-eyeL .sbc-pupil')||q('.sbc-pupil'), pupilR:q('.sbc-eyeR .sbc-pupil'),
       smile:q('.sbc-smile'), open:q('.sbc-open'), cheekL:q('.sbc-cheekL'), cheekR:q('.sbc-cheekR'),
-      brL:q('.sbc-brL'), brR:q('.sbc-brR'), armL:q('.sbc-armL'), armR:q('.sbc-armR'), style:style };
+      brL:q('.sbc-brL'), brR:q('.sbc-brR'), armL:q('.sbc-armL'), armR:q('.sbc-armR'), style:el.dataset.char||'custom' };
     el._chParts=p; el._chFace=f;
-    p.eyeL.style.transformOrigin=f.eyeLx+'px '+f.eyeY+'px'; p.eyeR.style.transformOrigin=f.eyeRx+'px '+f.eyeY+'px';
-    if(p.armL && S.armPivot){ p.armL.style.transformOrigin=S.armPivot.Lx+'px '+S.armPivot.Ly+'px'; p.armR.style.transformOrigin=S.armPivot.Rx+'px '+S.armPivot.Ry+'px'; }
-    p.brL.style.transformOrigin=f.eyeLx+'px '+f.browY+'px'; p.brR.style.transformOrigin=f.eyeRx+'px '+f.browY+'px';
-    p.bodyG.style.transformOrigin=(vb[0]/2)+'px '+S.originY+'px';
+    if(p.eyeL) p.eyeL.style.transformOrigin=f.eyeLx+'px '+f.eyeY+'px';
+    if(p.eyeR) p.eyeR.style.transformOrigin=f.eyeRx+'px '+f.eyeY+'px';
+    if(p.armL && armPivot){ p.armL.style.transformOrigin=armPivot.Lx+'px '+armPivot.Ly+'px'; if(p.armR) p.armR.style.transformOrigin=armPivot.Rx+'px '+armPivot.Ry+'px'; }
+    if(p.brL) p.brL.style.transformOrigin=f.eyeLx+'px '+f.browY+'px';
+    if(p.brR) p.brR.style.transformOrigin=f.eyeRx+'px '+f.browY+'px';
+    if(p.bodyG) p.bodyG.style.transformOrigin=((vb?vb[0]:240)/2)+'px '+(originY||250)+'px';
+  }
+  function _charAdopt(el){
+    // Rig-your-own-SVG: the element should contain a real inner <svg> (so shapes are
+    // parsed in the SVG namespace). Tag parts with data-sbc="eyeL|eyeR|pupilL|pupilR|
+    // mouth|open|armL|armR|brL|brR|cheekL|cheekR|body" and put a face descriptor on
+    // data-face (and optionally data-viewbox). The engine drives the tagged parts.
+    var fd=null; try{ fd=el.dataset.face?JSON.parse(el.dataset.face):null; }catch(e){ fd=null; }
+    var svg=el.querySelector('svg');
+    if(!svg){ // fallback: best-effort wrap of raw markup (prefer a real <svg> instead)
+      var v0=(el.dataset.viewbox||'240 300').split(/[\s,]+/).map(Number);
+      el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+(v0[0]||240)+' '+(v0[1]||300)+'" style="width:100%;height:100%;overflow:visible">'+_charSanitizeSVG(el.innerHTML)+'</svg>';
+      svg=el.querySelector('svg');
+    }
+    if(svg){
+      // sanitize in-DOM
+      svg.querySelectorAll('script,foreignObject,a,image,use').forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
+      svg.querySelectorAll('*').forEach(function(n){ for(var i=n.attributes.length-1;i>=0;i--){ var an=n.attributes[i].name; if(/^on/i.test(an)||/href/i.test(an)) n.removeAttribute(an); } });
+      svg.setAttribute('class',((svg.getAttribute('class')||'')+' sbc-svg').trim()); svg.style.width='100%'; svg.style.height='100%'; svg.style.overflow='visible';
+      // ensure a .sbc-bodyG group wraps the drawables (for breathe/gestures)
+      if(!svg.querySelector('.sbc-bodyG')){ var bg=document.createElementNS('http://www.w3.org/2000/svg','g'); bg.setAttribute('class','sbc-bodyG');
+        var kids=[]; for(var j=0;j<svg.childNodes.length;j++) kids.push(svg.childNodes[j]); kids.forEach(function(k){ bg.appendChild(k); }); svg.appendChild(bg); }
+    }
+    el.querySelectorAll('[data-sbc]').forEach(function(node){ var key=node.getAttribute('data-sbc'); if(_SBC_RIG[key]) node.classList.add(_SBC_RIG[key]); });
+    var vbA=[240,300]; var vbAttr=(svg&&svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);
+    if(vbAttr.length>=4 && isFinite(vbAttr[2]) && isFinite(vbAttr[3])) vbA=[vbAttr[2],vbAttr[3]];
+    if(el.dataset.viewbox){ var dv=el.dataset.viewbox.split(/[\s,]+/).map(Number); if(dv[0]&&dv[1]) vbA=[dv[0],dv[1]]; }
+    var f=(fd&&fd.eyes)?_compileFace(fd):_compileFace({eyes:{L:[vbA[0]*0.4,vbA[1]*0.42],R:[vbA[0]*0.6,vbA[1]*0.42]},mouth:{x:vbA[0]/2,y:vbA[1]*0.6,w:16}});
+    var ap=(fd&&fd.arms&&fd.arms.L&&fd.arms.R)?{Lx:fd.arms.L[0],Ly:fd.arms.L[1],Rx:fd.arms.R[0],Ry:fd.arms.R[1]}:null;
+    _charCacheParts(el,f,ap,vbA,(fd&&fd.origin&&fd.origin[1])||(vbA[1]-50));
+  }
+  function _charBuild(el){
+    var style=el.dataset.char||'blob'; var S=_CHAR_STYLES[style]||_CHAR_STYLES.blob;
+    var f=S.face; var vb=S.vb, sh=S.shadow;
+    var acc=el.dataset.accessory?_charAccessory(el.dataset.accessory,f):'';
+    var bodySVG = S.parts ? _renderParts(S.parts,_charTokens(el,S)) : S.body((el.dataset.color||'var(--accent,#7C5CFF)'),el);
+    var faceSVG = (S.faceRender===false) ? '' : _charFaceSVG(f);
+    el.innerHTML='<svg class="sbc-svg" viewBox="0 0 '+vb[0]+' '+vb[1]+'" style="width:100%;height:100%;overflow:visible">'
+      +'<ellipse class="sbc-shadow" cx="'+sh[0]+'" cy="'+sh[1]+'" rx="'+sh[2]+'" ry="'+sh[3]+'" fill="rgba(0,0,0,.22)"/>'
+      +'<g class="sbc-bodyG">'+bodySVG+faceSVG+acc+'</g></svg>';
+    _charCacheParts(el,f,S.armPivot,vb,S.originY);
   }
   function _charApplyMood(el, mood){
     var p=el._chParts, ch=el._ch, f=el._chFace; if(!p) return; ch.mood=mood;
-    p.cheekL.style.opacity='0'; p.cheekR.style.opacity='0';
+    if(p.cheekL) p.cheekL.style.opacity='0'; if(p.cheekR) p.cheekR.style.opacity='0';
     var _bd=String((f&&f.browDef)||0);
-    p.brL.style.opacity=_bd; p.brR.style.opacity=_bd; p.brL.style.transform=''; p.brR.style.transform='';
+    if(p.brL){ p.brL.style.opacity=_bd; p.brL.style.transform=''; } if(p.brR){ p.brR.style.opacity=_bd; p.brR.style.transform=''; }
     ch.eyeRy=1; ch.winkR=0; ch.moodLook=[0,0]; ch.moodSurprise=0;
     var kind='idle';
-    if(mood==='happy'||mood==='wink'){ kind='happy'; p.cheekL.style.opacity='.9'; p.cheekR.style.opacity='.9'; ch.eyeRy=0.78; }
+    if(mood==='happy'||mood==='wink'){ kind='happy'; if(p.cheekL)p.cheekL.style.opacity='.9'; if(p.cheekR)p.cheekR.style.opacity='.9'; ch.eyeRy=0.78; }
     if(mood==='wink') ch.winkR=1;
-    if(mood==='sad'){ kind='sad'; p.brL.style.opacity='.9'; p.brR.style.opacity='.9'; p.brL.style.transform='rotate(14deg)'; p.brR.style.transform='rotate(-14deg)'; ch.moodLook=[0,5]; }
-    if(mood==='surprised'){ p.brL.style.opacity='.9'; p.brR.style.opacity='.9'; p.brL.style.transform='translateY(-7px)'; p.brR.style.transform='translateY(-7px)'; ch.eyeRy=1.2; ch.moodSurprise=1; }
-    if(mood==='think'){ kind='think'; p.brR.style.opacity='.9'; p.brR.style.transform='translateY(-6px)'; ch.moodLook=[-5,-6]; }
-    p.smile.setAttribute('d', _charSmile(kind, f)); ch.smileD=kind;
+    if(mood==='sad'){ kind='sad'; if(p.brL){p.brL.style.opacity='.9';p.brL.style.transform='rotate(14deg)';} if(p.brR){p.brR.style.opacity='.9';p.brR.style.transform='rotate(-14deg)';} ch.moodLook=[0,5]; }
+    if(mood==='surprised'){ if(p.brL){p.brL.style.opacity='.9';p.brL.style.transform='translateY(-7px)';} if(p.brR){p.brR.style.opacity='.9';p.brR.style.transform='translateY(-7px)';} ch.eyeRy=1.2; ch.moodSurprise=1; }
+    if(mood==='think'){ kind='think'; if(p.brR){p.brR.style.opacity='.9';p.brR.style.transform='translateY(-6px)';} ch.moodLook=[-5,-6]; }
+    if(p.smile) p.smile.setAttribute('d', _charSmile(kind, f)); ch.smileD=kind;
   }
   function _charParseActs(spec){
     if(!spec) return [];
@@ -1024,35 +1124,43 @@
       else if(g.name==='spin'){ bodyR+=gp*360; } }
     if(ch.pointSel){ const d=_charScreenDir(el,ch.pointSel); if(d){ const ang=Math.atan2(d.dy,d.dx)*180/Math.PI;
       if(d.dx>=0){ armRr=Math.max(-165,Math.min(15,ang-90)); } else { armLr=Math.max(-15,Math.min(165,ang+90)); } } }
-    p.bodyG.style.transform='translateY('+(bodyTy+bodyExtraY)+'px) rotate('+bodyR+'deg) scale('+bodyScale+')';
+    if(p.bodyG) p.bodyG.style.transform='translateY('+(bodyTy+bodyExtraY)+'px) rotate('+bodyR+'deg) scale('+bodyScale+')';
     if(p.armL) p.armL.style.transform='rotate('+armLr+'deg)';
     if(p.armR) p.armR.style.transform='rotate('+armRr+'deg)';
-    const blinking=(((t+ch.blinkOff)%3.3)<0.12);
-    p.eyeL.style.transform='scaleY('+(blinking?0.08:ch.eyeRy)+')';
-    p.eyeR.style.transform='scaleY('+((blinking||ch.winkR)?0.08:ch.eyeRy)+')';
+    const blinking=(((t+(ch.blinkOff||0))%3.3)<0.12);
+    if(p.eyeL) p.eyeL.style.transform='scaleY('+(blinking?0.08:ch.eyeRy)+')';
+    if(p.eyeR) p.eyeR.style.transform='scaleY('+((blinking||ch.winkR)?0.08:ch.eyeRy)+')';
     let gx=ch.moodLook[0], gy=ch.moodLook[1]; const gsel=ch.pointSel||ch.gazeSel;
     if(gsel){ const d=_charScreenDir(el,gsel); if(d){ const m=Math.hypot(d.dx,d.dy)||1, M=10; gx=Math.max(-M,Math.min(M,d.dx/m*M)); gy=Math.max(-M,Math.min(M,d.dy/m*M)); } }
-    p.pupilL.style.transform='translate('+gx+'px,'+gy+'px)'; p.pupilR.style.transform='translate('+gx+'px,'+gy+'px)';
+    if(p.pupilL) p.pupilL.style.transform='translate('+gx+'px,'+gy+'px)'; if(p.pupilR) p.pupilR.style.transform='translate('+gx+'px,'+gy+'px)';
     const talking = ch.talk && (ch.dataset_talk || (ch._sayUntil && t<ch._sayUntil));
-    if(ch.moodSurprise && !talking){ p.smile.style.opacity='0'; p.open.style.opacity='1'; p.open.setAttribute('rx','11'); p.open.setAttribute('ry','13'); }
-    else if(talking){ p.smile.style.opacity='0'; p.open.style.opacity='1'; let amp;
+    if(ch.moodSurprise && !talking){ if(p.smile)p.smile.style.opacity='0'; if(p.open){p.open.style.opacity='1'; p.open.setAttribute('rx','11'); p.open.setAttribute('ry','13');} }
+    else if(talking){ if(p.smile)p.smile.style.opacity='0'; if(p.open){ p.open.style.opacity='1'; let amp;
       if(analyser && freqData){ analyser.getByteFrequencyData(freqData); let s=0; for(let i=2;i<26;i++) s+=freqData[i]; amp=Math.min(1,(s/24)/150); }
       else amp=0.42+0.42*Math.abs(Math.sin(t*9.0));
-      p.open.setAttribute('rx',(12+amp*4).toFixed(1)); p.open.setAttribute('ry',(3+amp*13).toFixed(1)); }
-    else { p.smile.style.opacity='1'; p.open.style.opacity='0'; }
+      p.open.setAttribute('rx',(12+amp*4).toFixed(1)); p.open.setAttribute('ry',(3+amp*13).toFixed(1)); } }
+    else { if(p.smile)p.smile.style.opacity='1'; if(p.open)p.open.style.opacity='0'; }
     if(el._chBubble && el._chBubble._full!=null){ const bt=el._chBubble; const n=Math.floor(Math.max(0,(t-bt._t0))/0.045); bt.span.textContent=bt._full.slice(0,n);
       if(ch._sayUntil && t>ch._sayUntil+0.5) bt.b.style.opacity='0'; }
   }
   Object.assign(PRESETS, {
     character: { dur: 9999, apply: (el,p,c) => {
-      if(!el._chInit){ el._chInit=1;
+      if(!el._chInit){
+        _charRegisterBundle();
+        var _style=el.dataset.char||'blob';
+        var _adopt = (_style==='custom') || (el.dataset.charSvg!==undefined) || (!_CHAR_STYLES[_style] && !el.dataset.charSrc && el.querySelector('[data-sbc]'));
+        if(!_adopt && !_CHAR_STYLES[_style] && el.dataset.charSrc){
+          if(!el._chFetch){ el._chFetch=1; fetch(el.dataset.charSrc).then(function(r){return r.json();}).then(function(j){ if(j&&!j.name)j.name=_style; defineCharacter(j); }).catch(function(e){ console.warn('[storyboard] char-src failed', e); }); }
+          return; // wait for the def, build next tick
+        }
+        el._chInit=1;
         if(getComputedStyle(el).position==='static') el.style.position='relative';
-        _charBuild(el);
+        if(_adopt) _charAdopt(el); else _charBuild(el);
         const _se=el.closest('.slide'); const _sn=_se?parseInt(_se.dataset.slide||'0',10):0; let _cue=0; for(const tm of TIMINGS){ if(tm.slide===_sn){ _cue=tm.time; break; } }
         el._ch={ mood:'idle', eyeRy:1, winkR:0, moodLook:[0,0], moodSurprise:0, smileD:'', cue:_cue,
           gazeSel:el.dataset.look||null, pointSel:null,
           talk: el.dataset.talk==='1', dataset_talk: el.dataset.talk==='1',
-          acts:_charParseActs(el.dataset.acts), gestures:[], _t:0, _sayUntil:0 };
+          acts:_charParseActs(el.dataset.acts), gestures:[], _t:0, _sayUntil:0, blinkOff:(_charSeq++ *1.13)%3.3 };
         _charApplyMood(el, el.dataset.mood||'idle');
       }
       el.style.opacity=1;
@@ -1714,6 +1822,8 @@
     isSynthetic:()=>synthetic,
     registerPreset(name,def){ PRESETS[name]=def; },
     registerEase(name,fn){ EASE[name]=fn; },
+    defineCharacter,
+    characters:()=>Object.keys(_CHAR_STYLES),
   };
 
   global.Storyboard = Storyboard;

@@ -856,6 +856,13 @@ An owned procedural mascot/guide that lives the whole beat (auto-blink, breathe,
 | `data-char` | `blob` · `orb` · `bot` (antenna robot) · `cat` (ears + whiskers) · `ghost` (wavy hem) · `star` · `bean` (tall capsule) · `person` (modern-flat human) · `cutout` (construction-paper / South-Park look — big outlined eyes, stubby body, mitten hands) — all share the same face/acting |
 | `data-skin` / `data-hair` / `data-haircolor` | **`person` & `cutout`:** skin (`light`/`medium`/`tan`/`brown`/`deep` or hex), hair (`short`/`long`/`bun`/`curly`/`buzz`/`cap`/`bald`; `cutout` also `afro`/`hood`), hair color (`dark`/`brown`/`blonde`/`auburn`/`red`/`gray`/`white` or hex). `data-color` = clothing (`cutout` also `data-pants`). |
 | `data-accessory` | optional `glasses` · `hat` · `bowtie` |
+
+### Bring your own character
+Not limited to the built-ins — add your own **two ways** (both inherit the full acting):
+- **JSON definition** — `Storyboard.defineCharacter(def)`, a bundled `window.SB_CHARACTERS` map, or `data-char-src="x.json"`. A `face` descriptor (engine-animated) + a `parts` list (your art) + `$token` colors (`$skin`/`$clothing`/`$accent`/…). Safe (whitelisted shapes, no scripts), shareable, and **`/storyboard` can generate one from a description or a reference image**.
+- **Rig your own SVG** — `data-char="custom"` with an inner `<svg>` whose parts are tagged `data-sbc="eyeL|eyeR|pupilL|pupilR|mouth|open|armL|armR|brL|brR|cheekL|cheekR|body"` plus a `data-face` descriptor. The engine drives the tagged parts.
+
+Full format reference + copy-paste examples: **`examples/characters/README.md`**. Validate a definition with `python skill/validate_character.py <file.json>`. Live demo: `examples/showcase/byo-characters.html`.
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
 | `data-look` | selector the eyes track from the start |

@@ -1,0 +1,23 @@
+{
+  "name": "robo",
+  "v": 1,
+  "viewBox": [240, 300],
+  "origin": [120, 250],
+  "shadow": [120, 288, 64, 12],
+  "arms": { "L": [33, 150], "R": [207, 150] },
+  "params": { "clothing": "$color" },
+  "face": {
+    "eyes":   { "L": [92, 130], "R": [148, 130], "rx": 24, "ry": 26, "pupil": 10, "outline": "#1c1c22" },
+    "mouth":  { "x": 120, "y": 174, "w": 17 },
+    "brows":  { "y": 100, "default": 1, "w": 6 },
+    "cheeks": { "L": [74, 168], "R": [166, 168] }
+  },
+  "parts": [
+    { "shape": "rect",   "x": 18,  "y": 150, "w": 30, "h": 86,  "r": 15, "fill": "$clothing", "stroke": "#1c1c22", "sw": 3, "rig": "armL" },
+    { "shape": "rect",   "x": 192, "y": 150, "w": 30, "h": 86,  "r": 15, "fill": "$clothing", "stroke": "#1c1c22", "sw": 3, "rig": "armR" },
+    { "shape": "line",   "x1": 120, "y1": 56, "x2": 120, "y2": 32, "stroke": "#1c1c22", "sw": 5, "lc": "round" },
+    { "shape": "circle", "cx": 120, "cy": 26, "r": 8, "fill": "$clothing", "stroke": "#1c1c22", "sw": 3 },
+    { "shape": "rect",   "x": 48,  "y": 56,  "w": 144, "h": 190, "r": 30, "fill": "$clothing", "stroke": "#1c1c22", "sw": 3 },
+    { "shape": "circle", "cx": 120, "cy": 214, "r": 11, "fill": "$accent2" }
+  ]
+}
