@@ -1324,9 +1324,10 @@
       if(el._s3===undefined){
         if(typeof window==='undefined' || !window.THREE){ if(!window._sb3warn){ window._sb3warn=1; console.warn('[storyboard] three.js not loaded — include three.min.js for data-anim="scene3d"'); } return; }
         var w=el.clientWidth||el.offsetWidth||720, h=el.clientHeight||el.offsetHeight||540;
+        var _res=parseFloat(el.dataset.res)||1;   // internal render scale (<1 = softer but faster; good for full-bleed)
         try{
           var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
-          renderer.setPixelRatio(1); renderer.setSize(w,h,false);
+          renderer.setPixelRatio(1); renderer.setSize(Math.round(w*_res),Math.round(h*_res),false);
           renderer.domElement.style.cssText='width:100%;height:100%;display:block';
           el.appendChild(renderer.domElement);
           var scene=new THREE.Scene();

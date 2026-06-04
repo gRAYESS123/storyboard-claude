@@ -41,6 +41,7 @@ The "playable document" pattern is the unlock. Animations sync to your voice-ove
   - **The cast & sets demo** ([`cast-and-sets.mp4`](examples/showcase/cast-and-sets.mp4)) — the actor layer in action: a whole cast (mascots + diverse human figures) waves, points, talks (lip-sync) and reacts, staged on device mockups + props (sticky notes, speech bubbles, pins), across living environments (night/day/dusk skies, snow, embers).
   - **Bring your own characters** ([`byo-characters.mp4`](examples/showcase/byo-characters.mp4)) — the same acting on a JSON-defined character and a rig-your-own-SVG character, side by side. Format reference + examples in [`examples/characters/`](examples/characters/).
   - **Real 3D** ([`scene-3d.mp4`](examples/showcase/scene-3d.mp4)) — clock-synced WebGL (three.js): a lit torus knot, an orbiting scene with a moving camera, a multi-material cube, and a faceted gem — all rendered headless.
+  - **Beautiful 3D** ([`scene-3d-beauty.mp4`](examples/showcase/scene-3d-beauty.mp4)) — full-bleed WebGL: a spiral galaxy, a synthwave highway with streaming car lights, a ringed planet, and a warp-speed finale.
 
   Open either `.html` (the synthetic clock plays it with no audio) or watch the rendered MP4.
 - **`examples/stripe-radar/`** — a complete 150-second product pitch: AAF-driven sync, full concept → script → build → render pipeline.
