@@ -1,6 +1,6 @@
-# Demos — the engine, five ways
+# Demos — the engine, six ways
 
-This folder ships five silent demo decks (capability reels, not narrated explainers):
+This folder ships six silent demo decks (capability reels, not narrated explainers):
 
 | File | What it is |
 |---|---|
@@ -9,6 +9,7 @@ This folder ships five silent demo decks (capability reels, not narrated explain
 | **`cast-and-sets.html`** / `cast-and-sets.mp4` | The **cast & sets** demo — the actor layer in action: procedural characters that wave, point, talk (lip-sync) and react, staged on device mockups + props, across living environments (night/day/dusk skies, snow, embers). |
 | **`cutout-cast.html`** / `cutout-cast.mp4` | The **cutout cast** — a construction-paper / South-Park-style character set (big outlined eyes, stubby bodies, mitten hands) that talks, reacts and waves; one `cutout` style, many looks via skin/hair/clothing. |
 | **`byo-characters.html`** / `byo-characters.mp4` | **Bring your own character** — built-in styles, a JSON-defined character, and a rig-your-own-SVG character side by side, all sharing the acting. Format docs in [`../characters/`](../characters/). |
+| **`scene-3d.html`** / `scene-3d.mp4` | **Real 3D (WebGL)** — clock-synced three.js: a lit torus knot, an orbiting scene with a moving camera, a multi-material cube, and a faceted gem. Keep scenes modest (headless renders use software GL). |
 
 Open either in a browser (the synthetic clock plays the timeline with no audio — a PREVIEW badge shows on screen, hidden in renders), or watch the rendered MP4.
 

@@ -1300,6 +1300,49 @@
     }},
   });
 
+  /* =====================================================================
+     3D (real WebGL via three.js)
+       <div class="anim" data-anim="scene3d" data-scene="myScene"></div>
+       window.SB_SCENES = { myScene: function(api){           // api: {THREE,scene,camera,renderer,el,w,h}
+         var m = new api.THREE.Mesh(geo, mat); api.scene.add(m);
+         return function(t,p){ m.rotation.y = t*0.6; };        // called each frame with the audio clock
+       } };
+     Needs three.min.js loaded on the page. Headless renders use software GL —
+     keep scenes modest (a few meshes, simple lights) and elements < ~900px.
+  ===================================================================== */
+  function _sb3Default(api){
+    var T=api.THREE, s=api.scene, cam=api.camera;
+    s.add(new T.AmbientLight(0xffffff,0.55));
+    var d=new T.DirectionalLight(0xffffff,0.95); d.position.set(3,4,6); s.add(d);
+    var d2=new T.DirectionalLight(0xFF5C8A,0.45); d2.position.set(-5,-2,2); s.add(d2);
+    var mesh=new T.Mesh(new T.IcosahedronGeometry(1.6,0), new T.MeshStandardMaterial({color:0x7C5CFF,roughness:0.35,metalness:0.25,flatShading:true}));
+    s.add(mesh); cam.position.set(0,0,5);
+    return function(t,p){ mesh.rotation.x=t*0.5; mesh.rotation.y=t*0.7; };
+  }
+  Object.assign(PRESETS, {
+    scene3d: { dur: 9999, apply: (el,p,c) => {
+      if(el._s3===undefined){
+        if(typeof window==='undefined' || !window.THREE){ if(!window._sb3warn){ window._sb3warn=1; console.warn('[storyboard] three.js not loaded — include three.min.js for data-anim="scene3d"'); } return; }
+        var w=el.clientWidth||el.offsetWidth||720, h=el.clientHeight||el.offsetHeight||540;
+        try{
+          var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+          renderer.setPixelRatio(1); renderer.setSize(w,h,false);
+          renderer.domElement.style.cssText='width:100%;height:100%;display:block';
+          el.appendChild(renderer.domElement);
+          var scene=new THREE.Scene();
+          var camera=new THREE.PerspectiveCamera(parseFloat(el.dataset.fov)||50, w/h, 0.1, 200); camera.position.set(0,0,5);
+          var fn=(window.SB_SCENES && window.SB_SCENES[el.dataset.scene]) || _sb3Default;
+          var upd=fn({THREE:THREE, scene:scene, camera:camera, renderer:renderer, el:el, w:w, h:h});
+          el._s3={renderer:renderer, scene:scene, camera:camera, update:(typeof upd==='function')?upd:null};
+        }catch(e){ console.warn('[storyboard] scene3d init failed', e); el._s3=null; }
+      }
+      var s=el._s3; if(!s) return; el.style.opacity=1;
+      var _sl=el.closest('.slide'); if(_sl){ var _cs=getComputedStyle(_sl); if(_cs.visibility==='hidden'||parseFloat(_cs.opacity||'1')<0.03) return; }  // don't burn GL on hidden slides
+      if(s.update){ try{ s.update(c.time||0, p); }catch(e){} }
+      s.renderer.render(s.scene, s.camera);
+    }},
+  });
+
   const LOOPS = {
     float:   (t,amp,per) => `translateY(${Math.sin(t/per*Math.PI*2)*amp}px)`,
     sway:    (t,amp,per) => `rotate(${Math.sin(t/per*Math.PI*2)*amp}deg)`,

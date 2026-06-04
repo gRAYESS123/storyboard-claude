@@ -863,6 +863,32 @@ Not limited to the built-ins — add your own **two ways** (both inherit the ful
 - **Rig your own SVG** — `data-char="custom"` with an inner `<svg>` whose parts are tagged `data-sbc="eyeL|eyeR|pupilL|pupilR|mouth|open|armL|armR|brL|brR|cheekL|cheekR|body"` plus a `data-face` descriptor. The engine drives the tagged parts.
 
 Full format reference + copy-paste examples: **`examples/characters/README.md`**. Validate a definition with `python skill/validate_character.py <file.json>`. Live demo: `examples/showcase/byo-characters.html`.
+
+---
+
+# Real 3D (WebGL via three.js)
+
+Beyond CSS 3D transforms — actual WebGL meshes, lighting, materials and a 3D camera, driven by the audio clock.
+
+```html
+<div class="anim" data-anim="scene3d" data-scene="myScene" style="width:800px;height:800px"></div>
+<script src="three.min.js"></script>   <!-- skill/assets/vendor/three.min.js -->
+<script>
+window.SB_SCENES = { myScene: function(api){            // api: {THREE, scene, camera, renderer, el, w, h}
+  var T=api.THREE;
+  var m = new T.Mesh(new T.TorusKnotGeometry(1.2,0.4,110,16),
+                     new T.MeshStandardMaterial({color:0x7C5CFF, metalness:0.4, roughness:0.3}));
+  api.scene.add(m);
+  api.scene.add(new T.AmbientLight(0xffffff,0.5));
+  var d=new T.DirectionalLight(0xffffff,1); d.position.set(4,5,6); api.scene.add(d);
+  return function(t,p){ m.rotation.y = t*0.6; };          // t = audio time, p = preset progress
+}};
+</script>
+```
+
+Your scene function builds the three.js scene and returns an `update(t,p)` that runs every frame with the audio clock — so the 3D **scrubs with the VO**. No `data-scene` → a rotating icosahedron default. `data-fov` sets the camera FOV.
+
+**Render note:** headless renders use software GL (SwiftShader), so keep scenes modest — a few meshes, simple lights, the element under ~900px — for smooth MP4s (the live browser preview uses your GPU). Inactive slides skip GL automatically. Bundle the vendored `three.min.js` beside the deck. Demo: `examples/showcase/scene-3d.html`. (GLTF model loading is a follow-on: add `GLTFLoader` + a model file.)
 | `data-mood` | initial expression (default `idle`) |
 | `data-talk` | `"1"` = continuous lip-sync (mouth rides the audio analyser; sine-flap when silent) |
 | `data-look` | selector the eyes track from the start |
