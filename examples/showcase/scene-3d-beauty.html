@@ -2,63 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Storyboard — Cinematic 3D (galaxy · city · world · warp)</title>
+<title>Storyboard — Cosmic Zoom (universe · Earth · neon city)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#03040a;font-family:'Space Grotesk',system-ui,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#02030a;font-family:'Space Grotesk',system-ui,sans-serif}
 .stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .deck{width:1920px;height:1080px;transform-origin:center;overflow:hidden;backface-visibility:hidden}
-:root{--ink:#F4F6FF;--ink-soft:#c9cfee;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF5C8A;--gold:#FFD166}
-.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:#03040a;color:var(--ink);contain:layout paint}
+:root{--ink:#F4F6FF;--ink-soft:#cfd5f2;--accent:#7C5CFF;--accent2:#19E3B1;--accent3:#FF2D9B;--gold:#FFD166}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:#02030a;color:var(--ink);contain:layout paint}
 .anim{opacity:0;will-change:transform,opacity,filter}
 .bleed3d{position:absolute;inset:0;z-index:1}
 .scrim{position:absolute;inset:0;z-index:2;pointer-events:none}
-.gradient-fill{background:linear-gradient(110deg,#fff,#dfe6ff 45%,#b7c4ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.flash{position:absolute;inset:0;z-index:30;background:#eaf1ff;pointer-events:none}
+.gradient-fill{background:linear-gradient(110deg,#fff,#e3e9ff 45%,#bcc8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.neon-fill{background:linear-gradient(110deg,#fff,#7afcff 40%,#ff6ad5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .t-wrap{position:absolute;z-index:3}
 .eyebrow{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent2)}
-.mega{font-size:158px;line-height:.94;font-weight:700;letter-spacing:-.04em;text-shadow:0 10px 60px rgba(0,0,0,.9)}
-.big{font-size:124px;line-height:1.0;font-weight:700;letter-spacing:-.03em;text-shadow:0 10px 60px rgba(0,0,0,.9)}
+.mega{font-size:160px;line-height:.93;font-weight:700;letter-spacing:-.04em;text-shadow:0 10px 60px rgba(0,0,0,.92)}
+.big{font-size:128px;line-height:1.0;font-weight:700;letter-spacing:-.03em;text-shadow:0 10px 60px rgba(0,0,0,.92)}
 .sub{font-size:34px;line-height:1.4;color:var(--ink-soft);margin-top:22px;text-shadow:0 2px 30px rgba(0,0,0,.95)}
-.cta-pill{display:inline-block;margin-top:46px;padding:30px 60px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2);box-shadow:0 0 60px rgba(25,227,177,.5)}
-.transition-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:0}
-.transition-overlay.dissolve{background:#03040a}.transition-overlay.flash{background:#fff}
+.cta-pill{display:inline-block;margin-top:46px;padding:30px 60px;border-radius:18px;font-size:38px;font-weight:700;color:#06070c;background:var(--accent2);box-shadow:0 0 70px rgba(25,227,177,.6)}
 </style>
 </head>
 <body>
 <div class="stage"><div class="deck" id="deck">
 
   <section class="slide" data-slide="1" data-transition-in="cut">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="galaxy" data-res="0.7" data-bloom="0.55,0.6,0.5" data-exposure="0.95" data-fov="55" data-t-rel="0" data-dur="9999"></div>
-    <div class="scrim" style="background:radial-gradient(120% 80% at 50% 18%,transparent 40%,rgba(3,4,12,.55))"></div>
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="universe" data-res="0.75" data-bloom="0.6,0.6,0.45" data-exposure="0.95" data-fov="58" data-t-rel="0" data-dur="9999"></div>
+    <div class="scrim" style="background:radial-gradient(120% 85% at 50% 16%,transparent 42%,rgba(2,3,10,.55))"></div>
     <div class="t-wrap" style="top:90px;left:0;right:0;text-align:center">
-      <p class="eyebrow anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">webgl · gpu render · 40k stars</p>
+      <p class="eyebrow anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.8">webgl · gpu render · cosmic zoom</p>
       <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.9" data-dur="1.5" style="margin-top:16px">A whole<br>universe.</h1>
     </div>
   </section>
 
-  <section class="slide" data-slide="2" data-transition-in="crossDissolve">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="city" data-res="0.7" data-bloom="0.55,0.62,0.5" data-exposure="1.0" data-fov="62" data-t-rel="0" data-dur="9999"></div>
-    <div class="scrim" style="background:linear-gradient(100deg,rgba(3,4,12,.76),rgba(3,4,12,.34) 33%,transparent 55%),linear-gradient(180deg,rgba(3,4,12,.42),transparent 24%,transparent 74%,rgba(3,4,12,.55))"></div>
-    <div class="t-wrap" style="top:86px;left:120px">
-      <h1 class="big anim" data-anim="fadeUp" data-t-rel="0.3" data-dur="0.9">The city<br>never sleeps.</h1>
-      <p class="sub anim" data-anim="wordReveal" data-t-rel="1.6" data-dur="1.6" style="max-width:720px">A neon skyline of a million lit windows — flown through in real 3D, on the audio clock.</p>
+  <section class="slide" data-slide="2" data-transition-in="flash">
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="earth" data-res="0.75" data-bloom="0.42,0.55,0.6" data-exposure="0.98" data-fov="48" data-t-rel="0" data-dur="9999"></div>
+    <div class="flash anim" data-anim="flashOut" data-t-rel="0" data-dur="0.45"></div>
+    <div class="scrim" style="background:radial-gradient(110% 90% at 50% 50%,transparent 56%,rgba(2,3,10,.5))"></div>
+    <div class="t-wrap" style="bottom:108px;left:0;right:0;text-align:center">
+      <h1 class="big gradient-fill anim" data-anim="letterSpring" data-t-rel="0.7" data-dur="1.4">A living world.</h1>
     </div>
   </section>
 
-  <section class="slide" data-slide="3" data-transition-in="crossDissolve">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="planet" data-res="0.7" data-bloom="0.5,0.55,0.6" data-exposure="0.98" data-fov="50" data-t-rel="0" data-dur="9999"></div>
-    <div class="scrim" style="background:radial-gradient(110% 90% at 50% 50%,transparent 55%,rgba(3,4,12,.5))"></div>
-    <div class="t-wrap" style="bottom:110px;left:0;right:0;text-align:center">
-      <h1 class="big gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.4">Worlds to explore.</h1>
+  <section class="slide" data-slide="3" data-transition-in="flash">
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="city" data-res="0.7" data-bloom="0.5,0.6,0.55" data-exposure="1.0" data-fov="64" data-t-rel="0" data-dur="9999"></div>
+    <div class="flash anim" data-anim="flashOut" data-t-rel="0" data-dur="0.45"></div>
+    <div class="scrim" style="background:linear-gradient(100deg,rgba(2,3,10,.74),rgba(2,3,10,.3) 32%,transparent 54%),linear-gradient(180deg,rgba(2,3,10,.4),transparent 26%,transparent 72%,rgba(2,3,10,.55))"></div>
+    <div class="t-wrap" style="top:84px;left:120px">
+      <h1 class="big neon-fill anim" data-anim="fadeUp" data-t-rel="0.4" data-dur="0.9">Down to the<br>street.</h1>
+      <p class="sub anim" data-anim="wordReveal" data-t-rel="1.7" data-dur="1.6" style="max-width:720px">From the galaxy to a million neon windows — one continuous shot, in real 3D.</p>
     </div>
   </section>
 
   <section class="slide" data-slide="4" data-transition-in="flash">
-    <div class="bleed3d anim" data-anim="scene3d" data-scene="warp" data-res="0.7" data-bloom="0.8,0.6,0.2" data-exposure="1.05" data-fov="70" data-t-rel="0" data-dur="9999"></div>
+    <div class="bleed3d anim" data-anim="scene3d" data-scene="cityCta" data-res="0.7" data-bloom="0.5,0.6,0.55" data-exposure="1.0" data-fov="58" data-t-rel="0" data-dur="9999"></div>
+    <div class="flash anim" data-anim="flashOut" data-t-rel="0" data-dur="0.45"></div>
+    <div class="scrim" style="background:radial-gradient(120% 100% at 50% 60%,transparent 38%,rgba(2,3,10,.66))"></div>
     <div class="t-wrap" style="top:50%;left:0;right:0;text-align:center;transform:translateY(-50%)">
-      <h1 class="mega gradient-fill anim" data-anim="letterSpring" data-t-rel="0.4" data-dur="1.4">Storyboard,<br>in 3D.</h1>
+      <h1 class="mega neon-fill anim" data-anim="letterSpring" data-t-rel="0.5" data-dur="1.4">Storyboard,<br>in 3D.</h1>
       <p class="sub anim" data-anim="fadeUp" data-t-rel="1.9" data-dur="0.7" style="text-align:center">github.com/gRAYESS123/storyboard-claude</p>
       <span class="cta-pill anim" data-anim="spring" data-t-rel="2.4" data-dur="0.9" data-loop="breathe" data-loop-amp="2" data-loop-period="2.4">/storyboard</span>
     </div>
@@ -71,186 +75,180 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03040a;font-family:
 <script src="three.min.js"></script>
 <script src="three-bloom.js"></script>
 <script>
-/* ---------- shared texture + material helpers ---------- */
-function softTex(T){ var c=document.createElement('canvas'); c.width=c.height=64; var x=c.getContext('2d');
-  var g=x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.25,'rgba(255,255,255,.8)'); g.addColorStop(0.55,'rgba(255,255,255,.22)'); g.addColorStop(1,'rgba(255,255,255,0)');
-  x.fillStyle=g; x.fillRect(0,0,64,64); return new T.CanvasTexture(c); }
+/* ---------------- shared helpers ---------------- */
+function softTex(T){ var c=document.createElement('canvas'); c.width=c.height=128; var x=c.getContext('2d');
+  var g=x.createRadialGradient(64,64,0,64,64,64); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.25,'rgba(255,255,255,.8)'); g.addColorStop(0.55,'rgba(255,255,255,.22)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,128,128); return new T.CanvasTexture(c); }
 function sprite(T,tex,color,sx,sy){ var s=new T.Sprite(new T.SpriteMaterial({map:tex,color:color,transparent:true,depthWrite:false,blending:T.AdditiveBlending})); s.scale.set(sx,sy||sx,1); return s; }
-function gridTex(T,stops){ var c=document.createElement('canvas'); c.width=8; c.height=200; var x=c.getContext('2d');
-  var g=x.createLinearGradient(0,0,0,200); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); x.fillStyle=g; x.fillRect(0,0,8,200); var t=new T.CanvasTexture(c); return t; }
-function envGrad(T,r,top,bot){ var c=document.createElement('canvas'); c.width=8; c.height=128; var x=c.getContext('2d');
-  var g=x.createLinearGradient(0,0,0,128); g.addColorStop(0,top); g.addColorStop(1,bot); x.fillStyle=g; x.fillRect(0,0,8,128);
-  var tex=new T.CanvasTexture(c); tex.mapping=T.EquirectangularReflectionMapping; var pm=new T.PMREMGenerator(r); var e=pm.fromEquirectangular(tex).texture; pm.dispose(); tex.dispose(); return e; }
-function atmo(T,radius,color,strength){ var m=new T.ShaderMaterial({
-    uniforms:{ gc:{value:new T.Color(color)}, st:{value:strength} },
+function vgrad(T,stops){ var c=document.createElement('canvas'); c.width=8; c.height=256; var x=c.getContext('2d'); var g=x.createLinearGradient(0,0,0,256); stops.forEach(function(s){ g.addColorStop(s[0],s[1]); }); x.fillStyle=g; x.fillRect(0,0,8,256); return new T.CanvasTexture(c); }
+function envGrad(T,r,top,bot){ var c=document.createElement('canvas'); c.width=8; c.height=128; var x=c.getContext('2d'); var g=x.createLinearGradient(0,0,0,128); g.addColorStop(0,top); g.addColorStop(1,bot); x.fillStyle=g; x.fillRect(0,0,8,128); var tex=new T.CanvasTexture(c); tex.mapping=T.EquirectangularReflectionMapping; var pm=new T.PMREMGenerator(r); var e=pm.fromEquirectangular(tex).texture; pm.dispose(); tex.dispose(); return e; }
+function atmo(T,radius,color,strength){ var m=new T.ShaderMaterial({ uniforms:{ gc:{value:new T.Color(color)}, st:{value:strength} },
     vertexShader:'varying float vI; void main(){ vec4 wp=modelMatrix*vec4(position,1.0); vec3 wn=normalize(mat3(modelMatrix)*normal); vec3 vd=normalize(cameraPosition-wp.xyz); vI=pow(1.0-abs(dot(wn,vd)),3.0); gl_Position=projectionMatrix*viewMatrix*wp; }',
     fragmentShader:'varying float vI; uniform vec3 gc; uniform float st; void main(){ gl_FragColor=vec4(gc, vI*st); }',
     transparent:true, blending:T.AdditiveBlending, side:T.BackSide, depthWrite:false });
-  return new T.Mesh(new T.SphereGeometry(radius,48,48), m); }
+  return new T.Mesh(new T.SphereGeometry(radius,64,64), m); }
 function lerp3(T,a,b,c,t){ var ca=new T.Color(a),cb=new T.Color(b),cc=new T.Color(c); return t<0.5? ca.lerp(cb,t/0.5): cb.lerp(cc,(t-0.5)/0.5); }
-function eio(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }   // easeInOut
-function eo(t){ return 1-Math.pow(1-t,3); }                          // easeOut
+function eio(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+function eo(t){ return 1-Math.pow(1-t,3); }
+function starfield(T,scene,tex,n,rin,rout,col,size,op){ var p=new Float32Array(n*3); for(var i=0;i<n;i++){ var rr=rin+Math.random()*(rout-rin), th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1); p[i*3]=rr*Math.sin(ph)*Math.cos(th); p[i*3+1]=rr*Math.sin(ph)*Math.sin(th); p[i*3+2]=rr*Math.cos(ph); } var g=new T.BufferGeometry(); g.setAttribute('position',new T.BufferAttribute(p,3)); scene.add(new T.Points(g,new T.PointsMaterial({color:col,size:size,map:tex,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:op,sizeAttenuation:true}))); }
 
-/* building facade: dark glass with a sparse scatter of warm lit windows (real night skyline) */
-function facadeCanvas(palette){ var c=document.createElement('canvas'); c.width=64; c.height=64; var x=c.getContext('2d');
-  x.fillStyle='#04050b'; x.fillRect(0,0,64,64);
-  var cols=7, rows=7, gx=2.4, gy=2.8, cw=(64-gx)/cols, ch=(64-gy)/rows;
-  for(var j=0;j<rows;j++) for(var i=0;i<cols;i++){
-    if(Math.random()>0.40) continue;                       // mostly-dark glass
-    var r=Math.random(), a=0.4+Math.random()*0.55;
-    if(r<palette[0]) x.fillStyle='rgba(255,196,112,'+a+')';        // warm amber (dominant)
-    else if(r<palette[0]+palette[1]) x.fillStyle='rgba(150,196,255,'+a+')';  // cool office
-    else x.fillStyle='rgba(255,244,222,'+a+')';                    // warm white
-    x.fillRect(gx+i*cw+0.7, gy+j*ch+0.7, cw-1.8, ch-1.8);
+/* crisp building facade: dark glass, sparse warm/cool lit windows, optional neon edge trim */
+function facadeCanvas(palette){ var R=128; var c=document.createElement('canvas'); c.width=c.height=R; var x=c.getContext('2d');
+  x.fillStyle='#04050b'; x.fillRect(0,0,R,R);
+  var cols=8, rows=8, mx=3, my=3, cw=(R-mx)/cols, ch=(R-my)/rows;
+  for(var j=0;j<rows;j++) for(var i=0;i<cols;i++){ if(Math.random()>0.42) continue;
+    var r=Math.random(), a=0.55+Math.random()*0.45;
+    if(r<palette[0]) x.fillStyle='rgba(255,196,108,'+a+')';
+    else if(r<palette[0]+palette[1]) x.fillStyle='rgba(140,200,255,'+a+')';
+    else x.fillStyle='rgba(255,248,228,'+a+')';
+    x.fillRect(mx+i*cw+1, my+j*ch+1, cw-3, ch-3);
   }
   return c;
 }
+/* defined avenue: asphalt + double-yellow centre + dashed lane lines + solid edges (tiles along z) */
+function asphaltCanvas(){ var W=160,H=160; var c=document.createElement('canvas'); c.width=W; c.height=H; var x=c.getContext('2d');
+  x.fillStyle='#0a0b11'; x.fillRect(0,0,W,H);
+  for(var i=0;i<2600;i++){ var v=18+Math.random()*26; x.fillStyle='rgba('+v+','+v+','+(v+6)+',0.5)'; x.fillRect(Math.random()*W,Math.random()*H,1,1); }
+  x.fillStyle='#e9c63a'; x.fillRect(W*0.485,0,2.4,H); x.fillRect(W*0.515-2.4,0,2.4,H);          // double yellow centre
+  x.fillStyle='#e8ecf5'; for(var d=0;d<H;d+=26){ x.fillRect(W*0.265,d,2.2,15); x.fillRect(W*0.735-2.2,d,2.2,15); } // dashed lanes
+  x.fillStyle='#cfd6e6'; x.fillRect(W*0.045,0,2.2,H); x.fillRect(W*0.955-2.2,0,2.2,H);          // solid edges
+  return c;
+}
+function concreteCanvas(){ var W=64,H=64; var c=document.createElement('canvas'); c.width=W; c.height=H; var x=c.getContext('2d'); x.fillStyle='#15161e'; x.fillRect(0,0,W,H);
+  for(var i=0;i<500;i++){ var v=24+Math.random()*22; x.fillStyle='rgba('+v+','+v+','+(v+4)+',0.5)'; x.fillRect(Math.random()*W,Math.random()*H,1,1); }
+  x.strokeStyle='rgba(0,0,0,0.35)'; x.lineWidth=1; for(var g=0;g<W;g+=16){ x.beginPath(); x.moveTo(g,0); x.lineTo(g,H); x.stroke(); }
+  return c;
+}
+
+/* ---------------- the shared neon city ---------------- */
+var NEON=[0xFF1E8E,0x14F0D0,0x9D5BFF,0x36C8FF,0xFFD23A,0xFF4D5E,0x6AFF7A];
+function buildCity(T,s,api,soft){
+  s.background=new T.Color(0x06040f); s.fog=new T.Fog(0x180c30, 35, 210);
+  // sky + city glow + moon + stars
+  var sky=new T.Mesh(new T.PlaneGeometry(700,300), new T.MeshBasicMaterial({map:vgrad(T,[[0,'#050410'],[0.55,'#130b2c'],[0.83,'#341540'],[1,'#56233e']]),depthWrite:false,fog:false})); sky.position.set(0,46,-170); s.add(sky);
+  var moon=sprite(T,soft,0xCFE6FF,7); moon.position.set(-58,64,-168); s.add(moon);
+  starfield(T,s,soft,700,120,260,0xcdd8ff,0.5,0.7);
+  // lighting + wet-road reflections via env
+  var env=envGrad(T,api.renderer,'#2a3f6e','#0a0a16'); s.environment=env;
+  var key=new T.DirectionalLight(0xb4ccff,0.6); key.position.set(-30,60,10); s.add(key);
+  s.add(new T.HemisphereLight(0x33477e,0x070810,0.5)); s.add(new T.AmbientLight(0x10162e,0.4));
+  // wet asphalt avenue
+  var aTex=new T.CanvasTexture(asphaltCanvas()); aTex.wrapS=aTex.wrapT=T.RepeatWrapping; aTex.repeat.set(1,26); aTex.anisotropy=8;
+  var road=new T.Mesh(new T.PlaneGeometry(12,420), new T.MeshStandardMaterial({map:aTex,roughness:0.34,metalness:0.55,envMapIntensity:0.5}));
+  road.rotation.x=-Math.PI/2; road.position.set(0,0,-50); s.add(road);
+  // dark ground either side of the road
+  var ground=new T.Mesh(new T.PlaneGeometry(500,500), new T.MeshStandardMaterial({color:0x07070e,roughness:0.6,metalness:0.3})); ground.rotation.x=-Math.PI/2; ground.position.y=-0.02; s.add(ground);
+  // sidewalks (raised curbs)
+  var cc=new T.CanvasTexture(concreteCanvas()); cc.wrapS=cc.wrapT=T.RepeatWrapping; cc.repeat.set(2,40);
+  [-7,7].forEach(function(sx){ var sw=new T.Mesh(new T.BoxGeometry(3,0.5,420), new T.MeshStandardMaterial({map:cc,roughness:0.9,metalness:0.05})); sw.position.set(sx,0.25,-50); s.add(sw); });
+  // helper: neon sign (emissive plane) + wet reflection
+  function neon(x,y,z,w,h,col,ry){ var m=new T.Mesh(new T.PlaneGeometry(w,h), new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.96,fog:true,side:T.DoubleSide})); m.position.set(x,y,z); if(ry)m.rotation.y=ry; s.add(m);
+    var gl=sprite(T,soft,col,w*0.85,h*0.85); gl.position.set(x,y,z+0.1); gl.material.opacity=0.7; s.add(gl);
+    if(y<9){ var rf=new T.Mesh(new T.PlaneGeometry(w,h*1.4), new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.16,fog:true})); rf.rotation.x=-Math.PI/2; rf.position.set(x,0.03,z+1.4); s.add(rf); }
+    return m; }
+  // buildings flanking the avenue
+  var faces=[facadeCanvas([0.82,0.08,0.10]),facadeCanvas([0.58,0.32,0.10]),facadeCanvas([0.5,0.4,0.1])];
+  function building(x,z){ var w=5+Math.random()*5, d=5+Math.random()*5, dc=Math.abs(x), h=(12+Math.pow(Math.random(),1.6)*72)*(dc<36?1:Math.max(0.4,1-(dc-36)/150));
+    var cv=faces[(Math.random()*faces.length)|0]; var tx=new T.CanvasTexture(cv); tx.wrapS=tx.wrapT=T.RepeatWrapping;
+    tx.repeat.set(Math.max(2,Math.round(w/3.0)), Math.max(3,Math.round(h/3.2))); tx.offset.set(Math.random(),Math.random()); tx.anisotropy=8;
+    var m=new T.Mesh(new T.BoxGeometry(w,h,d), new T.MeshStandardMaterial({color:0x080b16,emissive:0xfff0d8,emissiveMap:tx,emissiveIntensity:0.55+Math.random()*0.5,roughness:0.8,metalness:0.24}));
+    m.position.set(x,h/2,z); s.add(m);
+    var inner = x<0 ? x+d/2+0.05 : x-d/2-0.05; var face = x<0 ? Math.PI/2 : -Math.PI/2;
+    // vertical neon edge trim on some towers
+    if(Math.random()<0.4){ var col=NEON[(Math.random()*NEON.length)|0]; var strip=new T.Mesh(new T.PlaneGeometry(0.3,h*0.8), new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.92,fog:true})); strip.position.set(inner, h*0.5, z+(Math.random()-0.5)*d*0.6); strip.rotation.y=face; s.add(strip); }
+    // facade neon signs (mid height)
+    if(Math.random()<0.6){ var c2=NEON[(Math.random()*NEON.length)|0]; neon(inner, h*(0.35+Math.random()*0.4), z+(Math.random()-0.5)*d*0.5, 1.4+Math.random()*2.4, 1.0+Math.random()*1.8, c2, face); }
+    // street-level shopfront glow
+    if(Math.random()<0.7){ var c3=NEON[(Math.random()*NEON.length)|0]; neon(inner, 1.6+Math.random()*1.4, z+(Math.random()-0.5)*d*0.5, 2.6+Math.random()*2, 0.8+Math.random()*0.8, c3, face); }
+    return h; }
+  for(var bx=-120; bx<=120; bx+=11+Math.random()*6){ for(var bz=34; bz>=-186; bz-=11+Math.random()*6){
+    if(Math.abs(bx)<8.5) continue;                 // keep the avenue clear
+    if(Math.random()<0.12) continue;               // occasional gaps
+    building(bx+(Math.random()-0.5)*4, bz+(Math.random()-0.5)*4); } }
+  // streetlights along the curbs
+  for(var lz=24; lz>-150; lz-=18){ [-6.5,6.5].forEach(function(lx){ var pole=new T.Mesh(new T.CylinderGeometry(0.1,0.1,7,6), new T.MeshStandardMaterial({color:0x0c0d14,roughness:0.6,metalness:0.6})); pole.position.set(lx,3.5,lz); s.add(pole); var lamp=sprite(T,soft,0xFFE7B0,1.3); lamp.material.opacity=0.8; lamp.position.set(lx-(lx<0?-1:1)*0.6,7,lz); s.add(lamp); }); }
+  // car light-trails + reflections
+  var cars=[]; function car(head){ var lane=(head?-1:1)*(1.4+Math.random()*2.6); var col=head?0xEAF4FF:0xFF2D55; var len=3+Math.random()*3.5;
+    var m=new T.Mesh(new T.BoxGeometry(0.5,0.14,len), new T.MeshBasicMaterial({color:col,fog:true})); m.position.set(lane,0.55,0); s.add(m);
+    var gl=sprite(T,soft,col,2.4,1.1); s.add(gl); var rf=sprite(T,soft,col,2.8,1.4); rf.material.opacity=0.42; s.add(rf);
+    var o={mesh:m,glow:gl,refl:rf,head:head,lane:lane,v:26+Math.random()*22,ph:Math.random()*220,len:len}; cars.push(o); return o; }
+  for(var ci=0;ci<30;ci++) car(ci%2===0);
+  function updateCars(lt){ cars.forEach(function(o){ var span=190; var z=30 - (((o.ph + lt*o.v*(o.head?1:-0.7))%span)+span)%span;
+    o.mesh.position.set(o.lane,0.55,z); o.glow.position.set(o.lane,0.6,z+(o.head?-o.len/2:o.len/2)); o.refl.position.set(o.lane,-0.55,z+(o.head?-o.len/2:o.len/2)); }); }
+  return { updateCars:updateCars };
+}
 
 window.SB_SCENES = {
-  /* ============================ GALAXY ============================ */
-  galaxy: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x05061a);
-    var tex=softTex(T), N=40000, RAD=13, ARMS=5, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
-    for(var i=0;i<N;i++){ var r=Math.pow(Math.random(),1.6)*RAD, br=(i%ARMS)/ARMS*6.2832, sp=r*0.42, spread=(0.06+0.30*(r/RAD));
-      var jx=(Math.random()-0.5), jz=(Math.random()-0.5);
-      pos[i*3]=Math.cos(br+sp)*r + jx*r*spread*2.0;
-      pos[i*3+1]=(Math.random()-0.5)*(0.5+r*0.06);
-      pos[i*3+2]=Math.sin(br+sp)*r + jz*r*spread*2.0;
-      var c=lerp3(T,0xFFF1D0,0xFF74C4,0x4A6BFF, Math.min(1,r/RAD)); var b=0.7+Math.random()*0.6;
-      col[i*3]=c.r*b; col[i*3+1]=c.g*b; col[i*3+2]=c.b*b; sz[i]=(Math.random()<0.04?2.4:1.0); }
+  /* ===================== UNIVERSE (dive into the galaxy) ===================== */
+  universe: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x04051a);
+    var tex=softTex(T), N=46000, RAD=13, ARMS=5, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+    for(var i=0;i<N;i++){ var r=Math.pow(Math.random(),1.6)*RAD, br=(i%ARMS)/ARMS*6.2832, sp=r*0.42, spread=(0.05+0.30*(r/RAD));
+      pos[i*3]=Math.cos(br+sp)*r + (Math.random()-0.5)*r*spread*2.0; pos[i*3+1]=(Math.random()-0.5)*(0.5+r*0.05); pos[i*3+2]=Math.sin(br+sp)*r + (Math.random()-0.5)*r*spread*2.0;
+      var c=lerp3(T,0xFFF1D0,0xFF74C4,0x4A6BFF, Math.min(1,r/RAD)); var b=0.7+Math.random()*0.6; col[i*3]=c.r*b; col[i*3+1]=c.g*b; col[i*3+2]=c.b*b; }
     var g=new T.BufferGeometry(); g.setAttribute('position',new T.BufferAttribute(pos,3)); g.setAttribute('color',new T.BufferAttribute(col,3));
-    s.add(new T.Points(g, new T.PointsMaterial({size:0.16,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true,opacity:0.62})));
+    s.add(new T.Points(g, new T.PointsMaterial({size:0.15,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true,opacity:0.62})));
     s.add(sprite(T,tex,0xFFE6B0,2.4)); s.add(sprite(T,tex,0xFF9AD8,5.0)); var halo=sprite(T,tex,0x3a2470,9); s.add(halo);
-    // distant starfield backdrop
-    var SB=1500, sp2=new Float32Array(SB*3); for(var k=0;k<SB;k++){ var rr=40+Math.random()*60, th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1);
-      sp2[k*3]=rr*Math.sin(ph)*Math.cos(th); sp2[k*3+1]=rr*Math.sin(ph)*Math.sin(th); sp2[k*3+2]=rr*Math.cos(ph); }
-    var bg=new T.BufferGeometry(); bg.setAttribute('position',new T.BufferAttribute(sp2,3));
-    s.add(new T.Points(bg,new T.PointsMaterial({color:0x9fb4ff,size:0.3,map:tex,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:0.5})));
+    starfield(T,s,tex,1500,40,90,0x9fb4ff,0.3,0.5);
     var t0=null;
-    return function(t,p){ if(t0===null)t0=t; var lt=t-t0;
-      s.rotation.y = lt*0.16;
-      var k=eio(Math.min(1,lt/6.5));
-      var rad = 19 - 9*k;                                   // majestic push-in
-      var ang = -0.5 + lt*0.12;
-      cam.position.set(Math.sin(ang)*rad, 8.5 - 5.2*k + Math.sin(lt*0.5)*0.6, Math.cos(ang)*rad);
-      cam.lookAt(0, -0.3, 0);
-    };
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; s.rotation.y=lt*0.15;
+      var k=eio(Math.min(1,lt/5.0)); var rad=22-18*k; var ang=-0.6+lt*0.14;
+      cam.position.set(Math.sin(ang)*rad, 7-6*k+Math.sin(lt*0.5)*0.5, Math.cos(ang)*rad); cam.lookAt(0,-0.2,0); };
   },
 
-  /* ====================== MODERN NIGHT CITY ====================== */
-  city: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T);
-    s.background=new T.Color(0x070512); s.fog=new T.Fog(0x140a2a, 30, 150);
-    // night sky + city glow on the horizon
-    var sky=new T.Mesh(new T.PlaneGeometry(600,260), new T.MeshBasicMaterial({map:gridTex(T,[[0,'#0a0820'],[0.55,'#1b1140'],[0.82,'#4a1f63'],[1,'#86314f']]),depthWrite:false,fog:false}));
-    sky.position.set(0,40,-150); s.add(sky);
-    var moon=sprite(T,soft,0xBFE0FF,9); moon.position.set(-46,52,-150); s.add(moon);
-    var ST=900, st=new Float32Array(ST*3); for(var i=0;i<ST;i++){ st[i*3]=(Math.random()-0.5)*400; st[i*3+1]=30+Math.random()*90; st[i*3+2]=-120-Math.random()*40; }
-    var sg=new T.BufferGeometry(); sg.setAttribute('position',new T.BufferAttribute(st,3));
-    s.add(new T.Points(sg,new T.PointsMaterial({color:0xbcd0ff,size:0.45,map:soft,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:0.7})));
-    // lighting — moonlight key + cool sky fill; emissive windows do the rest
-    s.environment=envGrad(T,api.renderer,'#243a66','#0a0a16');
-    var moonL=new T.DirectionalLight(0x9fbcff,0.5); moonL.position.set(-30,40,-20); s.add(moonL);
-    s.add(new T.HemisphereLight(0x2a3a66,0x05060c,0.35));
-    // wet asphalt — glossy, reflective sheen from the env
-    var road=new T.Mesh(new T.PlaneGeometry(400,400), new T.MeshStandardMaterial({color:0x05060e,roughness:0.16,metalness:0.85,envMapIntensity:1.1}));
-    road.rotation.x=-Math.PI/2; road.position.y=0; s.add(road);
-    // lane glow stripe
-    var stripe=new T.Mesh(new T.PlaneGeometry(0.5,260), new T.MeshBasicMaterial({color:0x2ad8c0,transparent:true,opacity:0.25,fog:true})); stripe.rotation.x=-Math.PI/2; stripe.position.set(0,0.02,-40); s.add(stripe);
-    // buildings — both sides of a deep avenue, varied heights, lit-window facades
-    var faces=[facadeCanvas([0.82,0.08,0.10]),facadeCanvas([0.6,0.3,0.1]),facadeCanvas([0.5,0.4,0.1])];
-    var neon=[0xFF3B8A,0x19E3B1,0x7C5CFF,0x49B7FF,0xFFC24B];
-    function building(x,z){ var w=4+Math.random()*5, d=4+Math.random()*5, h=8+Math.pow(Math.random(),1.5)*52;
-      var cv=faces[(Math.random()*faces.length)|0]; var tx=new T.CanvasTexture(cv); tx.wrapS=tx.wrapT=T.RepeatWrapping;
-      tx.repeat.set(Math.max(2,Math.round(w/3.2)), Math.max(3,Math.round(h/3.4))); tx.offset.set(Math.random(),Math.random());
-      var m=new T.Mesh(new T.BoxGeometry(w,h,d), new T.MeshStandardMaterial({color:0x080b16,emissive:0xfff0d8,emissiveMap:tx,emissiveIntensity:0.5+Math.random()*0.5,roughness:0.82,metalness:0.22}));
-      m.position.set(x,h/2,z); s.add(m);
-      if(Math.random()<0.22){ var col=neon[(Math.random()*neon.length)|0]; var sgn=new T.Mesh(new T.PlaneGeometry(w*0.7,1.2+Math.random()*1.6), new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.92,fog:true}));
-        sgn.position.set(x + (x<0?d/2+0.06:-d/2-0.06), h*(0.4+Math.random()*0.4), z); sgn.rotation.y=x<0?Math.PI/2:-Math.PI/2; s.add(sgn); }
-      return h; }
-    for(var zz=20; zz>-120; zz-=Math.random()*7+5){
-      var gap=7+Math.random()*4;
-      building(-(gap+Math.random()*30), zz); building(gap+Math.random()*30, zz);
-      if(Math.random()<0.5) building(-(gap+18+Math.random()*22), zz-3);
-      if(Math.random()<0.5) building(gap+18+Math.random()*22, zz-3);
-    }
-    // car light trails — glowing streaks gliding down the lanes (+ wet-road reflections)
-    var cars=[]; function car(head){ var lane=(head? -1:1)*(2+Math.random()*4.5);
-      var col=head?0xCFE9FF:0xFF2D55; var len=2.5+Math.random()*3;
-      var m=new T.Mesh(new T.BoxGeometry(0.5,0.12,len), new T.MeshBasicMaterial({color:col,fog:true})); m.position.set(lane,0.5,0); s.add(m);
-      var gl=sprite(T,soft,col,2.0,1.0); gl.position.copy(m.position); s.add(gl);
-      var rf=sprite(T,soft,col,2.2,1.1); rf.material.opacity=0.4; s.add(rf);   // reflection
-      var o={mesh:m,glow:gl,refl:rf,head:head,lane:lane,v:24+Math.random()*22,ph:Math.random()*200,len:len}; cars.push(o); return o; }
-    for(var c=0;c<26;c++) car(c%2===0);
-    cam.position.set(0,6,30);
-    var t0=null;
-    return function(t,p){ if(t0===null)t0=t; var lt=t-t0;
-      cars.forEach(function(o){ var span=170; var z=20 - (((o.ph + lt*o.v*(o.head?1:-0.7))%span)+span)%span;
-        o.mesh.position.set(o.lane,0.5,z); o.glow.position.set(o.lane,0.55,z+(o.head?-o.len/2:o.len/2));
-        o.refl.position.set(o.lane,-0.55,z+(o.head?-o.len/2:o.len/2)); });
-      // drone flythrough down the avenue
-      var fwd = 30 - lt*7.5;                                 // move forward through the city
-      cam.position.set(Math.sin(lt*0.45)*3.2, 6.4 + Math.sin(lt*0.32)*1.2, fwd);
-      cam.lookAt(Math.sin(lt*0.45)*1.5, 4.0, fwd-32);
-      cam.rotateZ(Math.sin(lt*0.55)*0.045);                 // subtle bank
-    };
-  },
-
-  /* ====================== ALIEN WORLD ====================== */
-  planet: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); s.background=new T.Color(0x04050d);
-    // surface texture — ocean + continents + ice caps; night-lights emissive map
-    var W=512,H=256; var day=document.createElement('canvas'); day.width=W; day.height=H; var dx=day.getContext('2d');
-    var og=dx.createLinearGradient(0,0,0,H); og.addColorStop(0,'#bfe6ff'); og.addColorStop(0.16,'#1f6fb0'); og.addColorStop(0.5,'#0d4f8c'); og.addColorStop(0.84,'#1f6fb0'); og.addColorStop(1,'#cfeeff'); dx.fillStyle=og; dx.fillRect(0,0,W,H);
+  /* ===================== EARTH (a living world) ===================== */
+  earth: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); s.background=new T.Color(0x03040c);
+    var W=1024,H=512; var day=document.createElement('canvas'); day.width=W; day.height=H; var dx=day.getContext('2d');
+    var og=dx.createLinearGradient(0,0,0,H); og.addColorStop(0,'#0a2a4a'); og.addColorStop(0.5,'#0c4f86'); og.addColorStop(1,'#0a2a4a'); dx.fillStyle=og; dx.fillRect(0,0,W,H);
+    var rough=document.createElement('canvas'); rough.width=W; rough.height=H; var rx=rough.getContext('2d'); rx.fillStyle='#4a4a4a'; rx.fillRect(0,0,W,H); // ocean smooth (low rough)
     var night=document.createElement('canvas'); night.width=W; night.height=H; var nx=night.getContext('2d'); nx.fillStyle='#000'; nx.fillRect(0,0,W,H);
-    var conts=[]; for(var c=0;c<13;c++){ var cx=Math.random()*W, cy=40+Math.random()*(H-80), cw=24+Math.random()*64, ch=18+Math.random()*40; conts.push([cx,cy,cw,ch]);
-      dx.fillStyle=Math.random()<0.5?'#2f7d3f':'#7a6a3a'; dx.beginPath(); dx.ellipse(cx,cy,cw,ch,Math.random()*3,0,6.28); dx.fill();
-      dx.fillStyle='rgba(20,60,30,0.5)'; for(var b=0;b<10;b++){ dx.beginPath(); dx.ellipse(cx+(Math.random()-0.5)*cw,cy+(Math.random()-0.5)*ch,4+Math.random()*9,4+Math.random()*8,0,0,6.28); dx.fill(); }
-      for(var L=0;L<40;L++){ var lx=cx+(Math.random()-0.5)*cw*1.6, ly=cy+(Math.random()-0.5)*ch*1.6; nx.fillStyle='rgba(255,'+(200+Math.random()*55|0)+','+(120+Math.random()*80|0)+','+(0.5+Math.random()*0.5)+')'; nx.fillRect(lx,ly,1.4,1.4); } }
-    var dayTex=new T.CanvasTexture(day), nightTex=new T.CanvasTexture(night);
-    var sun=new T.DirectionalLight(0xfff2dc,2.0); sun.position.set(8,2,6); s.add(sun); s.add(new T.HemisphereLight(0x20406e,0x05060c,0.25));
-    var planet=new T.Mesh(new T.SphereGeometry(2.5,96,96), new T.MeshStandardMaterial({map:dayTex,emissiveMap:nightTex,emissive:0xffd28a,emissiveIntensity:1.6,roughness:0.85,metalness:0.0})); s.add(planet);
-    // clouds
-    var cl=document.createElement('canvas'); cl.width=W; cl.height=H; var cx2=cl.getContext('2d'); cx2.clearRect(0,0,W,H);
-    for(var w=0;w<70;w++){ var wx=Math.random()*W, wy=Math.random()*H, wr=8+Math.random()*26; var grd=cx2.createRadialGradient(wx,wy,0,wx,wy,wr); grd.addColorStop(0,'rgba(255,255,255,'+(0.25+Math.random()*0.35)+')'); grd.addColorStop(1,'rgba(255,255,255,0)'); cx2.fillStyle=grd; cx2.beginPath(); cx2.arc(wx,wy,wr,0,6.28); cx2.fill(); }
-    var clouds=new T.Mesh(new T.SphereGeometry(2.56,72,72), new T.MeshStandardMaterial({map:new T.CanvasTexture(cl),transparent:true,depthWrite:false,roughness:1,metalness:0,opacity:0.9})); s.add(clouds);
-    s.add(atmo(T,2.78,0x8fd4ff,1.0));
-    var ring=new T.Mesh(new T.RingGeometry(3.4,5.2,128), new T.MeshBasicMaterial({color:0xE7C9A0,transparent:true,opacity:0.32,side:T.DoubleSide})); ring.rotation.x=Math.PI*0.44; ring.rotation.z=0.3; s.add(ring);
-    var moon=new T.Mesh(new T.SphereGeometry(0.42,32,32), new T.MeshStandardMaterial({color:0x9aa0b0,roughness:1,metalness:0})); s.add(moon);
-    // starfield + sun flare
-    var SS=2200, sp=new Float32Array(SS*3); for(var i=0;i<SS;i++){ var rr=34+Math.random()*60, th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1); sp[i*3]=rr*Math.sin(ph)*Math.cos(th); sp[i*3+1]=rr*Math.sin(ph)*Math.sin(th); sp[i*3+2]=rr*Math.cos(ph); }
-    var sgeo=new T.BufferGeometry(); sgeo.setAttribute('position',new T.BufferAttribute(sp,3));
-    s.add(new T.Points(sgeo,new T.PointsMaterial({color:0xffffff,size:0.3,map:soft,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:0.7})));
-    var flare=sprite(T,soft,0xFFE9C2,6); flare.position.set(16,5,-6); s.add(flare);
-    cam.position.set(0,1.2,8.6);
+    var conts=[]; for(var c=0;c<16;c++){ var cx=Math.random()*W, cy=60+Math.random()*(H-120), cw=40+Math.random()*120, ch=30+Math.random()*70, rot=Math.random()*3; conts.push([cx,cy,cw,ch,rot]);
+      dx.fillStyle=Math.random()<0.55?'#2f7d3a':'#8a6f3a'; dx.beginPath(); dx.ellipse(cx,cy,cw,ch,rot,0,6.28); dx.fill();
+      dx.fillStyle='rgba(20,55,28,0.45)'; for(var b=0;b<14;b++){ dx.beginPath(); dx.ellipse(cx+(Math.random()-0.5)*cw,cy+(Math.random()-0.5)*ch,6+Math.random()*16,6+Math.random()*14,0,0,6.28); dx.fill(); }
+      rx.fillStyle='#dcdcdc'; rx.beginPath(); rx.ellipse(cx,cy,cw,ch,rot,0,6.28); rx.fill();   // land rough
+      for(var L=0;L<70;L++){ var lx=cx+(Math.random()-0.5)*cw*1.5, ly=cy+(Math.random()-0.5)*ch*1.5; nx.fillStyle='rgba(255,'+(200+Math.random()*55|0)+','+(120+Math.random()*80|0)+','+(0.55+Math.random()*0.45)+')'; nx.fillRect(lx,ly,1.5,1.5); } }
+    dx.fillStyle='#eaf3ff'; dx.beginPath(); dx.ellipse(W/2,8,W,40,0,0,6.28); dx.fill(); dx.beginPath(); dx.ellipse(W/2,H-8,W,40,0,0,6.28); dx.fill(); // ice caps
+    rx.fillStyle='#bcbcbc'; rx.fillRect(0,0,W,28); rx.fillRect(0,H-28,W,28);
+    var dayTex=new T.CanvasTexture(day), roughTex=new T.CanvasTexture(rough), nightTex=new T.CanvasTexture(night);
+    var sun=new T.DirectionalLight(0xfff4e2,2.0); sun.position.set(6,2.5,9); s.add(sun); s.add(new T.HemisphereLight(0x24466e,0x06080f,0.34));
+    var earth=new T.Mesh(new T.SphereGeometry(2.5,128,128), new T.MeshStandardMaterial({map:dayTex,roughnessMap:roughTex,roughness:1.0,metalness:0.12,emissiveMap:nightTex,emissive:0xffd28a,emissiveIntensity:1.7,envMapIntensity:0.5})); s.add(earth);
+    var cl=document.createElement('canvas'); cl.width=W; cl.height=H; var cx2=cl.getContext('2d'); for(var w=0;w<120;w++){ var wx=Math.random()*W, wy=Math.random()*H, wr=10+Math.random()*40; var grd=cx2.createRadialGradient(wx,wy,0,wx,wy,wr); grd.addColorStop(0,'rgba(255,255,255,'+(0.3+Math.random()*0.4)+')'); grd.addColorStop(1,'rgba(255,255,255,0)'); cx2.fillStyle=grd; cx2.beginPath(); cx2.arc(wx,wy,wr,0,6.28); cx2.fill(); }
+    var clouds=new T.Mesh(new T.SphereGeometry(2.56,96,96), new T.MeshStandardMaterial({map:new T.CanvasTexture(cl),transparent:true,depthWrite:false,roughness:1,metalness:0,opacity:0.92})); s.add(clouds);
+    s.add(atmo(T,2.8,0x7fc6ff,1.1));
+    starfield(T,s,soft,2200,36,70,0xffffff,0.28,0.7);
+    var flare=sprite(T,soft,0xFFEAC6,7); flare.position.set(17,5,-4); s.add(flare);
+    cam.position.set(0,1.0,14);
     var t0=null;
-    return function(t,p){ if(t0===null)t0=t; var lt=t-t0;
-      planet.rotation.y=lt*0.12; clouds.rotation.y=lt*0.15; ring.rotation.z=0.3+lt*0.04;
-      moon.position.set(Math.cos(lt*0.5)*7.0, 3.2+Math.sin(lt*0.5)*0.8, Math.sin(lt*0.5)*7.0);
-      var k=eo(Math.min(1,lt/5.5)); var rad=10.5-2.2*k; var ang=-0.4+lt*0.10;
-      cam.position.set(Math.sin(ang)*rad, 1.0+Math.sin(lt*0.28)*1.2, Math.cos(ang)*rad);
-      cam.lookAt(0,0,0);
-    };
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; earth.rotation.y=lt*0.05; clouds.rotation.y=lt*0.07;
+      var k=eo(Math.min(1,lt/6.0)); var rad=15-9.5*k; var ang=-0.25+lt*0.05;
+      cam.position.set(Math.sin(ang)*rad, 0.8+1.6*k, Math.cos(ang)*rad); cam.lookAt(0,0.2,0); };
   },
 
-  /* ====================== HYPERSPACE WARP ====================== */
-  warp: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; s.background=new T.Color(0x05060f); var soft=softTex(T);
-    var N=520, streaks=[]; var geo=new T.BoxGeometry(0.04,0.04,1);
-    for(var i=0;i<N;i++){ var hue=0.55+Math.random()*0.16, c=new T.Color().setHSL(hue,0.7,0.66);
-      var m=new T.Mesh(geo, new T.MeshBasicMaterial({color:c})); var ang=Math.random()*6.283, rad=1+Math.random()*16;
-      m.position.set(Math.cos(ang)*rad, Math.sin(ang)*rad, 0); m.userData={ph:Math.random()*120, rad:rad, ang:ang, v:34+Math.random()*40}; s.add(m); streaks.push(m); }
-    var core=sprite(T,soft,0xBFE8FF,4.5); s.add(core); var core2=sprite(T,soft,0x7C5CFF,9); s.add(core2);
-    cam.position.set(0,0,6); cam.lookAt(0,0,-1);
+  /* ===================== CITY (aerial -> street) ===================== */
+  city: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); var city=buildCity(T,s,api,soft);
+    cam.position.set(0,44,44);
     var t0=null;
-    return function(t,p){ if(t0===null)t0=t; var lt=t-t0; var accel=1+lt*0.5;
-      streaks.forEach(function(m){ var span=130; var z=-120 + (((m.userData.ph + lt*m.userData.v*accel)%span)+span)%span;
-        m.position.set(Math.cos(m.userData.ang)*m.userData.rad, Math.sin(m.userData.ang)*m.userData.rad, z);
-        var stretch=2+ (z+120)/span*40*accel; m.scale.set(1,1,stretch); });
-      core.position.z=-2; core2.position.z=-6; cam.rotation.z=lt*0.06; cam.position.x=Math.sin(lt*2.4)*0.05;
-    };
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt);
+      var k=eio(Math.min(1,lt/5.0)); var y=44-28*k; var z=44-lt*6.5;
+      cam.position.set(Math.sin(lt*0.18)*4.0, y, z);
+      cam.lookAt(Math.sin(lt*0.18)*2.0, y-18, z-34); cam.rotateZ(Math.sin(lt*0.5)*0.03); };
+  },
+
+  /* ===================== CITY CTA (settled street hero) ===================== */
+  cityCta: function(api){ var T=api.THREE, s=api.scene, cam=api.camera; var soft=softTex(T); var city=buildCity(T,s,api,soft);
+    cam.position.set(0,14,22);
+    var t0=null;
+    return function(t){ if(t0===null)t0=t; var lt=t-t0; city.updateCars(lt);
+      cam.position.set(Math.sin(lt*0.14)*2.0, 14+Math.sin(lt*0.2)*0.6, 22-lt*0.7);
+      cam.lookAt(0, -2, -30); };
   }
 };
-const TIMINGS = [ { time:0.0, slide:1 }, { time:7.0, slide:2 }, { time:14.0, slide:3 }, { time:20.0, slide:4 } ];
-const SLIDE_LABELS = ['Galaxy','Night city','Alien world','Warp CTA'];
+const TIMINGS = [ { time:0.0, slide:1 }, { time:6.0, slide:2 }, { time:13.0, slide:3 }, { time:20.0, slide:4 } ];
+const SLIDE_LABELS = ['Universe','Earth','City','CTA'];
 </script>
 <script src="storyboard-engine.js"></script>
-<script>Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 26 });</script>
+<script>
+Storyboard.registerPreset('flashOut', { dur:0.5, apply:function(el,p){ el.style.opacity = Math.max(0, 1-p); } });
+Storyboard.init({ timings: TIMINGS, labels: SLIDE_LABELS, fallbackDuration: 26 });
+</script>
 </body>
 </html>
