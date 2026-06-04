@@ -896,10 +896,17 @@ Your scene function builds the three.js scene and returns an `update(t,p)` that 
      data-exposure="0.9"          <!-- tone-mapping exposure (default 1.0) -->
      data-res="0.7"></div>         <!-- live-preview render scale; offline --frames renders full-res -->
 <script src="three.min.js"></script>
-<script src="three-bloom.js"></script>  <!-- skill/assets/vendor/three-bloom.js — required for data-bloom -->
+<script src="three-bloom.js"></script>   <!-- required for data-bloom -->
+<script src="three-extras.js"></script>  <!-- Reflector + BokehPass — required for data-dof + planar reflections -->
 ```
 
 The look lives in **restraint**: keep the base scene fairly **dark**, then bloom only the **brightest** cores. A high `threshold` (~0.55–0.72) blooms just the hot spots; `threshold` near 0 blooms *everything* and blows the frame to white — the classic mistake. Pair it with `exposure` ≤ 1.0. For pretty particles, draw points/sprites with a **soft round texture** (radial-gradient canvas) and additive blending — never hard squares. A fresnel shell (`BackSide`, `abs(dot(n,view))`) gives a clean atmosphere rim; a key + `HemisphereLight` fill reads as a lit world (skip IBL — equirect gradients can wash the lower hemisphere).
+
+**What separates a modern render from "90s graphics"** (load `three-extras.js`):
+- **`data-dof="focusDist,aperture,maxblur"`** — depth-of-field bokeh (e.g. `"46,0.0008,0.005"`). Far lights melt into bokeh, the focal plane stays sharp → instantly cinematic. (Gotcha: `BokehPass` doesn't render the scene, it *blurs an existing buffer by depth* — the engine wires it as the LAST composer pass after `RenderPass`+bloom.)
+- **Real reflections** — `new THREE.Reflector(planeGeo, {textureWidth, textureHeight, color})` is a planar mirror that re-renders the scene each frame. For a wet street: a `Reflector` at `y≈0` + a semi-transparent asphalt/markings plane just above it. This single thing modernizes any night scene.
+- **Glass, not lit boxes** — buildings = dark reflective `MeshStandardMaterial` (`roughness ~0.15, metalness ~0.6`) with an **emissive window map** (tall windows, whole floors lit/dark — *not* a uniform checkerboard, which reads as static). Bake the lit/neon scene into a **`CubeCamera` → `scene.environment`** once at init so the glass reflects the city.
+- **Vary silhouettes** (setbacks, spires, rooftop units) and add **emissive neon billboards**; flat equal-height boxes are the biggest "90s" tell.
 
 **Rendering 3D — use the offline frame path.** For any `scene3d` deck, render with **`--frames`**:
 

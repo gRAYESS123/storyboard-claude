@@ -1342,12 +1342,22 @@
           var camera=new THREE.PerspectiveCamera(parseFloat(el.dataset.fov)||50, w/h, 0.1, 400); camera.position.set(0,0,5);
           var fn=(window.SB_SCENES && window.SB_SCENES[el.dataset.scene]) || _sb3Default;
           var upd=fn({THREE:THREE, scene:scene, camera:camera, renderer:renderer, el:el, w:w, h:h});
-          var composer=null;   // data-bloom="strength,radius,threshold" -> cinematic glow (needs three-bloom.js)
-          if(el.dataset.bloom && THREE.EffectComposer && THREE.UnrealBloomPass){
-            var bp=(el.dataset.bloom||'').split(',').map(parseFloat);
+          // Postprocessing: data-bloom="strength,radius,threshold" (cinematic glow, needs three-bloom.js)
+          // and data-dof="focusDist,aperture,maxblur" (depth-of-field bokeh, needs three-extras.js).
+          var composer=null;
+          var _wantBloom=el.dataset.bloom && THREE.EffectComposer && THREE.UnrealBloomPass;
+          var _wantDof=el.dataset.dof && THREE.EffectComposer && THREE.BokehPass;
+          if(_wantBloom || _wantDof){
             composer=new THREE.EffectComposer(renderer);
-            composer.addPass(new THREE.RenderPass(scene,camera));
-            composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(rw,rh), isFinite(bp[0])?bp[0]:0.7, isFinite(bp[1])?bp[1]:0.4, isFinite(bp[2])?bp[2]:0.85));
+            composer.addPass(new THREE.RenderPass(scene,camera));   // BokehPass blurs this buffer (it doesn't render the scene itself)
+            if(_wantBloom){
+              var bp=(el.dataset.bloom||'').split(',').map(parseFloat);
+              composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(rw,rh), isFinite(bp[0])?bp[0]:0.7, isFinite(bp[1])?bp[1]:0.4, isFinite(bp[2])?bp[2]:0.85));
+            }
+            if(_wantDof){   // DoF last (BokehPass.needsSwap=false -> must be the final, renderToScreen pass)
+              var dp=(el.dataset.dof||'').split(',').map(parseFloat);
+              composer.addPass(new THREE.BokehPass(scene,camera,{ focus:isFinite(dp[0])?dp[0]:25, aperture:isFinite(dp[1])?dp[1]:0.0006, maxblur:isFinite(dp[2])?dp[2]:0.01, width:rw, height:rh }));
+            }
           }
           el._s3={renderer:renderer, scene:scene, camera:camera, update:(typeof upd==='function')?upd:null, composer:composer};
         }catch(e){ console.warn('[storyboard] scene3d init failed', e); el._s3=null; }
