@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://storyboard-claude.vercel.app/sitemap.xml
