@@ -246,7 +246,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; line-height
 .site-footer { border-top: 1px solid var(--border); background: var(--surface); padding: 56px 0 32px; }
 .footer-inner { display: grid; grid-template-columns: 1.4fr 2.6fr; gap: 3rem; }
 .footer-tagline { color: var(--muted); font-size: 0.95rem; margin-top: 1rem; max-width: 34ch; }
-.footer-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 420px; margin-left: auto; }
+.footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 640px; margin-left: auto; }
 .footer-col { display: flex; flex-direction: column; gap: 0.7rem; }
 .footer-col h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); margin-bottom: 0.3rem; }
 .footer-col a { color: var(--muted); font-size: 0.92rem; transition: color 0.18s var(--ease); }
@@ -276,6 +276,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; line-height
     .ba-arrow { transform: rotate(90deg); margin: -4px auto; }
     .feature-grid, .steps, .usecase-grid { grid-template-columns: 1fr; }
     .style-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-cols { grid-template-columns: repeat(2, 1fr); }
     .hero { padding-top: 44px; }
     .hero-video { margin-top: 40px; }
     .terminal-body { font-size: 0.78rem; padding: 18px; }

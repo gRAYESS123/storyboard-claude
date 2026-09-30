@@ -210,7 +210,7 @@ The animator's brain (`animator.md`) is the heart of the project — improvement
 
 ## Credits
 
-Built by [Georges Rayess](https://georgesrayess.com). Inspired by the documentary explainer-video lineage of Kurzgesagt, Vox, and old-school *Mythbusters* talking-to-camera. Animator-mode design borrows from the 12 principles of animation (Disney, 1981).
+Built by [Georges Rayess](https://georgesrayess.com). More from Georges: [Help Me Breathe](https://helpmebreath.com) (guided breathing timer) and [Gapscout](https://www.gapscout.ai) (AI ad automation). Website: [easystoryboard.com](https://www.easystoryboard.com). Inspired by the documentary explainer-video lineage of Kurzgesagt, Vox, and old-school *Mythbusters* talking-to-camera. Animator-mode design borrows from the 12 principles of animation (Disney, 1981).
 
 Powered by [Claude Code](https://claude.com/claude-code) and [ElevenLabs](https://elevenlabs.io). Real Lottie playback via [airbnb/lottie-web](https://github.com/airbnb/lottie-web) (MIT), with a bundled set of owned, generated animations.
 
