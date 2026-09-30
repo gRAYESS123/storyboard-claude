@@ -202,7 +202,22 @@ Round to one decimal. These are seeded values — the user (or the verify phase)
 
 **Output:** `<out>/VO English.mp3`, `<out>/word_timestamps.json`, and (optionally) a `TIMINGS` array written directly into `storyboard.html`.
 
-This phase is opt-in. The default flow keeps the user in control of voice / take selection — they paste into ElevenLabs themselves. When invoked, the skill calls ElevenLabs in one of two ways:
+This phase is opt-in. The default flow keeps the user in control of voice / take selection. Three ways to voice the script:
+
+### Path 0 — Free voice, no API key (recommended default)
+
+`tts_free.py` uses free Microsoft Edge neural voices (needs `python -m pip install edge-tts` and internet). It voices each beat separately and joins them with exact pauses, so slide cues are **exact**, and writes word timestamps too:
+
+```bash
+python ~/.claude/skills/storyboard/tts_free.py script.md --apply storyboard.html
+python ~/.claude/skills/storyboard/tts_free.py --list-voices en-
+```
+
+It reads the beats JSON block in `script.md` (a fenced json block `{"beats":[{"slide":1,"text":"...","pause_after":0.7}, ...]}` — always include one), falling back to splitting the SSML block on `<break>` tags. Outputs `voiceover.mp3` + `word_timestamps.json` (`{source, audio, duration, words:[{text,start,end}], cues:[{slide,time}]}`) and, with `--apply`, rewrites `const TIMINGS` / `const WORDS` in the deck. Default voice `en-US-AndrewMultilingualNeural`; `--voice`, `--rate "-5%"`. Best for drafts and personal projects — for commercial work prefer ElevenLabs.
+
+Before the first run on a machine, run `python ~/.claude/skills/storyboard/doctor.py` (add `--smoke` for a 2-second test render) — it checks Playwright/Chromium, ffmpeg, edge-tts, ElevenLabs and prints fix commands. `python ~/.claude/skills/storyboard/new_project.py <dir> --aspect 16:9|9:16 --title "..."` scaffolds a project (template, engine, concept/script skeletons).
+
+ElevenLabs, either way:
 
 ### Path A — Inside Claude Code (ElevenLabs MCP available)
 
@@ -767,8 +782,7 @@ If `verify` ran and found issues, lead the handoff with the actions to fix them.
 
 # What this skill does NOT do
 
-- It does not generate voice-over audio. The user runs ElevenLabs. (We have the MCP available — it was a deliberate choice to keep the user in control of voice + take selection.)
-- It does not render an MP4. The user screen-records the playback.
+- It does not generate voice-over or render an MP4 unless asked (`generate` / `render` phases, or `--auto-vo` / `--render`) — by default the user stays in control of voice and take selection.
 - It does not invent statistics, quotes, or facts not in the source. If the input is thin, ask for more rather than padding.
 - It does not modify the styles of an adopted HTML page. The overlay is purely additive.
 

@@ -96,13 +96,13 @@ def _gpu_flags():
     return base
 
 
-async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'high', no_audio: bool = False, duration_override=None) -> None:
+async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'high', no_audio: bool = False, duration_override=None, cpu: bool = False) -> None:
     # Per-output temp dir so concurrent renders into the same folder don't collide
     # (a fixed '.render-tmp' lets two renders clobber each other's WebM frames).
     tmp_dir = out_mp4.parent / ('.render-tmp-' + out_mp4.stem)
     if tmp_dir.exists():
-        shutil.rmtree(tmp_dir)
-    tmp_dir.mkdir(parents=True)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+    tmp_dir.mkdir(parents=True, exist_ok=True)
 
     # Serve the storyboard dir over HTTP so headless Chromium can load audio
     srv_port, srv = _start_server(html_path.parent)
@@ -147,7 +147,10 @@ async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'hig
                 '--disable-blink-features=AutomationControlled',
                 '--enable-features=NetworkService',
                 '--allow-file-access-from-files',  # allows file:// pages to load local audio
-                *_gpu_flags(),                  # use the real GPU (not SwiftShader) for WebGL/3D
+                # CPU mode: software compositing — Playwright's screencast reliably captures
+                # CSS/SVG composited layers (GPU compositing can yield blank frames on some
+                # Windows/ANGLE setups). GPU mode keeps the real GPU for WebGL/3D decks.
+                *(['--disable-gpu', '--disable-gpu-compositing'] if cpu else _gpu_flags()),
             ]
         )
         context = await browser.new_context(
@@ -211,7 +214,10 @@ async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'hig
             play_start = time.perf_counter()
             lead_in = play_start - recording_start
             print(f"[ok] Lead-in before play(): {lead_in:.3f}s")
-            await page.evaluate("document.getElementById('voAudio').play()")
+            # Drive playback through the engine (NOT voAudio.play() directly): the rAF
+            # animation loop that reveals elements only starts inside Storyboard.play().
+            # A raw voAudio.play() advances audio but leaves every .anim element hidden.
+            await page.evaluate("window.Storyboard.play()")
             print(f"[..] Recording for {duration + TAIL_SEC:.2f}s...")
             await asyncio.sleep(duration + TAIL_SEC)
 
@@ -248,7 +254,11 @@ async def render(html_path: Path, audio_path, out_mp4: Path, quality: str = 'hig
         print(proc.stderr[-2000:])
         sys.exit(1)
 
-    shutil.rmtree(tmp_dir)
+    for _attempt in range(5):
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        if not tmp_dir.exists():
+            break
+        time.sleep(0.6)  # Windows: wait for Chromium to release the .webm lock
     srv.shutdown()
 
     size_mb = out_mp4.stat().st_size / 1_048_576
@@ -361,7 +371,11 @@ async def render_frames(html_path: Path, audio_path, out_mp4: Path, fps: int = 3
         print(proc.stderr[-2000:])
         sys.exit(1)
 
-    shutil.rmtree(tmp_dir)
+    for _attempt in range(5):
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        if not tmp_dir.exists():
+            break
+        time.sleep(0.6)  # Windows: wait for Chromium to release the .webm lock
     srv.shutdown()
     size_mb = out_mp4.stat().st_size / 1_048_576
     print(f"\n[OK] Wrote {out_mp4.name} ({size_mb:.1f} MB)")
@@ -382,6 +396,10 @@ def main():
                     help='OFFLINE deterministic render: step the clock frame-by-frame, screenshot each, '
                          'assemble a PNG sequence. Perfectly smooth + supersampled — best for 3D/WebGL decks.')
     ap.add_argument('--fps', type=int, default=30, help='Frame rate for --frames mode (default 30)')
+    ap.add_argument('--cpu', action='store_true',
+                    help='Software compositing for the recording (no GPU). Fixes blank/white video '
+                         'capture on machines where GPU-composited layers are not screencast. '
+                         'Use for CSS/SVG decks; omit for WebGL/3D decks.')
     ap.add_argument('--supersample', type=float, default=1.5,
                     help='--frames mode: internal WebGL supersample factor for antialiasing (default 1.5)')
     args = ap.parse_args()
@@ -409,7 +427,7 @@ def main():
                                   no_audio=args.no_audio, duration_override=args.duration,
                                   supersample=args.supersample))
     else:
-        asyncio.run(render(html, audio, out, quality=args.quality, no_audio=args.no_audio, duration_override=args.duration))
+        asyncio.run(render(html, audio, out, quality=args.quality, no_audio=args.no_audio, duration_override=args.duration, cpu=args.cpu))
 
 
 if __name__ == '__main__':
