@@ -1,0 +1,18 @@
+# Easy Storyboard
+
+> Easy Storyboard is a free Claude Code skill. Type /storyboard and a link, PDF, Word/Markdown doc, pasted text or an existing HTML page, and Claude plans the story, writes the narration, voices it (free neural voice or ElevenLabs), choreographs every scene on a motion engine, audits it, and renders an MP4 on your machine. Built by Georges Rayess.
+
+## Pages
+- [Home](https://www.easystoryboard.com/): overview, features, install guide, FAQ
+- [90-second tour](https://www.easystoryboard.com/tour): demo video made with the skill, with chapters and transcript
+- [Claude Code video skill](https://www.easystoryboard.com/claude-code-video-skill): what the skill is, its phases, commands and requirements
+- [Blog post to video](https://www.easystoryboard.com/blog-post-to-video): turn a blog post into a narrated video
+- [PDF to video](https://www.easystoryboard.com/pdf-to-video): turn a PDF, Word or Markdown doc into an explainer
+- [Animated characters](https://www.easystoryboard.com/animated-character-videos): rigged characters that wave, point, look, react and talk on a timeline
+
+## Key facts
+- Free download; runs inside Claude Code on Windows, macOS and Linux; needs Python 3.9+, Playwright/Chromium, imageio-ffmpeg; edge-tts for the free voice.
+- Output: concept.md, script.md, storyboard.html, voiceover.mp3 and an MP4 in 16:9 or 9:16.
+- Motion engine: 110+ presets, spring physics, 23 transitions, camera moves, charts, kinetic type, nine rigged characters, real 3D, sound effects.
+- Source: https://github.com/gRAYESS123/storyboard-claude
+- Author: Georges Rayess (https://georgesrayess.com)

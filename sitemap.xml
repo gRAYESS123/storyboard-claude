@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.easystoryboard.com/</loc>
-    <lastmod>2026-09-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url><loc>https://www.easystoryboard.com/</loc><lastmod>2026-10-05</lastmod><priority>1.0</priority><video:video><video:thumbnail_loc>https://www.easystoryboard.com/media/tour-poster.jpg</video:thumbnail_loc><video:title>Easy Storyboard: the 90-second tour</video:title><video:description>A 90-second tour of Easy Storyboard, the free Claude Code skill that turns links, PDFs and docs into narrated, animated videos. The tour itself was made with the skill: script, voice, animation and render.</video:description><video:content_loc>https://www.easystoryboard.com/media/easy-storyboard-tour.mp4</video:content_loc></video:video><video:video><video:thumbnail_loc>https://www.easystoryboard.com/media/character-rigging-poster.jpg</video:thumbnail_loc><video:title>Character rigging in Easy Storyboard</video:title><video:description>Five rigged characters acting on a timeline: waving, looking at and pointing to a chart, changing mood, jumping and talking in speech bubbles.</video:description><video:content_loc>https://www.easystoryboard.com/media/character-rigging.mp4</video:content_loc></video:video></url>
+  <url><loc>https://www.easystoryboard.com/tour</loc><lastmod>2026-10-05</lastmod><priority>0.8</priority><video:video><video:thumbnail_loc>https://www.easystoryboard.com/media/tour-poster.jpg</video:thumbnail_loc><video:title>Easy Storyboard: the 90-second tour</video:title><video:description>A 90-second tour of Easy Storyboard, the free Claude Code skill that turns links, PDFs and docs into narrated, animated videos. The tour itself was made with the skill: script, voice, animation and render.</video:description><video:content_loc>https://www.easystoryboard.com/media/easy-storyboard-tour.mp4</video:content_loc></video:video></url>
+  <url><loc>https://www.easystoryboard.com/blog-post-to-video</loc><lastmod>2026-10-05</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.easystoryboard.com/pdf-to-video</loc><lastmod>2026-10-05</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.easystoryboard.com/claude-code-video-skill</loc><lastmod>2026-10-05</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.easystoryboard.com/animated-character-videos</loc><lastmod>2026-10-05</lastmod><priority>0.8</priority><video:video><video:thumbnail_loc>https://www.easystoryboard.com/media/character-rigging-poster.jpg</video:thumbnail_loc><video:title>Character rigging in Easy Storyboard</video:title><video:description>Five rigged characters acting on a timeline: waving, looking at and pointing to a chart, changing mood, jumping and talking in speech bubbles.</video:description><video:content_loc>https://www.easystoryboard.com/media/character-rigging.mp4</video:content_loc></video:video></url>
 </urlset>

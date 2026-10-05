@@ -33,7 +33,7 @@
             if (e.target.closest('a')) setNav(false);
         });
         window.addEventListener('resize', function () {
-            if (window.innerWidth > 760) setNav(false);
+            if (window.innerWidth > 920) setNav(false);
         });
     }
 
