@@ -1,4 +1,4 @@
-/* Easy Storyboards — landing page interactions */
+/* Easy Storyboard — landing page interactions */
 (function () {
     'use strict';
     var doc = document;

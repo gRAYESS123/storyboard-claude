@@ -1,4 +1,6 @@
-# Storyboard for Claude Code
+# Easy Storyboard — the /storyboard skill for Claude Code
+
+**Website:** [easystoryboard.com](https://www.easystoryboard.com) · watch the 90-second tour, made with the skill itself.
 
 **Turn any input — a URL, a brief, a PDF, or an existing HTML page — into a screen-recordable narrated explainer video. With Claude as your animator.**
 

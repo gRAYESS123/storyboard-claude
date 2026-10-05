@@ -1,6 +1,6 @@
 {
-  "name": "Easy Storyboards",
-  "short_name": "Storyboards",
+  "name": "Easy Storyboard",
+  "short_name": "Easy Storyboard",
   "description": "Turn any link, document, or slide deck into a narrated, animated storyboard video.",
   "start_url": "/",
   "scope": "/",
